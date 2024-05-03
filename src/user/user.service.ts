@@ -22,8 +22,8 @@ export class UserService {
     await this.repository.delete(id);
   }
 
-  async getUser(username: string): Promise<User> {
-    return this.repository.findOneBy({ username: username });
+  async getUser(email: string): Promise<User> {
+    return this.repository.findOneBy({ email: email });
   }
 
   async createUser(user: User): Promise<User> {
