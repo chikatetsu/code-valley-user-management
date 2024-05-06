@@ -1,11 +1,13 @@
 import {
   CanActivate,
   ExecutionContext,
+  HttpException,
+  HttpStatus,
   Injectable,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
+import { configService } from '../config/config.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -15,23 +17,33 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
     if (!token) {
-      throw new UnauthorizedException();
+      throw new HttpException('Aucun token renseigné', HttpStatus.UNAUTHORIZED);
     }
     try {
       const payload = await this.jwtService.verifyAsync(token, {
-        secret: 'secret',
+        secret: configService.getJwtSecret(),
       });
-      // 💡 We're assigning the payload to the request object here
-      // so that we can access it in our route handlers
       request['user'] = payload;
     } catch {
-      throw new UnauthorizedException();
+      throw new HttpException('Token invalide', HttpStatus.CONFLICT);
     }
     return true;
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {
-    const [type, token] = request.headers.authorization?.split(' ') ?? [];
-    return type === 'Bearer' ? token : undefined;
+    if (!request.headers.authorization) {
+      return undefined;
+    }
+
+    const [type, token] = request.headers.authorization.split(' ') ?? [];
+
+    if (type?.toLowerCase() !== 'bearer') {
+      throw new HttpException(
+        "Type d'authorisation invalide",
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    return token;
   }
 }

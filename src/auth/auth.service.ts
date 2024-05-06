@@ -47,8 +47,7 @@ export class AuthService {
 
     if (!user) {
       throw new HttpException(
-        'Aucun utilisateur trouvé avec cet email',
-        //'Le mot de passe est incorrect',
+        'Le mot de passe est incorrect',
         HttpStatus.UNAUTHORIZED,
       );
     }

@@ -1,5 +1,6 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { User } from '../user/user.entity';
+import { JwtModuleOptions } from '@nestjs/jwt';
 require('dotenv').config();
 
 class ConfigService {
@@ -31,6 +32,18 @@ class ConfigService {
       synchronize: true,
     };
   }
+
+  public getJwtSecret(): string {
+    return this.getValue('JWT_SECRET');
+  }
+
+  public getJwtConfig(): JwtModuleOptions {
+    return {
+      global: true,
+      secret: this.getValue('JWT_SECRET'),
+      signOptions: { expiresIn: this.getValue('JWT_EXPIRES') },
+    };
+  }
 }
 
 const configService = new ConfigService(process.env).ensureValues([
@@ -39,6 +52,8 @@ const configService = new ConfigService(process.env).ensureValues([
   'PGUSER',
   'PGPASSWORD',
   'PGDATABASE',
+  'JWT_EXPIRES',
+  'JWT_SECRET',
 ]);
 
 export { configService };
