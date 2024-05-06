@@ -12,7 +12,7 @@ import { AuthService } from './auth.service';
 import { LoginDto, RegisterDto, TokenResponse } from './auth.dto';
 import { AuthGuard } from './auth.guard';
 import {
-  ApiBadRequestResponse,
+  ApiBadRequestResponse, ApiBearerAuth,
   ApiBody,
   ApiOkResponse,
   ApiTags,
@@ -51,6 +51,7 @@ export class AuthController {
   }
 
   @Get('profile')
+  @ApiBearerAuth()
   @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
