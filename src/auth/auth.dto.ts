@@ -29,7 +29,6 @@ export class TokenResponse {
   @ApiProperty()
   @IsString()
   accessToken: string;
-
   constructor(accessToken: string) {
     this.accessToken = accessToken;
   }

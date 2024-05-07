@@ -3,7 +3,8 @@ import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../user/user.entity';
 import { ProfileDto, TokenResponse } from './auth.dto';
-import * as bcrypt from 'bcryptjs';
+import { compare, genSalt, hash } from 'bcrypt';
+
 
 @Injectable()
 export class AuthService {
@@ -26,10 +27,13 @@ export class AuthService {
       );
     }
 
+    const salt = await genSalt();
     const currentDate = new Date();
+    const hashedPassword = await hash(password, salt);
+
     user = new User();
     user.email = email;
-    user.password = await this.encodePassword(password);
+    user.password = hashedPassword;
     user.username = username;
     user.createdAt = currentDate;
     user.lastLoginAt = currentDate;
@@ -54,8 +58,8 @@ export class AuthService {
         HttpStatus.UNAUTHORIZED,
       );
     }
-    const isSamePassword = await this.isPasswordValid(user.password, password);
-    if (!isSamePassword) {
+    const isPasswordMatching = await compare(password, user.password);
+    if (!isPasswordMatching) {
       throw new HttpException(
         'Le mot de passe est incorrect',
         HttpStatus.UNAUTHORIZED,
@@ -74,7 +78,7 @@ export class AuthService {
 
   /** Encode User's password */
   private async encodePassword(password: string): Promise<string> {
-    return bcrypt.hash(password, 10);
+    return hash(password, 10);
   }
 
   /** Validate User's password */
@@ -82,6 +86,6 @@ export class AuthService {
     password: string,
     userPassword: string,
   ): Promise<boolean> {
-    return bcrypt.compare(userPassword, password);
+    return compare(userPassword, password);
   }
 }
