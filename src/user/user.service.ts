@@ -10,11 +10,11 @@ export class UserService {
     private repository: Repository<User>,
   ) {}
 
-  findAll(): Promise<User[]> {
+  async findAll(): Promise<User[]> {
     return this.repository.find();
   }
 
-  findOne(id: number): Promise<User | null> {
+  async findOne(id: number): Promise<User | null> {
     return this.repository.findOneBy({ id });
   }
 
@@ -28,5 +28,12 @@ export class UserService {
 
   async createUser(user: User): Promise<User> {
     return this.repository.save(user);
+  }
+
+  async updateLastLoginAt(id: number): Promise<User> {
+    return this.repository.save({
+      id: id,
+      lastLoginAt: new Date(),
+    });
   }
 }

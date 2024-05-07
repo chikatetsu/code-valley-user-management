@@ -2,7 +2,8 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../user/user.entity';
-import { TokenResponse } from './auth.dto';
+import { ProfileDto, TokenResponse } from './auth.dto';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class AuthService {
@@ -25,11 +26,13 @@ export class AuthService {
       );
     }
 
+    const currentDate = new Date();
     user = new User();
     user.email = email;
-    //user.password = this.helper.encodePassword(password);
-    user.password = password;
+    user.password = await this.encodePassword(password);
     user.username = username;
+    user.createdAt = currentDate;
+    user.lastLoginAt = currentDate;
     const createdUser: User = await this.userService.createUser(user);
     if (!createdUser) {
       throw new HttpException(
@@ -43,7 +46,7 @@ export class AuthService {
   }
 
   async logIn(email: string, password: string): Promise<TokenResponse> {
-    const user = await this.userService.getUser(email);
+    let user = await this.userService.getUser(email);
 
     if (!user) {
       throw new HttpException(
@@ -51,14 +54,34 @@ export class AuthService {
         HttpStatus.UNAUTHORIZED,
       );
     }
-    if (user.password !== password) {
+    const isSamePassword = await this.isPasswordValid(user.password, password);
+    if (!isSamePassword) {
       throw new HttpException(
         'Le mot de passe est incorrect',
         HttpStatus.UNAUTHORIZED,
       );
     }
-
-    const payload = { sub: user.id, username: user.username };
+    user = await this.userService.updateLastLoginAt(user.id);
+    const payload = new ProfileDto(
+      user.id,
+      user.email,
+      user.username,
+      user.lastLoginAt,
+      user.createdAt,
+    );
     return new TokenResponse(await this.jwtService.signAsync(payload));
+  }
+
+  /** Encode User's password */
+  private async encodePassword(password: string): Promise<string> {
+    return bcrypt.hash(password, 10);
+  }
+
+  /** Validate User's password */
+  public isPasswordValid(
+    password: string,
+    userPassword: string,
+  ): Promise<boolean> {
+    return bcrypt.compare(userPassword, password);
   }
 }
