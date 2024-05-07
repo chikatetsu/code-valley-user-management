@@ -2,9 +2,8 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../user/user.entity';
-import { ProfileDto, TokenResponse } from './auth.dto';
+import { TokenResponse } from './auth.dto';
 import { compare, genSalt, hash } from 'bcrypt';
-
 
 @Injectable()
 export class AuthService {
@@ -45,8 +44,7 @@ export class AuthService {
       );
     }
 
-    const payload = { sub: createdUser.id, username: createdUser.username };
-    return new TokenResponse(await this.jwtService.signAsync(payload));
+    return this.generateToken(user);
   }
 
   async logIn(email: string, password: string): Promise<TokenResponse> {
@@ -66,26 +64,17 @@ export class AuthService {
       );
     }
     user = await this.userService.updateLastLoginAt(user.id);
-    const payload = new ProfileDto(
-      user.id,
-      user.email,
-      user.username,
-      user.lastLoginAt,
-      user.createdAt,
-    );
+    return this.generateToken(user);
+  }
+
+  private async generateToken(user: User): Promise<TokenResponse> {
+    const payload = {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      lastLoginAt: user.lastLoginAt,
+      createdAt: user.createdAt,
+    };
     return new TokenResponse(await this.jwtService.signAsync(payload));
-  }
-
-  /** Encode User's password */
-  private async encodePassword(password: string): Promise<string> {
-    return hash(password, 10);
-  }
-
-  /** Validate User's password */
-  public isPasswordValid(
-    password: string,
-    userPassword: string,
-  ): Promise<boolean> {
-    return compare(userPassword, password);
   }
 }

@@ -28,7 +28,6 @@ export class AuthGuard implements CanActivate {
   }
 
   private extractTokenFromHeader(request: Request): string {
-    console.log(request.headers.authorization);
     if (!request.headers.authorization) {
       throw new HttpException('Aucun token renseigné', HttpStatus.UNAUTHORIZED);
     }
