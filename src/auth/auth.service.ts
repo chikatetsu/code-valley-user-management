@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../user/user.entity';
@@ -7,6 +7,7 @@ import { compare, genSalt, hash } from 'bcrypt';
 
 @Injectable()
 export class AuthService {
+
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
@@ -49,22 +50,24 @@ export class AuthService {
 
   async logIn(email: string, password: string): Promise<TokenResponse> {
     let user = await this.userService.getUser(email);
-
+  
     if (!user) {
-      throw new HttpException(
-        'Le mot de passe est incorrect',
-        HttpStatus.UNAUTHORIZED,
-      );
+      throw new HttpException('Email non trouvé', HttpStatus.UNAUTHORIZED);
     }
     const isPasswordMatching = await compare(password, user.password);
     if (!isPasswordMatching) {
-      throw new HttpException(
-        'Le mot de passe est incorrect',
-        HttpStatus.UNAUTHORIZED,
-      );
+      throw new HttpException('Le mot de passe est incorrect', HttpStatus.UNAUTHORIZED);
     }
+    
     user = await this.userService.updateLastLoginAt(user.id);
     return this.generateToken(user);
+  }
+  
+  async loginWithGoogle(googleUser: any): Promise<TokenResponse> {
+    
+    let user = await this.userService.findOrCreate(googleUser);
+    const payload = { email: user.email, sub: user.id };
+    return new TokenResponse(await this.jwtService.signAsync(payload));
   }
 
   private async generateToken(user: User): Promise<TokenResponse> {

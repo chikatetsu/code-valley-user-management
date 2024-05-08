@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDate, IsEmail, IsNumber, IsString } from 'class-validator';
 
@@ -34,38 +35,10 @@ export class TokenResponse {
   }
 }
 
-export class ProfileDto {
-  @ApiProperty()
-  @IsNumber()
-  public id!: number;
-
-  @ApiProperty()
-  @IsString()
-  public email!: string;
-
-  @ApiProperty()
-  @IsString()
-  public username!: string;
-
-  @ApiProperty()
-  @IsDate()
-  public lastLoginAt: Date;
-
-  @ApiProperty()
-  @IsDate()
-  public createdAt: Date;
-
-  constructor(
-    id: number,
-    email: string,
-    username: string,
-    lastLoginAt: Date,
-    createdAt: Date,
-  ) {
-    this.id = id;
-    this.email = email;
-    this.username = username;
-    this.lastLoginAt = lastLoginAt;
-    this.createdAt = createdAt;
-  }
+export interface ProfileDto {
+  id: number;
+  email: string;
+  username: string;
+  lastLoginAt: Date;
+  createdAt: Date;
 }

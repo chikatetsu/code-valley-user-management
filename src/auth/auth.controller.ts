@@ -6,11 +6,13 @@ import {
   HttpStatus,
   Post,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto, RegisterDto, TokenResponse } from './auth.dto';
-import { AuthGuard } from './auth.guard';
+import { AuthGuard } from '@nestjs/passport';
+
 import {
   ApiBadRequestResponse, ApiBearerAuth,
   ApiBody,
@@ -52,7 +54,7 @@ export class AuthController {
 
   @Get('profile')
   @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     description: "Connected user's information",
@@ -60,5 +62,18 @@ export class AuthController {
   })
   getProfile(@Req() req: any): User {
     return req.user as User;
+  }
+
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  async googleAuth(@Req() req) {
+    return req.user;
+  }
+
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  async googleAuthRedirect(@Req() req, @Res() res) {
+    const jwt = await this.authService.loginWithGoogle(req.user);
+    res.redirect(`http://localhost:5173/?token=${jwt.accessToken}`);
   }
 }

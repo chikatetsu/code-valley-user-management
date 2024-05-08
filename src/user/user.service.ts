@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { User } from './user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -15,6 +15,9 @@ export class UserService {
   }
 
   async findOne(id: number): Promise<User | null> {
+    if (!id) {
+      return null;
+    }
     return this.repository.findOneBy({ id });
   }
 
@@ -28,6 +31,21 @@ export class UserService {
 
   async createUser(user: User): Promise<User> {
     return this.repository.save(user);
+  }
+
+  public async findOrCreate(googleUser: any): Promise<User> {
+    let user: User = await this.getUser(googleUser.email);
+
+    if (!user) {
+      user = new User();
+      user.email = googleUser.email;
+      user.username = googleUser.name;
+      user.createdAt = new Date();
+      user.lastLoginAt = new Date();
+      user = await this.createUser(user);
+    }
+
+    return user;
   }
 
   async updateLastLoginAt(id: number): Promise<User> {
