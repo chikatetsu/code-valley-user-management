@@ -1,15 +1,16 @@
+import { UserModule } from "@application/user/user.module";
 import { Module } from "@nestjs/common";
-import { UserModule } from "../user/user.module";
 import { JwtModule } from "@nestjs/jwt";
-import { configService } from "src/infrastructure/config/config.service";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { User } from "src/domain/user/entities/user.entity";
+import { configService } from "@infra/config/config.service";
 import { PassportModule } from "@nestjs/passport";
-import { AuthService } from "src/domain/auth/services/auth.service";
-import { UserService } from "src/domain/user/services/user.service";
-import { GoogleStrategy } from "src/domain/auth/services/google.strategy";
-import { JwtStrategy } from "src/domain/auth/services/jwt.strategy";
+import { User } from "@domain/user/entities/user.entity";
+import { AuthService } from "@domain/auth/services/auth.service";
+import { UserService } from "@domain/user/services/user.service";
+import { GoogleStrategy } from "@domain/auth/services/google.strategy";
+import { JwtStrategy } from "@domain/auth/services/jwt.strategy";
 import { AuthController } from "./auth.controller";
+
 
 
 @Module({

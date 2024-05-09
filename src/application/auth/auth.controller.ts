@@ -9,7 +9,7 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { AuthService } from '../../domain/auth/services/auth.service';
+import { AuthService } from '@domain/auth/services/auth.service';
 import { LoginDto, RegisterDto, TokenResponse } from './dto/auth.dto';
 import { AuthGuard } from '@nestjs/passport';
 

@@ -1,9 +1,5 @@
-import { UserCreateDTO } from 'src/application/user/dto/UserCreate.dto';
-import { User } from '../entities/user.entity';
-import { UserResponseDTO } from 'src/application/user/dto/UserResponse.dto';
-import { UserIdDTO } from 'src/application/user/dto/UserId.dto';
-import { UserQueryDTO } from 'src/application/user/dto/UserQuery.dto';
-
+import { UserCreateDTO, UserIdDTO, UserQueryDTO, UserResponseDTO } from "@application/user/dto";
+import { User } from "../entities/user.entity";
 
 export interface IUserService {
   findAll(): Promise<User[]>;

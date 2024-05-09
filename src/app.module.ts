@@ -2,8 +2,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { configService } from './infrastructure/config/config.service';
-import { ApiModule } from './infrastructure/web/api.module';
+import { configService } from '@infra/config/config.service';
+import { ApiModule } from '@infra/web/api.module';
 
 @Module({
   imports: [

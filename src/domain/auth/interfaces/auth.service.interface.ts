@@ -1,6 +1,6 @@
-import { LoginDto, RegisterDto } from './../../../application/auth/dto/auth.dto';
-import { TokenResponse } from "src/application/auth/dto/auth.dto";
-import { GoogleUser } from "src/interfaces/google-user.interface";
+
+import { LoginDto, RegisterDto, TokenResponse } from "@application/auth/dto/auth.dto";
+import { GoogleUser } from "interfaces/google-user.interface";
 
 export interface IAuthService {
     register(dto: RegisterDto): Promise<TokenResponse>;

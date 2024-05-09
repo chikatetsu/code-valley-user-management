@@ -1,12 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { User, UserBuilder } from '../entities/user.entity';
+import { User, UserBuilder } from '@domain/user/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { IUserService } from '../interfaces/user.service.interface';
-import { UserCreateDTO } from 'src/application/user/dto/UserCreate.dto';
-import { UserResponseDTO } from 'src/application/user/dto/UserResponse.dto';
-import { UserIdDTO } from 'src/application/user/dto/UserId.dto';
-import { UserQueryDTO } from 'src/application/user/dto/UserQuery.dto';
+import { UserQueryDTO, UserResponseDTO, UserCreateDTO, UserIdDTO } from '@application/user/dto';
 
 @Injectable()
 export class UserService implements IUserService {

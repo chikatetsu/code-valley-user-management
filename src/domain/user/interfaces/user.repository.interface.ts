@@ -1,4 +1,4 @@
-import { User } from '../entities/user.entity';
+import { User } from "../entities/user.entity";
 import { DeepPartial, DeleteResult, FindOneOptions, SaveOptions } from 'typeorm';
 
 export interface IUserRepository {

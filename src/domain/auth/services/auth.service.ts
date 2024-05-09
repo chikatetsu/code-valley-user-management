@@ -1,13 +1,13 @@
-import { RegisterDto , LoginDto, TokenResponse } from '../../../application/auth/dto/auth.dto';
+import { IAuthService } from '../interfaces/auth.service.interface';
+import { RegisterDto , LoginDto, TokenResponse } from '@application/auth/dto/auth.dto';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { UserService } from '../../user/services/user.service';
+import { UserService } from '@domain/user/services/user.service';
 import { JwtService } from '@nestjs/jwt';
 
 import { compare, genSalt, hash } from 'bcrypt';
-import { configService } from 'src/infrastructure/config/config.service';
-import { User, UserBuilder } from '../../user/entities/user.entity';
-import { GoogleUser } from 'src/interfaces/google-user.interface';
-import { IAuthService } from '../interfaces/auth.service.interface';
+import { configService } from '@infra/config/config.service';
+import { User, UserBuilder } from '@domain/user/entities/user.entity';
+import { GoogleUser } from 'interfaces/google-user.interface';
 
 const USER_ALREADY_EXISTS_ERROR = 'Cet email ou nom d\'utilisateur est déjà utilisé';
 const USER_CREATION_FAILED_ERROR = "Une erreur est survenue lors de la création de l'utilisateur";
