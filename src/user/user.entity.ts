@@ -13,8 +13,9 @@ export class User {
   public email!: string;
 
   @Exclude()
-  @Column({ type: 'varchar' })
-  public password!: string;
+  @Column({ type: 'varchar', nullable: true })
+  public password?: string;  
+
 
   @ApiProperty()
   @Column({ type: 'varchar' })

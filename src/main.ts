@@ -11,7 +11,13 @@ async function bootstrap() {
   const port: number =
     Number.parseInt(process.env.PORT) || config.get<number>('PORT') || 3000;
 
-  app.enableCors();
+    app.enableCors({
+      origin: true,
+      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+      preflightContinue: false,
+      optionsSuccessStatus: 204,
+      credentials: true,
+    });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
   const configSwagger = new DocumentBuilder()
@@ -25,12 +31,21 @@ async function bootstrap() {
       packageJson.author.email,
     );
 
+
+  let nestApplicationLogger = new Logger('NestApplication');
+
   const document = SwaggerModule.createDocument(app, configSwagger.build());
   SwaggerModule.setup('api', app, document);
   await app.listen(port, () => {
-    new Logger('NestApplication').log(
+    nestApplicationLogger.log(
       `${packageJson.name} is listening on port ${port}`,
     );
   });
+
+  nestApplicationLogger.log(
+    `Swagger is available on http://localhost:${port}/api`,
+  );
+
+ 
 }
 bootstrap();

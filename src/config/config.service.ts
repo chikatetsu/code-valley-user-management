@@ -1,6 +1,7 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { User } from '../user/user.entity';
 import { JwtModuleOptions } from '@nestjs/jwt';
+import { Logger } from '@nestjs/common';
 require('dotenv').config();
 
 class ConfigService {
@@ -44,6 +45,19 @@ class ConfigService {
       signOptions: { expiresIn: this.getValue('JWT_EXPIRES') },
     };
   }
+
+  public getGoogleConfig() {
+    return {
+      clientId: this.getValue('GOOGLE_CLIENT_ID'),
+      clientSecret: this.getValue('GOOGLE_CLIENT_SECRET'),
+      callbackURL: `http://localhost:3000/auth/google/callback`,
+    };
+  }
+
+  public getAppPort() {
+    return this.getValue('APP_PORT');
+  }
+
 }
 
 const configService = new ConfigService(process.env).ensureValues([
@@ -54,6 +68,10 @@ const configService = new ConfigService(process.env).ensureValues([
   'PGDATABASE',
   'JWT_EXPIRES',
   'JWT_SECRET',
+  'APP_PORT',
+  'GOOGLE_CLIENT_ID',
+  'GOOGLE_CLIENT_SECRET',
+  'FRONTEND_URL',
 ]);
 
 export { configService };

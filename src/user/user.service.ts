@@ -39,7 +39,7 @@ export class UserService {
     if (!user) {
       user = new User();
       user.email = googleUser.email;
-      user.username = googleUser.name;
+      user.username = googleUser.firstName + "_" + googleUser.lastName;
       user.createdAt = new Date();
       user.lastLoginAt = new Date();
       user = await this.createUser(user);

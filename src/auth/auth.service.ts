@@ -4,10 +4,10 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from '../user/user.entity';
 import { TokenResponse } from './auth.dto';
 import { compare, genSalt, hash } from 'bcrypt';
+import { configService } from 'src/config/config.service';
 
 @Injectable()
 export class AuthService {
-
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
@@ -64,10 +64,20 @@ export class AuthService {
   }
   
   async loginWithGoogle(googleUser: any): Promise<TokenResponse> {
-    
     let user = await this.userService.findOrCreate(googleUser);
     const payload = { email: user.email, sub: user.id };
     return new TokenResponse(await this.jwtService.signAsync(payload));
+  }
+
+  async getGoogleAuthUrl(): Promise<string> { 
+    const googleConfig = configService.getGoogleConfig();
+    const scope = encodeURIComponent('email profile');
+    Logger.log(googleConfig);
+    Logger.log('Google Auth URL:', googleConfig.callbackURL);
+
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=${googleConfig.clientId}&redirect_uri=${encodeURIComponent(googleConfig.callbackURL)}&scope=${scope}&access_type=online&prompt=consent`;
+
+    return authUrl;
   }
 
   private async generateToken(user: User): Promise<TokenResponse> {
@@ -80,4 +90,5 @@ export class AuthService {
     };
     return new TokenResponse(await this.jwtService.signAsync(payload));
   }
+  
 }

@@ -1,18 +1,41 @@
 import { Logger } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDate, IsEmail, IsNumber, IsString } from 'class-validator';
+import { IsDate, IsEmail, IsNumber, IsString, IsStrongPassword } from 'class-validator';
 
 export class RegisterDto {
-  @ApiProperty()
+  @ApiProperty(
+    {
+      example: 'ricardo.juez@gmail.com',
+    },
+  )
   @IsEmail()
   email: string;
 
-  @ApiProperty()
+  @ApiProperty(
+    {
+      example: 'carlito0605',
+    },
+  )
   @IsString()
   username: string;
 
-  @ApiProperty()
+  @ApiProperty( {
+    description: 'min 8 characters, 1 lowercase, 1 uppercase, 1 number, 1 symbol',
+    example: 'Password123!',
+  })
   @IsString()
+  @IsStrongPassword(
+    {
+      minLength: 8,
+      minLowercase: 1,
+      minUppercase: 1,
+      minNumbers: 1,
+      minSymbols: 1,
+    },
+    {
+      message: 'password too weak (min 8 characters, 1 lowercase, 1 uppercase, 1 number, 1 symbol)',
+    },
+  )
   password: string;
 }
 
