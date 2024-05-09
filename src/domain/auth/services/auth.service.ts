@@ -1,11 +1,13 @@
+import { RegisterDto , LoginDto, TokenResponse } from '../../../application/auth/dto/auth.dto';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UserService } from '../../user/services/user.service';
 import { JwtService } from '@nestjs/jwt';
-import { TokenResponse } from '../../../application/auth/dto/auth.dto';
+
 import { compare, genSalt, hash } from 'bcrypt';
 import { configService } from 'src/infrastructure/config/config.service';
 import { User, UserBuilder } from '../../user/entities/user.entity';
 import { GoogleUser } from 'src/interfaces/google-user.interface';
+import { IAuthService } from '../interfaces/auth.service.interface';
 
 const USER_ALREADY_EXISTS_ERROR = 'Cet email ou nom d\'utilisateur est déjà utilisé';
 const USER_CREATION_FAILED_ERROR = "Une erreur est survenue lors de la création de l'utilisateur";
@@ -13,23 +15,23 @@ const EMAIL_NOT_FOUND_ERROR = 'Email non trouvé';
 const PASSWORD_INCORRECT_ERROR = 'Le mot de passe est incorrect';
 
 @Injectable()
-export class AuthService {
+export class AuthService implements IAuthService {
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
   ) {}
 
-  public async register(email: string, username: string, password: string): Promise<TokenResponse> {
-    const user = await this.userService.getUserByUsernameOrEmail(username, email);
+  public async register(dto: RegisterDto): Promise<TokenResponse> {
+    const user = await this.userService.getUserByUsernameOrEmail({ email: dto.email, username: dto.username });
     if (user) {
       throw new HttpException(USER_ALREADY_EXISTS_ERROR, HttpStatus.CONFLICT);
     }
 
-    const hashedPassword = await this.hashPassword(password);
+    const hashedPassword = await this.hashPassword(dto.password);
     const currentDate = new Date();
     const newUser = new UserBuilder()
-      .withEmail(email)
-      .withUsername(username)
+      .withEmail(dto.email)
+      .withUsername(dto.username)
       .withPassword(hashedPassword)
       .withCreatedAt(currentDate)
       .withLastLoginAt(currentDate)
@@ -43,18 +45,18 @@ export class AuthService {
     return this.generateToken(newUser);
   }
 
-  async logIn(email: string, password: string): Promise<TokenResponse> {
-    const user = await this.userService.getUserByEmail(email);
+  async logIn(dto: LoginDto): Promise<TokenResponse> {
+    const user = await this.userService.getUserByEmail({ email: dto.email });
     if (!user) {
       throw new HttpException(EMAIL_NOT_FOUND_ERROR, HttpStatus.UNAUTHORIZED);
     }
 
-    const isPasswordMatching = await compare(password, user.password);
+    const isPasswordMatching = await compare(dto.password, user.password);
     if (!isPasswordMatching) {
       throw new HttpException(PASSWORD_INCORRECT_ERROR, HttpStatus.UNAUTHORIZED);
     }
     
-    await this.userService.updateLastLoginAt(user.id);
+    await this.userService.updateLastLoginAt({ id: user.id });
     return this.generateToken(user);
   }
   

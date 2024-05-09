@@ -36,8 +36,7 @@ export class AuthController {
   })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   public register(@Body() signInDto: RegisterDto): Promise<TokenResponse> {
-    const { email, username, password } = signInDto;
-    return this.authService.register(email, username, password);
+    return this.authService.register(signInDto)
   }
 
   @Post('login')
@@ -49,8 +48,7 @@ export class AuthController {
   })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   public logIn(@Body() signInDto: LoginDto): Promise<TokenResponse> {
-    const { email, password } = signInDto;
-    return this.authService.logIn(email, password);
+    return this.authService.logIn(signInDto);
   }
 
   @Get('profile')

@@ -2,9 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { User, UserBuilder } from '../entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { IUserService } from '../interfaces/user.service.interface';
+import { UserCreateDTO } from 'src/application/user/dto/UserCreate.dto';
+import { UserResponseDTO } from 'src/application/user/dto/UserResponse.dto';
+import { UserIdDTO } from 'src/application/user/dto/UserId.dto';
+import { UserQueryDTO } from 'src/application/user/dto/UserQuery.dto';
 
 @Injectable()
-export class UserService {
+export class UserService implements IUserService {
   constructor(
     @InjectRepository(User)
     private repository: Repository<User>,
@@ -14,34 +19,41 @@ export class UserService {
     return this.repository.find();
   }
 
-  async findOne(id: number): Promise<User | null> {
-    if (!id) {
+  async findOne(dto: UserIdDTO): Promise<User | null> {
+    if (!dto.id) {
       return null;
     }
-    return this.repository.findOneBy({ id });
+    return this.repository.findOneBy({ id: dto.id });
   }
 
-  async remove(id: number): Promise<void> {
-    await this.repository.delete(id);
+  async remove(dto: UserIdDTO): Promise<void> {
+    await this.repository.delete({ id: dto.id });
   }
 
-  async getUserByEmail(email: string): Promise<User> {
-    return this.repository.findOneBy({ email: email });
+  async getUserByEmail(query: UserQueryDTO): Promise<User> {
+    return this.repository.findOneBy({ email: query.email });
   }
 
-  async getUserByUsernameOrEmail(username: string, email: string): Promise<User> {
-    let userByUsername = this.repository.findOneBy({ username: username });
-    let userByEmail = this.repository.findOneBy({ email: email });
+  async getUserByUsernameOrEmail(query: UserQueryDTO): Promise<User> {
+    let userByUsername = this.repository.findOneBy({ username: query.username });
+    let userByEmail = this.repository.findOneBy({ email: query.email });
 
     return userByUsername || userByEmail;
   }
 
-  async createUser(user: User): Promise<User> {
-    return this.repository.save(user);
+  async createUser(createDto: UserCreateDTO): Promise<UserResponseDTO> {
+    const user = new UserBuilder()
+        .withEmail(createDto.email)
+        .withUsername(createDto.username ?? await this.generateUsername(createDto.firstName, createDto.lastName))
+        .withPassword(createDto.password ?? null)
+        .build();
+
+    const savedUser = await this.repository.save(user);
+    return this.toResponseDto(savedUser);
   }
 
-  async isUsernameTaken(username: string): Promise<boolean> {
-    const user = await this.repository.findOneBy({ username: username });
+  async isUsernameTaken(query: UserQueryDTO): Promise<boolean> {
+    const user = await this.repository.findOneBy({ username: query.username });
     return Boolean(user); 
   }
 
@@ -50,7 +62,7 @@ export class UserService {
     let username = baseUsername;
     let i = 1;
   
-    while (await this.isUsernameTaken(username)) {
+    while (await this.isUsernameTaken({ username })) {
       username = `${baseUsername}${i}`; 
       i++;
     }
@@ -59,28 +71,45 @@ export class UserService {
   }
   
   public async findOrCreate(googleUser: any): Promise<User> {
-    const currentDate = new Date();
     let user: User = await this.getUserByEmail(googleUser.email);
 
     if (!user) {
       user = new UserBuilder()
       .withEmail(googleUser.email)
       .withUsername(await this.generateUsername(googleUser.firstName, googleUser.lastName))
-      .withLastLoginAt(currentDate)
-      .withLastLoginAt(currentDate)
+      .withCreatedAt(new Date())
       .build();
-
-      user = await this.createUser(user);
+      
+      let userDto = await this.createUser(this.toUserCreateDto(user));
+      user = await this.repository.findOneBy({ id: userDto.id });
     }
 
-    user = await this.updateLastLoginAt(user.id);
+    user = await this.updateLastLoginAt({ id: user.id });
     return user;
   }
 
-  async updateLastLoginAt(id: number): Promise<User> {
+  async updateLastLoginAt(dto: UserIdDTO): Promise<User> {
     return this.repository.save({
-      id: id,
+      id: dto.id,
       lastLoginAt: new Date(),
     });
+  }
+
+    private toResponseDto(user: User): UserResponseDTO {
+    return {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        lastLoginAt: user.lastLoginAt,
+        createdAt: user.createdAt,
+    };
+  }
+
+  private toUserCreateDto(user: User): UserCreateDTO {
+    return {
+      email: user.email,
+      username: user.username,
+      password: user.password,
+    };
   }
 }
