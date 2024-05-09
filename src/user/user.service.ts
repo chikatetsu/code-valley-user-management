@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { User } from './user.entity';
+import { User, UserBuilder } from './user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -59,20 +59,21 @@ export class UserService {
   }
   
   public async findOrCreate(googleUser: any): Promise<User> {
+    const currentDate = new Date();
     let user: User = await this.getUserByEmail(googleUser.email);
 
     if (!user) {
-      user = new User();
-            
-      const currentDate = new Date();
-      user.email = googleUser.email;
-      user.username = await this.generateUsername(googleUser.firstName, googleUser.lastName);
-      user.createdAt = currentDate;
-      user.lastLoginAt = currentDate;
+      user = new UserBuilder()
+      .withEmail(googleUser.email)
+      .withUsername(await this.generateUsername(googleUser.firstName, googleUser.lastName))
+      .withLastLoginAt(currentDate)
+      .withLastLoginAt(currentDate)
+      .build();
 
       user = await this.createUser(user);
     }
 
+    user = await this.updateLastLoginAt(user.id);
     return user;
   }
 

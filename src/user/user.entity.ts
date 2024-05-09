@@ -1,9 +1,9 @@
 import { Exclude } from 'class-transformer';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
-export class User  {
+export class User extends BaseEntity {
   @ApiProperty()
   @PrimaryGeneratedColumn()
   public id!: number;
@@ -28,5 +28,52 @@ export class User  {
   @ApiProperty()
   @Column({ type: 'timestamp', nullable: true, default: null })
   public createdAt: Date;
+
+  constructor(obj = {}) {
+    super()
+    Object.assign(this, obj)
+  }
+
 }
+
+export class UserBuilder {
+  private user: User;
+  private currentDateTime: Date = new Date();
+
+  constructor() {
+    this.user = new User();
+    this.user.createdAt = this.currentDateTime;
+    this.user.lastLoginAt = this.currentDateTime;
+  }
+
+  public withEmail(email: string): this {
+    this.user.email = email;
+    return this;
+  }
+
+  public withPassword(password: string): this {
+    this.user.password = password;
+    return this;
+  }
+
+  public withUsername(username: string): this {
+    this.user.username = username;
+    return this;
+  }
+
+  public withLastLoginAt(lastLoginAt: Date): this {
+    this.user.lastLoginAt = lastLoginAt;
+    return this;
+  }
+
+  public withCreatedAt(createdAt: Date): this {
+    this.user.createdAt = createdAt;
+    return this;
+  }
+
+  public build(): User {
+    return this.user;
+  }
+}
+
 

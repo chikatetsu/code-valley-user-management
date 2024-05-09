@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
-import { User } from '../user/user.entity';
+import { User, UserBuilder } from '../user/user.entity';
 import { TokenResponse } from './auth.dto';
 import { compare, genSalt, hash } from 'bcrypt';
 import { configService } from 'src/config/config.service';
@@ -26,13 +26,13 @@ export class AuthService {
 
     const hashedPassword = await this.hashPassword(password);
     const currentDate = new Date();
-    const newUser = new User();
-    newUser.email = email;
-    newUser.username = username;
-    newUser.password = hashedPassword;
-    newUser.createdAt = currentDate;
-    newUser.lastLoginAt = currentDate;
-        
+    const newUser = new UserBuilder()
+      .withEmail(email)
+      .withUsername(username)
+      .withPassword(hashedPassword)
+      .withCreatedAt(currentDate)
+      .withLastLoginAt(currentDate)
+      .build();
     const createdUser = await this.userService.createUser(newUser);
 
     if (!createdUser) {
