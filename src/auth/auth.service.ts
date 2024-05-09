@@ -72,9 +72,6 @@ export class AuthService {
   async getGoogleAuthUrl(): Promise<string> { 
     const googleConfig = configService.getGoogleConfig();
     const scope = encodeURIComponent('email profile');
-    Logger.log(googleConfig);
-    Logger.log('Google Auth URL:', googleConfig.callbackURL);
-
     const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=${googleConfig.clientId}&redirect_uri=${encodeURIComponent(googleConfig.callbackURL)}&scope=${scope}&access_type=online&prompt=consent`;
 
     return authUrl;

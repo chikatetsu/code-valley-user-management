@@ -50,12 +50,16 @@ class ConfigService {
     return {
       clientId: this.getValue('GOOGLE_CLIENT_ID'),
       clientSecret: this.getValue('GOOGLE_CLIENT_SECRET'),
-      callbackURL: `http://localhost:3000/auth/google/callback`,
+      callbackURL: `http://localhost:${this.getAppPort()}/auth/google/callback`,
     };
   }
 
   public getAppPort() {
     return this.getValue('APP_PORT');
+  }
+
+  public getFrontendUrl() {
+    return this.getValue('FRONTEND_URL');
   }
 
 }

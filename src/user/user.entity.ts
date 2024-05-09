@@ -9,7 +9,7 @@ export class User {
   public id!: number;
 
   @ApiProperty()
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', unique: true})
   public email!: string;
 
   @Exclude()

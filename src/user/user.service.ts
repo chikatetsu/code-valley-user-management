@@ -33,13 +33,29 @@ export class UserService {
     return this.repository.save(user);
   }
 
+  async isUsernameTaken(username: string): Promise<boolean> {
+    return this.repository.findOneBy({ username: username }) !== null;
+  }
+
+  async generateUsername(firstName: string, lastName: string): Promise<string> {
+    let username = firstName + "_" + lastName;
+    let i = 1;
+
+    while (await this.isUsernameTaken(username)) {
+      username = firstName + "_" + lastName + i;
+      i++;
+    }
+
+    return username;
+  }
+
   public async findOrCreate(googleUser: any): Promise<User> {
     let user: User = await this.getUser(googleUser.email);
 
     if (!user) {
       user = new User();
       user.email = googleUser.email;
-      user.username = googleUser.firstName + "_" + googleUser.lastName;
+      user.username = await this.generateUsername(googleUser.firstName, googleUser.lastName);
       user.createdAt = new Date();
       user.lastLoginAt = new Date();
       user = await this.createUser(user);

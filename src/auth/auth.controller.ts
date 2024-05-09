@@ -20,6 +20,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { User } from '../user/user.entity';
+import { configService } from 'src/config/config.service';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -69,10 +70,12 @@ export class AuthController {
     const url = await this.authService.getGoogleAuthUrl();
     return { url };
   }
+  
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   async googleAuthRedirect(@Req() req, @Res() res) {
     const jwt = await this.authService.loginWithGoogle(req.user);
-    res.redirect(`http://localhost:5173/?token=${jwt.accessToken}`);
+    const frontendUrl = configService.getFrontendUrl()
+    res.redirect(`${frontendUrl}/?token=${jwt.accessToken}`);
   }
 }
