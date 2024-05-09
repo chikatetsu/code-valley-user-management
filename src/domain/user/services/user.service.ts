@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { User, UserBuilder } from '@domain/user/entities/user.entity';
-import { InjectRepository } from '@nestjs/typeorm';
 import { IUserService } from '../interfaces/user.service.interface';
 import { UserQueryDTO, UserResponseDTO, UserCreateDTO, UserIdDTO } from '@application/user/dto';
 import { UserRepository } from '@infra/database/user.repository';
@@ -11,13 +10,13 @@ export class UserService implements IUserService {
     private userRepository: UserRepository,
   ) {}
 
-  async findOne(dto: UserIdDTO): Promise<UserResponseDTO | null> {
+  async findOne(dto: UserIdDTO): Promise<User | null> {
     if (!dto.id) {
       return null;
     }
-    const user = await this.userRepository.findOneBy({ id: dto.id });
-    return user ? this.toResponseDto(user) : null;
+    return await this.userRepository.findOneById(dto.id);
   }
+  
 
   async remove(dto: UserIdDTO): Promise<void> {
     await this.userRepository.delete({ id: dto.id });

@@ -46,7 +46,8 @@ export class AuthService implements IAuthService {
   }
 
   async logIn(dto: LoginDto): Promise<TokenResponse> {
-    const user = await this.userService.getUserByEmail({ email: dto.email });
+    const user : User = await this.userService.getUserByEmail({ email: dto.email });
+   
     if (!user) {
       throw new HttpException(EMAIL_NOT_FOUND_ERROR, HttpStatus.UNAUTHORIZED);
     }

@@ -39,11 +39,19 @@ export class RegisterDto {
 }
 
 export class LoginDto {
-  @ApiProperty()
+  @ApiProperty(
+    {
+      example: 'ricardo.juez@gmail.com',
+    },
+  )
   @IsEmail()
   email: string;
 
-  @ApiProperty()
+  @ApiProperty(
+    {
+      example: 'Password123!',
+    },
+  )
   @IsString()
   password: string;
 }
