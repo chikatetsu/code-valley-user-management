@@ -25,8 +25,15 @@ export class UserService {
     await this.repository.delete(id);
   }
 
-  async getUser(email: string): Promise<User> {
+  async getUserByEmail(email: string): Promise<User> {
     return this.repository.findOneBy({ email: email });
+  }
+
+  async getUserByUsernameOrEmail(username: string, email: string): Promise<User> {
+    let userByUsername = this.repository.findOneBy({ username: username });
+    let userByEmail = this.repository.findOneBy({ email: email });
+
+    return userByUsername || userByEmail;
   }
 
   async createUser(user: User): Promise<User> {
@@ -34,30 +41,35 @@ export class UserService {
   }
 
   async isUsernameTaken(username: string): Promise<boolean> {
-    return this.repository.findOneBy({ username: username }) !== null;
+    const user = await this.repository.findOneBy({ username: username });
+    return Boolean(user); 
   }
 
   async generateUsername(firstName: string, lastName: string): Promise<string> {
-    let username = firstName + "_" + lastName;
+    let baseUsername = `${firstName}_${lastName}`;
+    let username = baseUsername;
     let i = 1;
-
+  
     while (await this.isUsernameTaken(username)) {
-      username = firstName + "_" + lastName + i;
+      username = `${baseUsername}${i}`; 
       i++;
     }
 
     return username;
   }
-
+  
   public async findOrCreate(googleUser: any): Promise<User> {
-    let user: User = await this.getUser(googleUser.email);
+    let user: User = await this.getUserByEmail(googleUser.email);
 
     if (!user) {
       user = new User();
+            
+      const currentDate = new Date();
       user.email = googleUser.email;
       user.username = await this.generateUsername(googleUser.firstName, googleUser.lastName);
-      user.createdAt = new Date();
-      user.lastLoginAt = new Date();
+      user.createdAt = currentDate;
+      user.lastLoginAt = currentDate;
+
       user = await this.createUser(user);
     }
 

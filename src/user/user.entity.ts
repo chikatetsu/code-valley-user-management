@@ -3,7 +3,7 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
-export class User {
+export class User  {
   @ApiProperty()
   @PrimaryGeneratedColumn()
   public id!: number;
@@ -29,3 +29,4 @@ export class User {
   @Column({ type: 'timestamp', nullable: true, default: null })
   public createdAt: Date;
 }
+
