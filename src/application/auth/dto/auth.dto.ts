@@ -1,6 +1,5 @@
-import { Logger } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDate, IsEmail, IsNumber, IsString, IsStrongPassword } from 'class-validator';
+import { IsEmail, IsString, IsStrongPassword } from 'class-validator';
 
 export class RegisterDto {
   @ApiProperty(
@@ -40,11 +39,19 @@ export class RegisterDto {
 }
 
 export class LoginDto {
-  @ApiProperty()
+  @ApiProperty(
+    {
+      example: 'ricardo.juez@gmail.com',
+    },
+  )
   @IsEmail()
   email: string;
 
-  @ApiProperty()
+  @ApiProperty(
+    {
+      example: 'Password123!',
+    },
+  )
   @IsString()
   password: string;
 }
