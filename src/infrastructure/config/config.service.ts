@@ -1,7 +1,6 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { User } from '../user/user.entity';
+import { User } from '@domain/user/entities/user.entity';
 import { JwtModuleOptions } from '@nestjs/jwt';
-import { Logger } from '@nestjs/common';
 require('dotenv').config();
 
 class ConfigService {

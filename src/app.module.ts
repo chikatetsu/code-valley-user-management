@@ -1,9 +1,9 @@
+
 import { Module } from '@nestjs/common';
-import { AuthModule } from './auth/auth.module';
-import { UserModule } from './user/user.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { configService } from './config/config.service';
 import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { configService } from '@infra/config/config.service';
+import { ApiModule } from '@infra/web/api.module';
 
 @Module({
   imports: [
@@ -11,8 +11,7 @@ import { ConfigModule } from '@nestjs/config';
       isGlobal: true,
     }),
     TypeOrmModule.forRoot(configService.getTypeOrmConfig()),
-    AuthModule,
-    UserModule,
+    ApiModule,
   ],
 })
 export class AppModule {}
