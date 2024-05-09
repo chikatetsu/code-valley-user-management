@@ -1,7 +1,7 @@
 import { UserQueryDTO } from './UserQuery.dto';
-import { UserIdDTO } from 'src/application/user/dto/userId.dto';
-import { UserCreateDTO } from 'src/application/user/dto/UserCreate.dto';
-import { UserResponseDTO } from 'src/application/user/dto/UserResponse.dto';
+import { UserIdDTO } from './UserId.dto';
+import { UserCreateDTO } from './UserCreate.dto';
+import { UserResponseDTO } from './UserResponse.dto';
 export {
     UserResponseDTO,
     UserCreateDTO,
