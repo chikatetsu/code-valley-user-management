@@ -1,10 +1,11 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { UserService } from '../user/user.service';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { UserService } from '../../user/services/user.service';
 import { JwtService } from '@nestjs/jwt';
-import { User, UserBuilder } from '../user/user.entity';
-import { TokenResponse } from './auth.dto';
+import { TokenResponse } from '../../../application/auth/dto/auth.dto';
 import { compare, genSalt, hash } from 'bcrypt';
-import { configService } from 'src/config/config.service';
+import { configService } from 'src/infrastructure/config/config.service';
+import { User, UserBuilder } from '../../user/entities/user.entity';
+import { GoogleUser } from 'src/interfaces/google-user.interface';
 
 const USER_ALREADY_EXISTS_ERROR = 'Cet email ou nom d\'utilisateur est déjà utilisé';
 const USER_CREATION_FAILED_ERROR = "Une erreur est survenue lors de la création de l'utilisateur";
@@ -57,7 +58,7 @@ export class AuthService {
     return this.generateToken(user);
   }
   
-  async loginWithGoogle(googleUser: any): Promise<TokenResponse> {
+  async loginWithGoogle(googleUser: GoogleUser): Promise<TokenResponse> {
     let user = await this.userService.findOrCreate(googleUser);
     const payload = { email: user.email, sub: user.id };
     return new TokenResponse(await this.jwtService.signAsync(payload));

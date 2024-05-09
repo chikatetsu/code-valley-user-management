@@ -9,8 +9,8 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { LoginDto, RegisterDto, TokenResponse } from './auth.dto';
+import { AuthService } from '../../domain/auth/services/auth.service';
+import { LoginDto, RegisterDto, TokenResponse } from './dto/auth.dto';
 import { AuthGuard } from '@nestjs/passport';
 
 import {
@@ -19,8 +19,8 @@ import {
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { User } from '../user/user.entity';
-import { configService } from 'src/config/config.service';
+import { User } from '../../domain/user/entities/user.entity';
+import { configService } from 'src/infrastructure/config/config.service';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -73,6 +73,11 @@ export class AuthController {
   
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'User successfully logged in with Google',
+    type: TokenResponse,
+  })
   async googleAuthRedirect(@Req() req, @Res() res) {
     const jwt = await this.authService.loginWithGoogle(req.user);
     const frontendUrl = configService.getFrontendUrl()
