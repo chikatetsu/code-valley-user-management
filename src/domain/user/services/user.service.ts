@@ -1,39 +1,35 @@
 import { Injectable } from '@nestjs/common';
 import { User, UserBuilder } from '@domain/user/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { IUserService } from '../interfaces/user.service.interface';
 import { UserQueryDTO, UserResponseDTO, UserCreateDTO, UserIdDTO } from '@application/user/dto';
+import { UserRepository } from '@infra/database/user.repository';
 
 @Injectable()
 export class UserService implements IUserService {
   constructor(
-    @InjectRepository(User)
-    private repository: Repository<User>,
+    private userRepository: UserRepository,
   ) {}
 
-  async findAll(): Promise<User[]> {
-    return this.repository.find();
-  }
-
-  async findOne(dto: UserIdDTO): Promise<User | null> {
+  async findOne(dto: UserIdDTO): Promise<UserResponseDTO | null> {
     if (!dto.id) {
       return null;
     }
-    return this.repository.findOneBy({ id: dto.id });
+    const user = await this.userRepository.findOneBy({ id: dto.id });
+    return user ? this.toResponseDto(user) : null;
   }
 
   async remove(dto: UserIdDTO): Promise<void> {
-    await this.repository.delete({ id: dto.id });
+    await this.userRepository.delete({ id: dto.id });
   }
 
   async getUserByEmail(query: UserQueryDTO): Promise<User> {
-    return this.repository.findOneBy({ email: query.email });
+    return this.userRepository.findOneByEmail(query.email);
   }
 
   async getUserByUsernameOrEmail(query: UserQueryDTO): Promise<User> {
-    let userByUsername = this.repository.findOneBy({ username: query.username });
-    let userByEmail = this.repository.findOneBy({ email: query.email });
+    let userByUsername = this.userRepository.findOneByUsername(query.username);
+    let userByEmail = this.userRepository.findOneByEmail(query.email);
 
     return userByUsername || userByEmail;
   }
@@ -45,12 +41,12 @@ export class UserService implements IUserService {
         .withPassword(createDto.password ?? null)
         .build();
 
-    const savedUser = await this.repository.save(user);
+    const savedUser = await this.userRepository.save(user);
     return this.toResponseDto(savedUser);
   }
 
   async isUsernameTaken(query: UserQueryDTO): Promise<boolean> {
-    const user = await this.repository.findOneBy({ username: query.username });
+    const user = await this.userRepository.findOneByUsername(query.username);
     return Boolean(user); 
   }
 
@@ -78,7 +74,7 @@ export class UserService implements IUserService {
       .build();
       
       let userDto = await this.createUser(this.toUserCreateDto(user));
-      user = await this.repository.findOneBy({ id: userDto.id });
+      user = await this.userRepository.findOneById(userDto.id);
     }
 
     user = await this.updateLastLoginAt({ id: user.id });
@@ -86,7 +82,7 @@ export class UserService implements IUserService {
   }
 
   async updateLastLoginAt(dto: UserIdDTO): Promise<User> {
-    return this.repository.save({
+    return this.userRepository.save({
       id: dto.id,
       lastLoginAt: new Date(),
     });

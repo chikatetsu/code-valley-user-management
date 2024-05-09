@@ -2,8 +2,7 @@ import { UserCreateDTO, UserIdDTO, UserQueryDTO, UserResponseDTO } from "@applic
 import { User } from "../entities/user.entity";
 
 export interface IUserService {
-  findAll(): Promise<User[]>;
-  findOne(dto: UserIdDTO): Promise<User | null>;
+  findOne(dto: UserIdDTO): Promise<UserResponseDTO | null>;
   remove(dto: UserIdDTO): Promise<void>;
   getUserByEmail(query: UserQueryDTO): Promise<User>;
   getUserByUsernameOrEmail(query: UserQueryDTO): Promise<User>;
