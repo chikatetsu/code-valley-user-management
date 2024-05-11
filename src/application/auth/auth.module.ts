@@ -11,6 +11,7 @@ import { JwtStrategy } from "@domain/auth/services/jwt.strategy";
 import { AuthController } from "./auth.controller";
 import { UserRepository } from "@infra/database/user.repository";
 import { User } from "@domain/user/entities/user.entity";
+import { Jwt2faStrategy } from "@domain/auth/services/jwt-2fa.strategy";
 
 
 
@@ -21,7 +22,7 @@ import { User } from "@domain/user/entities/user.entity";
     TypeOrmModule.forFeature([User]),
     PassportModule.register({ defaultStrategy: 'google' }),
   ],
-  providers: [UserRepository, AuthService, UserService, GoogleStrategy, JwtStrategy],
+  providers: [UserRepository, AuthService, UserService,UserService, GoogleStrategy, JwtStrategy, Jwt2faStrategy],
   controllers: [AuthController],
 })
 export class AuthModule {}

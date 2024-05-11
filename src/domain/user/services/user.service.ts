@@ -22,7 +22,7 @@ export class UserService implements IUserService {
     await this.userRepository.delete({ id: dto.id });
   }
 
-  async getUserByEmail(query: UserQueryDTO): Promise<User> {
+  async findOneByEmail(query: UserQueryDTO): Promise<User> {
     return this.userRepository.findOneByEmail(query.email);
   }
 
@@ -63,7 +63,7 @@ export class UserService implements IUserService {
   }
   
   public async findOrCreate(googleUser: any): Promise<User> {
-    let user: User = await this.getUserByEmail(googleUser.email);
+    let user: User = await this.findOneByEmail(googleUser.email);
 
     if (!user) {
       user = new UserBuilder()
@@ -84,6 +84,20 @@ export class UserService implements IUserService {
     return this.userRepository.save({
       id: dto.id,
       lastLoginAt: new Date(),
+    });
+  }
+
+  async setTwoFactorAuthenticationSecret(secret: string, userId: number) {
+    return this.userRepository.save({
+      id: userId,
+      twoFactorAuthenticationSecret: secret,
+    });
+  }
+
+  async turnOnTwoFactorAuthentication(userId: number) {
+    return this.userRepository.save({
+      id: userId,
+      twoFactorAuthenticationEnabled: true,
     });
   }
 

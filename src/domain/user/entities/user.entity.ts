@@ -29,6 +29,15 @@ export class User extends BaseEntity {
   @Column({ type: 'timestamp', nullable: true, default: null })
   public createdAt: Date;
 
+  @ApiProperty()
+  @Column({ type: 'varchar', nullable: true })
+  public twoFactorAuthenticationSecret : string;
+
+  @ApiProperty()
+  @Column({ type: 'boolean', default: false })
+  public isTwoFactorAuthenticationEnabled : boolean;
+
+
   constructor(obj = {}) {
     super()
     Object.assign(this, obj)

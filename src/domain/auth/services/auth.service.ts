@@ -9,6 +9,9 @@ import { configService } from '@infra/config/config.service';
 import { User, UserBuilder } from '@domain/user/entities/user.entity';
 import { GoogleUser } from 'interfaces/google-user.interface';
 
+import { authenticator } from 'otplib';
+import { toDataURL } from 'qrcode';
+
 const USER_ALREADY_EXISTS_ERROR = 'Cet email ou nom d\'utilisateur est déjà utilisé';
 const USER_CREATION_FAILED_ERROR = "Une erreur est survenue lors de la création de l'utilisateur";
 const EMAIL_NOT_FOUND_ERROR = 'Email non trouvé';
@@ -16,6 +19,7 @@ const PASSWORD_INCORRECT_ERROR = 'Le mot de passe est incorrect';
 
 @Injectable()
 export class AuthService implements IAuthService {
+
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
@@ -46,7 +50,7 @@ export class AuthService implements IAuthService {
   }
 
   async logIn(dto: LoginDto): Promise<TokenResponse> {
-    const user : User = await this.userService.getUserByEmail({ email: dto.email });
+    const user : User = await this.userService.findOneByEmail({ email: dto.email });
    
     if (!user) {
       throw new HttpException(EMAIL_NOT_FOUND_ERROR, HttpStatus.UNAUTHORIZED);
@@ -67,11 +71,47 @@ export class AuthService implements IAuthService {
     return new TokenResponse(await this.jwtService.signAsync(payload));
   }
 
+  async loginWith2fa(userWithoutPsw: Partial<User>) {
+    const payload = {
+      email: userWithoutPsw.email,
+      isTwoFactorAuthenticationEnabled: !!userWithoutPsw.isTwoFactorAuthenticationEnabled,
+      isTwoFactorAuthenticated: true,
+    };
+
+    return {
+      email: payload.email,
+      access_token: this.jwtService.sign(payload),
+    };
+  }
   async getGoogleAuthUrl(): Promise<string> { 
     const googleConfig = configService.getGoogleConfig();
     const scope = encodeURIComponent('email profile');
     const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=${googleConfig.clientId}&redirect_uri=${encodeURIComponent(googleConfig.callbackURL)}&scope=${scope}&access_type=online&prompt=consent`;
     return authUrl;
+  }
+
+  async generateTwoFactorAuthenticationSecret(user: User) {
+    const secret = authenticator.generateSecret();
+
+    const otpauthUrl = authenticator.keyuri(user.email, 'Code Valley', secret);
+
+    await this.userService.setTwoFactorAuthenticationSecret(secret, user.id);
+
+    return {
+      secret,
+      otpauthUrl
+    }
+  }
+
+  isTwoFactorAuthenticationCodeValid(twoFactorAuthenticationCode: string, user: User) {
+    return authenticator.verify({
+      token: twoFactorAuthenticationCode,
+      secret: user.twoFactorAuthenticationSecret,
+    });
+  }
+
+  async generateQrCodeDataURL(otpAuthUrl: string) {
+    return toDataURL(otpAuthUrl);
   }
 
   private async generateToken(user: User): Promise<TokenResponse> {
