@@ -32,7 +32,7 @@ export class UserService implements IUserService {
     let userByUsername = this.userRepository.findOneByUsername(query.username);
     let userByEmail = this.userRepository.findOneByEmail(query.email);
 
-    return userByUsername || userByEmail;
+    return userByUsername && userByEmail;
   }
 
   async createUser(createDto: UserCreateDTO): Promise<UserResponseDTO> {
@@ -110,7 +110,7 @@ export class UserService implements IUserService {
   async changeStateTwoFactorAuthentication(userId: number, state: boolean) {
     return this.userRepository.save({
       id: userId,
-      twoFactorAuthenticationEnabled: state,
+      isTwoFactorAuthenticationEnabled: state,
       twoFactorAuthenticationSecret: null,
     });
   }
