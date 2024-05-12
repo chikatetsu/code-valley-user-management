@@ -26,6 +26,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) implements IJwtServi
       throw new UnauthorizedException(); 
     }
 
+    if (user.isTwoFactorAuthenticationEnabled && !payload.isTwoFactorAuthenticated) {
+      throw new UnauthorizedException("2FA authentication required");
+    }
+
     return user;
   }
 }

@@ -84,6 +84,7 @@ export class AuthService implements IAuthService {
 
   async loginWith2fa(userWithoutPsw: Partial<User>) {
     const payload = {
+      sub: userWithoutPsw.id,
       email: userWithoutPsw.email,
       isTwoFactorAuthenticationEnabled: !!userWithoutPsw.isTwoFactorAuthenticationEnabled,
       isTwoFactorAuthenticated: true,
