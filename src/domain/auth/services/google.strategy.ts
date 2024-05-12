@@ -5,7 +5,10 @@ import { configService } from '@infra/config/config.service';
 import { IGoogleService } from '../interfaces/google.service.interface';
 
 @Injectable()
-export class GoogleStrategy extends PassportStrategy(Strategy, 'google') implements IGoogleService {
+export class GoogleStrategy
+  extends PassportStrategy(Strategy, 'google')
+  implements IGoogleService
+{
   constructor() {
     super({
       clientID: process.env.GOOGLE_CLIENT_ID,
@@ -15,14 +18,19 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') impleme
     });
   }
 
-  async validate(accessToken: string, refreshToken: string, profile: any, done: VerifyCallback): Promise<void> {
+  async validate(
+    accessToken: string,
+    refreshToken: string,
+    profile: any,
+    done: VerifyCallback,
+  ): Promise<void> {
     const { name, emails, photos } = profile;
     const user = {
       email: emails[0].value,
       firstName: name.givenName,
       lastName: name.familyName,
       picture: photos[0].value,
-      accessToken
+      accessToken,
     };
     done(null, user);
   }

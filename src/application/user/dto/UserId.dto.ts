@@ -1,3 +1,3 @@
 export class UserIdDTO {
-    id: number;
+  id: number;
 }

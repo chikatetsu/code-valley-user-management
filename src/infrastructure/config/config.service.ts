@@ -60,7 +60,6 @@ class ConfigService {
   public getFrontendUrl() {
     return this.getValue('FRONTEND_URL');
   }
-
 }
 
 const configService = new ConfigService(process.env).ensureValues([

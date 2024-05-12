@@ -1,6 +1,5 @@
-import { User } from "@domain/user/entities/user.entity";
-
+import { User } from '@domain/user/entities/user.entity';
 
 export interface IJwtService {
-    validate(payload: any): Promise<User>;
+  validate(payload: any): Promise<User>;
 }

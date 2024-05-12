@@ -2,24 +2,21 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsString, IsStrongPassword } from 'class-validator';
 
 export class RegisterDto {
-  @ApiProperty(
-    {
-      example: 'ricardo.juez@gmail.com',
-    },
-  )
+  @ApiProperty({
+    example: 'ricardo.juez@gmail.com',
+  })
   @IsEmail()
   email: string;
 
-  @ApiProperty(
-    {
-      example: 'carlito0605',
-    },
-  )
+  @ApiProperty({
+    example: 'carlito0605',
+  })
   @IsString()
   username: string;
 
-  @ApiProperty( {
-    description: 'min 8 characters, 1 lowercase, 1 uppercase, 1 number, 1 symbol',
+  @ApiProperty({
+    description:
+      'min 8 characters, 1 lowercase, 1 uppercase, 1 number, 1 symbol',
     example: 'Password123!',
   })
   @IsString()
@@ -32,26 +29,23 @@ export class RegisterDto {
       minSymbols: 1,
     },
     {
-      message: 'password too weak (min 8 characters, 1 lowercase, 1 uppercase, 1 number, 1 symbol)',
+      message:
+        'password too weak (min 8 characters, 1 lowercase, 1 uppercase, 1 number, 1 symbol)',
     },
   )
   password: string;
 }
 
 export class LoginDto {
-  @ApiProperty(
-    {
-      example: 'ricardo.juez@gmail.com',
-    },
-  )
+  @ApiProperty({
+    example: 'ricardo.juez@gmail.com',
+  })
   @IsEmail()
   email: string;
 
-  @ApiProperty(
-    {
-      example: 'Password123!',
-    },
-  )
+  @ApiProperty({
+    example: 'Password123!',
+  })
   @IsString()
   password: string;
 }
@@ -63,6 +57,12 @@ export class TokenResponse {
   constructor(accessToken: string) {
     this.accessToken = accessToken;
   }
+}
+
+export class TfCodeAuthDto {
+  @ApiProperty()
+  @IsString()
+  twoFactorAuthenticationCode: string;
 }
 
 export interface ProfileDto {
