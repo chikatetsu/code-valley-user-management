@@ -49,7 +49,7 @@ export class AuthController {
     type: TokenResponse,
   })
   @ApiBadRequestResponse({ description: 'Bad Request' })
-  public logIn(@Body() signInDto: LoginDto): Promise<TokenResponse> {
+  public logIn(@Body() signInDto: LoginDto): Promise<TokenResponse | { status: number, message: string }> {
     return this.authService.logIn(signInDto);
   }
 

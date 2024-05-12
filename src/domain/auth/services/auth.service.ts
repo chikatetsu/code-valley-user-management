@@ -49,7 +49,7 @@ export class AuthService implements IAuthService {
     return this.generateToken(newUser);
   }
 
-  async logIn(dto: LoginDto): Promise<TokenResponse> {
+  async logIn(dto: LoginDto): Promise<TokenResponse | { status: number, message: string }> {
     const user : User = await this.userService.findOneByEmail({ email: dto.email });
    
     if (!user) {
@@ -62,7 +62,18 @@ export class AuthService implements IAuthService {
     }
     
     await this.userService.updateLastLoginAt({ id: user.id });
-    return this.generateToken(user);
+
+    let token = await this.generateToken(user);
+    if (user.isTwoFactorAuthenticationEnabled) {
+      throw new HttpException({
+        status: HttpStatus.ACCEPTED,
+        message: 'Two-factor authentication required',
+        accessToken: token.accessToken,
+      }, HttpStatus.ACCEPTED);
+    }
+    
+
+    return token;
   }
   
   async loginWithGoogle(googleUser: GoogleUser): Promise<TokenResponse> {
@@ -120,6 +131,7 @@ export class AuthService implements IAuthService {
       username: user.username,
       lastLoginAt: user.lastLoginAt,
       createdAt: user.createdAt,
+      isTwoFactorAuthenticated: false
     };
     return new TokenResponse(await this.jwtService.signAsync(payload));
   }
