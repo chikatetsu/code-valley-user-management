@@ -78,7 +78,17 @@ export class AuthController {
     if (request.user.isTwoFactorAuthenticationEnabled) {
       throw new UnauthorizedException('Two-factor authentication is already enabled');
     }
-    await this.userService.turnOnTwoFactorAuthentication(request.user.id);
+    await this.userService.changeStateTwoFactorAuthentication(request.user.id, true);
+  }
+
+  @Post('2fa/turn-off')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt-2fa'))
+  async turnOffTwoFactorAuthentication(@Req() request) {
+    if (!request.user.isTwoFactorAuthenticationEnabled) {
+      throw new UnauthorizedException('Two-factor authentication is already disabled');
+    }
+    await this.userService.changeStateTwoFactorAuthentication(request.user.id, false);
   }
 
   @Post('2fa/authenticate')
@@ -104,14 +114,13 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt-2fa'))
   async registerGenerate(@Res() response, @Req() request) {
     if (request.user.isTwoFactorAuthenticationEnabled) {
-      throw new UnauthorizedException('Two-factor authentication is already enabled');
+      throw new UnauthorizedException('Two-factor authentication is already enabled, please turn it off first');
     }
     
     const { otpauthUrl } =
       await this.authService.generateTwoFactorAuthenticationSecret(
         request.user,
       );
-
 
     return response.json(
       await this.authService.generateQrCodeDataURL(otpauthUrl),

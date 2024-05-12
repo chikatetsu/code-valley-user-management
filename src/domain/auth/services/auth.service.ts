@@ -92,7 +92,6 @@ export class AuthService implements IAuthService {
 
   async generateTwoFactorAuthenticationSecret(user: User) {
     const secret = authenticator.generateSecret();
-
     const otpauthUrl = authenticator.keyuri(user.email, 'Code Valley', secret);
 
     await this.userService.setTwoFactorAuthenticationSecret(secret, user.id);

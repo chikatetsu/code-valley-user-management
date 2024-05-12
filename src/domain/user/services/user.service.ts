@@ -94,10 +94,11 @@ export class UserService implements IUserService {
     });
   }
 
-  async turnOnTwoFactorAuthentication(userId: number) {
+  async changeStateTwoFactorAuthentication(userId: number, state: boolean) {
     return this.userRepository.save({
       id: userId,
-      twoFactorAuthenticationEnabled: true,
+      twoFactorAuthenticationEnabled: state,
+      twoFactorAuthenticationSecret: null,
     });
   }
 
