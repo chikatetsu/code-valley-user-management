@@ -9,13 +9,12 @@ export class User extends BaseEntity {
   public id!: number;
 
   @ApiProperty()
-  @Column({ type: 'varchar', unique: true})
+  @Column({ type: 'varchar', unique: true })
   public email!: string;
 
   @Exclude()
   @Column({ type: 'varchar', nullable: true })
-  public password?: string;  
-
+  public password?: string;
 
   @ApiProperty()
   @Column({ type: 'varchar' })
@@ -29,11 +28,18 @@ export class User extends BaseEntity {
   @Column({ type: 'timestamp', nullable: true, default: null })
   public createdAt: Date;
 
-  constructor(obj = {}) {
-    super()
-    Object.assign(this, obj)
-  }
+  @ApiProperty()
+  @Column({ type: 'varchar', nullable: true })
+  public twoFactorAuthenticationSecret: string;
 
+  @ApiProperty()
+  @Column({ type: 'boolean', default: false })
+  public isTwoFactorAuthenticationEnabled: boolean;
+
+  constructor(obj = {}) {
+    super();
+    Object.assign(this, obj);
+  }
 }
 
 export class UserBuilder {
@@ -75,5 +81,3 @@ export class UserBuilder {
     return this.user;
   }
 }
-
-

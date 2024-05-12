@@ -11,13 +11,13 @@ async function bootstrap() {
   const port: number =
     Number.parseInt(process.env.PORT) || config.get<number>('PORT') || 3000;
 
-    app.enableCors({
-      origin: true,
-      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      preflightContinue: false,
-      optionsSuccessStatus: 204,
-      credentials: true,
-    });
+  app.enableCors({
+    origin: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+    credentials: true,
+  });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
   const configSwagger = new DocumentBuilder()
@@ -30,7 +30,6 @@ async function bootstrap() {
       packageJson.author.url,
       packageJson.author.email,
     );
-
 
   let nestApplicationLogger = new Logger('NestApplication');
 
@@ -45,7 +44,5 @@ async function bootstrap() {
   nestApplicationLogger.log(
     `Swagger is available on http://localhost:${port}/api`,
   );
-
- 
 }
 bootstrap();
