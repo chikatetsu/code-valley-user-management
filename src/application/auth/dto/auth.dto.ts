@@ -65,6 +65,12 @@ export class TokenResponse {
   }
 }
 
+export class TfCodeAuthDto {
+  @ApiProperty()
+  @IsString()
+  twoFactorAuthenticationCode: string;
+}
+
 export interface ProfileDto {
   id: number;
   email: string;

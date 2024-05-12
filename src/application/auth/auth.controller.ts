@@ -11,7 +11,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from '@domain/auth/services/auth.service';
-import { LoginDto, RegisterDto, TokenResponse } from './dto/auth.dto';
+import { LoginDto, RegisterDto, TfCodeAuthDto, TokenResponse } from './dto/auth.dto';
 import { AuthGuard } from '@nestjs/passport';
 
 import {
@@ -72,23 +72,20 @@ export class AuthController {
   }
 
   @Post('2fa/turn-on')
+  @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt-2fa'))
-  async turnOnTwoFactorAuthentication(@Req() request, @Body() body) {
-    const isCodeValid =
-      this.authService.isTwoFactorAuthenticationCodeValid(
-        body.twoFactorAuthenticationCode,
-        request.user,
-      );
-    if (!isCodeValid) {
-      throw new UnauthorizedException('Wrong authentication code');
+  async turnOnTwoFactorAuthentication(@Req() request) {
+    if (request.user.isTwoFactorAuthenticationEnabled) {
+      throw new UnauthorizedException('Two-factor authentication is already enabled');
     }
     await this.userService.turnOnTwoFactorAuthentication(request.user.id);
   }
 
   @Post('2fa/authenticate')
   @HttpCode(200)
+  @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt-2fa'))
-  @ApiBody({ type: LoginDto })
+  @ApiBody({ type: TfCodeAuthDto })
   async authenticate(@Req() request, @Body() body) {
     const isCodeValid = this.authService.isTwoFactorAuthenticationCodeValid(
       body.twoFactorAuthenticationCode,
@@ -103,6 +100,7 @@ export class AuthController {
   }
 
   @Post('2fa/generate')
+  @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt-2fa'))
   async registerGenerate(@Res() response, @Req() request) {
     if (request.user.isTwoFactorAuthenticationEnabled) {
