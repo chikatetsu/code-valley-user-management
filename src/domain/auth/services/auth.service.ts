@@ -1,5 +1,9 @@
 import { IAuthService } from '../interfaces/auth.service.interface';
-import { RegisterDto , LoginDto, TokenResponse } from '@application/auth/dto/auth.dto';
+import {
+  RegisterDto,
+  LoginDto,
+  TokenResponse,
+} from '@application/auth/dto/auth.dto';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UserService } from '@domain/user/services/user.service';
 import { JwtService } from '@nestjs/jwt';
@@ -12,21 +16,25 @@ import { GoogleUser } from 'interfaces/google-user.interface';
 import { authenticator } from 'otplib';
 import { toDataURL } from 'qrcode';
 
-const USER_ALREADY_EXISTS_ERROR = 'Cet email ou nom d\'utilisateur est déjà utilisé';
-const USER_CREATION_FAILED_ERROR = "Une erreur est survenue lors de la création de l'utilisateur";
+const USER_ALREADY_EXISTS_ERROR =
+  "Cet email ou nom d'utilisateur est déjà utilisé";
+const USER_CREATION_FAILED_ERROR =
+  "Une erreur est survenue lors de la création de l'utilisateur";
 const EMAIL_NOT_FOUND_ERROR = 'Email non trouvé';
 const PASSWORD_INCORRECT_ERROR = 'Le mot de passe est incorrect';
 
 @Injectable()
 export class AuthService implements IAuthService {
-
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
   ) {}
 
   public async register(dto: RegisterDto): Promise<TokenResponse> {
-    const user = await this.userService.getUserByUsernameOrEmail({ email: dto.email, username: dto.username });
+    const user = await this.userService.getUserByUsernameOrEmail({
+      email: dto.email,
+      username: dto.username,
+    });
     if (user) {
       throw new HttpException(USER_ALREADY_EXISTS_ERROR, HttpStatus.CONFLICT);
     }
@@ -43,39 +51,51 @@ export class AuthService implements IAuthService {
     const createdUser = await this.userService.createUser(newUser);
 
     if (!createdUser) {
-      throw new HttpException(USER_CREATION_FAILED_ERROR, HttpStatus.UNAUTHORIZED);
+      throw new HttpException(
+        USER_CREATION_FAILED_ERROR,
+        HttpStatus.UNAUTHORIZED,
+      );
     }
 
     return this.generateToken(newUser);
   }
 
-  async logIn(dto: LoginDto): Promise<TokenResponse | { status: number, message: string }> {
-    const user : User = await this.userService.findOneByEmail({ email: dto.email });
-   
+  async logIn(
+    dto: LoginDto,
+  ): Promise<TokenResponse | { status: number; message: string }> {
+    const user: User = await this.userService.findOneByEmail({
+      email: dto.email,
+    });
+
     if (!user) {
       throw new HttpException(EMAIL_NOT_FOUND_ERROR, HttpStatus.UNAUTHORIZED);
     }
 
     const isPasswordMatching = await compare(dto.password, user.password);
     if (!isPasswordMatching) {
-      throw new HttpException(PASSWORD_INCORRECT_ERROR, HttpStatus.UNAUTHORIZED);
+      throw new HttpException(
+        PASSWORD_INCORRECT_ERROR,
+        HttpStatus.UNAUTHORIZED,
+      );
     }
-    
+
     await this.userService.updateLastLoginAt({ id: user.id });
 
     let token = await this.generateToken(user);
     if (user.isTwoFactorAuthenticationEnabled) {
-      throw new HttpException({
-        status: HttpStatus.ACCEPTED,
-        message: 'Two-factor authentication required',
-        accessToken: token.accessToken,
-      }, HttpStatus.ACCEPTED);
+      throw new HttpException(
+        {
+          status: HttpStatus.ACCEPTED,
+          message: 'Two-factor authentication required',
+          accessToken: token.accessToken,
+        },
+        HttpStatus.ACCEPTED,
+      );
     }
-    
 
     return token;
   }
-  
+
   async loginWithGoogle(googleUser: GoogleUser): Promise<TokenResponse> {
     let user = await this.userService.findOrCreate(googleUser);
     const payload = { email: user.email, sub: user.id };
@@ -86,7 +106,8 @@ export class AuthService implements IAuthService {
     const payload = {
       sub: userWithoutPsw.id,
       email: userWithoutPsw.email,
-      isTwoFactorAuthenticationEnabled: !!userWithoutPsw.isTwoFactorAuthenticationEnabled,
+      isTwoFactorAuthenticationEnabled:
+        !!userWithoutPsw.isTwoFactorAuthenticationEnabled,
       isTwoFactorAuthenticated: true,
     };
 
@@ -95,7 +116,7 @@ export class AuthService implements IAuthService {
       access_token: this.jwtService.sign(payload),
     };
   }
-  async getGoogleAuthUrl(): Promise<string> { 
+  async getGoogleAuthUrl(): Promise<string> {
     const googleConfig = configService.getGoogleConfig();
     const scope = encodeURIComponent('email profile');
     const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=${googleConfig.clientId}&redirect_uri=${encodeURIComponent(googleConfig.callbackURL)}&scope=${scope}&access_type=online&prompt=consent`;
@@ -110,11 +131,14 @@ export class AuthService implements IAuthService {
 
     return {
       secret,
-      otpauthUrl
-    }
+      otpauthUrl,
+    };
   }
 
-  isTwoFactorAuthenticationCodeValid(twoFactorAuthenticationCode: string, user: User) {
+  isTwoFactorAuthenticationCodeValid(
+    twoFactorAuthenticationCode: string,
+    user: User,
+  ) {
     return authenticator.verify({
       token: twoFactorAuthenticationCode,
       secret: user.twoFactorAuthenticationSecret,
@@ -132,7 +156,7 @@ export class AuthService implements IAuthService {
       username: user.username,
       lastLoginAt: user.lastLoginAt,
       createdAt: user.createdAt,
-      isTwoFactorAuthenticated: false
+      isTwoFactorAuthenticated: false,
     };
     return new TokenResponse(await this.jwtService.signAsync(payload));
   }
@@ -141,5 +165,4 @@ export class AuthService implements IAuthService {
     const salt = await genSalt();
     return hash(password, salt);
   }
-  
 }

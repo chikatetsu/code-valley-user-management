@@ -10,7 +10,7 @@ export class Jwt2faStrategy extends PassportStrategy(Strategy, 'jwt-2fa') {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.getJwtSecret()
+      secretOrKey: configService.getJwtSecret(),
     });
   }
 
@@ -20,14 +20,17 @@ export class Jwt2faStrategy extends PassportStrategy(Strategy, 'jwt-2fa') {
       throw new UnauthorizedException('User not found');
     }
 
-    if (!user.isTwoFactorAuthenticationEnabled && !payload.isTwoFactorAuthenticated) {
+    if (
+      !user.isTwoFactorAuthenticationEnabled &&
+      !payload.isTwoFactorAuthenticated
+    ) {
       throw new UnauthorizedException('2FA required');
     }
 
-    if(payload.isTwoFactorAuthenticated) {
+    if (payload.isTwoFactorAuthenticated) {
       throw new UnauthorizedException('2FA already authenticated');
     }
-    
+
     return user;
   }
 }

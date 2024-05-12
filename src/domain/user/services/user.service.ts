@@ -1,14 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { User, UserBuilder } from '@domain/user/entities/user.entity';
 import { IUserService } from '../interfaces/user.service.interface';
-import { UserQueryDTO, UserResponseDTO, UserCreateDTO, UserIdDTO } from '@application/user/dto';
+import {
+  UserQueryDTO,
+  UserResponseDTO,
+  UserCreateDTO,
+  UserIdDTO,
+} from '@application/user/dto';
 import { UserRepository } from '@infra/database/user.repository';
 
 @Injectable()
 export class UserService implements IUserService {
-  constructor(
-    private userRepository: UserRepository,
-  ) {}
+  constructor(private userRepository: UserRepository) {}
 
   async findOne(dto: UserIdDTO): Promise<User | null> {
     if (!dto.id) {
@@ -16,7 +19,6 @@ export class UserService implements IUserService {
     }
     return await this.userRepository.findOneById(dto.id);
   }
-  
 
   async remove(dto: UserIdDTO): Promise<void> {
     await this.userRepository.delete({ id: dto.id });
@@ -35,10 +37,16 @@ export class UserService implements IUserService {
 
   async createUser(createDto: UserCreateDTO): Promise<UserResponseDTO> {
     const user = new UserBuilder()
-        .withEmail(createDto.email)
-        .withUsername(createDto.username ?? await this.generateUsername(createDto.firstName, createDto.lastName))
-        .withPassword(createDto.password ?? null)
-        .build();
+      .withEmail(createDto.email)
+      .withUsername(
+        createDto.username ??
+          (await this.generateUsername(
+            createDto.firstName,
+            createDto.lastName,
+          )),
+      )
+      .withPassword(createDto.password ?? null)
+      .build();
 
     const savedUser = await this.userRepository.save(user);
     return this.toResponseDto(savedUser);
@@ -46,32 +54,37 @@ export class UserService implements IUserService {
 
   async isUsernameTaken(query: UserQueryDTO): Promise<boolean> {
     const user = await this.userRepository.findOneByUsername(query.username);
-    return Boolean(user); 
+    return Boolean(user);
   }
 
   async generateUsername(firstName: string, lastName: string): Promise<string> {
     let baseUsername = `${firstName}_${lastName}`;
     let username = baseUsername;
     let i = 1;
-  
+
     while (await this.isUsernameTaken({ username })) {
-      username = `${baseUsername}${i}`; 
+      username = `${baseUsername}${i}`;
       i++;
     }
 
     return username;
   }
-  
+
   public async findOrCreate(googleUser: any): Promise<User> {
     let user: User = await this.findOneByEmail(googleUser.email);
 
     if (!user) {
       user = new UserBuilder()
-      .withEmail(googleUser.email)
-      .withUsername(await this.generateUsername(googleUser.firstName, googleUser.lastName))
-      .withCreatedAt(new Date())
-      .build();
-      
+        .withEmail(googleUser.email)
+        .withUsername(
+          await this.generateUsername(
+            googleUser.firstName,
+            googleUser.lastName,
+          ),
+        )
+        .withCreatedAt(new Date())
+        .build();
+
       let userDto = await this.createUser(this.toUserCreateDto(user));
       user = await this.userRepository.findOneById(userDto.id);
     }
@@ -102,13 +115,13 @@ export class UserService implements IUserService {
     });
   }
 
-    private toResponseDto(user: User): UserResponseDTO {
+  private toResponseDto(user: User): UserResponseDTO {
     return {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        lastLoginAt: user.lastLoginAt,
-        createdAt: user.createdAt,
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      lastLoginAt: user.lastLoginAt,
+      createdAt: user.createdAt,
     };
   }
 

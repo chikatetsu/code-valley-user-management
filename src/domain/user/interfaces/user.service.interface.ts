@@ -1,5 +1,10 @@
-import { UserCreateDTO, UserIdDTO, UserQueryDTO, UserResponseDTO } from "@application/user/dto";
-import { User } from "../entities/user.entity";
+import {
+  UserCreateDTO,
+  UserIdDTO,
+  UserQueryDTO,
+  UserResponseDTO,
+} from '@application/user/dto';
+import { User } from '../entities/user.entity';
 
 export interface IUserService {
   findOne(dto: UserIdDTO): Promise<UserResponseDTO | null>;
