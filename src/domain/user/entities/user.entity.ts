@@ -1,6 +1,13 @@
-import { Exclude } from 'class-transformer';
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
+import { Friendship } from '@domain/friendship/entities/friendship.entity';
 
 @Entity()
 export class User extends BaseEntity {
@@ -35,6 +42,12 @@ export class User extends BaseEntity {
   @ApiProperty()
   @Column({ type: 'boolean', default: false })
   public isTwoFactorAuthenticationEnabled: boolean;
+
+  @OneToMany(() => Friendship, (friendship) => friendship.sender)
+  public sentFriendships!: Friendship[];
+
+  @OneToMany(() => Friendship, (friendship) => friendship.receiver)
+  public receivedFriendships!: Friendship[];
 
   constructor(obj = {}) {
     super();
