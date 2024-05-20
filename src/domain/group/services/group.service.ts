@@ -18,7 +18,7 @@ export class GroupService implements IGroupService {
   ) {}
 
   async createGroup(groupDTO: GroupDTO): Promise<GroupResponseDTO> {
-    const members = await this.userRepository.findByIds(groupDTO.memberIds);
+    const members = await this.userRepository.findManyByIds(groupDTO.memberIds);
     const group = await this.groupRepository.createGroup(
       groupDTO.name,
       members,

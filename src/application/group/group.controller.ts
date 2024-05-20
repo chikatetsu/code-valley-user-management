@@ -3,21 +3,23 @@ import { GroupService } from '@domain/group/services/group.service';
 import { GroupResponseDTO, GroupDTO } from '@application/group/dto';
 import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-import { GroupInterceptor } from './group.interceptor';
+import { NotFoundInterceptor, CreateGroupInterceptor } from './interceptors';
 
 @Controller('groups')
 @ApiTags('groups')
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
-@UseInterceptors(GroupInterceptor)
+@UseInterceptors(NotFoundInterceptor)
 export class GroupController {
   constructor(private readonly groupService: GroupService) {}
-  
+
   @Post('create')
   @ApiBody({ type: GroupDTO })
   @ApiResponse({ status: 201, type: GroupResponseDTO })
   @ApiResponse({ status: 400, description: 'Bad Request' })
+  @UseInterceptors(CreateGroupInterceptor)
   async createGroup(@Req() req: any, @Body() groupDTO: GroupDTO): Promise<GroupResponseDTO> {
+    groupDTO.memberIds.push(req.user.id);
     return this.groupService.createGroup(groupDTO);
   }
 

@@ -7,7 +7,7 @@ import { User } from '@domain/user/entities/user.entity';
 import { Group } from '@domain/group/entities/group.entity';
 
 @Injectable()
-export class GroupInterceptor implements NestInterceptor {
+export class NotFoundInterceptor implements NestInterceptor {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
