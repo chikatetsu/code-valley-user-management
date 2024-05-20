@@ -1,7 +1,7 @@
 import { Controller, Post, Param, Body, Delete, Get, ParseIntPipe, UseGuards, Req, Logger, UseInterceptors } from '@nestjs/common';
 import { GroupService } from '@domain/group/services/group.service';
 import { GroupResponseDTO, GroupDTO } from '@application/group/dto';
-import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { NotFoundInterceptor, CreateGroupInterceptor } from './interceptors';
 
@@ -23,22 +23,30 @@ export class GroupController {
     return this.groupService.createGroup(groupDTO);
   }
 
-  @Post('add/:groupId')
+  @Post('add/:groupId/:userId')
+  @ApiResponse({ status: 200, type: GroupResponseDTO })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiParam({ name: 'groupId', type: Number })
+  @ApiParam({ name: 'userId', type: Number })
   async addUserToGroup(
-    @Req() req: any,
-    @Param('groupId', ParseIntPipe) groupId: number,
-  ): Promise<GroupResponseDTO> {
-    const userId = req.user.id;
-    return this.groupService.addUserToGroup(groupId, userId);
-  }
-
-  @Delete('remove/:groupId/:userId')
-  async removeUserFromGroup(
     @Req() req: any,
     @Param('groupId', ParseIntPipe) groupId: number,
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<GroupResponseDTO> {
-    return this.groupService.removeUserFromGroup(groupId, userId);
+    return this.groupService.addUserToGroup(groupId, userId);
+  }
+
+  @Delete('remove/:groupId/:userId')
+  @ApiResponse({ status: 200, type: GroupResponseDTO })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiParam({ name: 'groupId', type: Number })
+  @ApiParam({ name: 'userId', type: Number })
+  async removeUserFromGroup(
+    @Req() req: any,
+    @Param('groupId', ParseIntPipe) groupId: number,
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<void> {
+    this.groupService.removeUserFromGroup(groupId, userId);
   }
 
   @Get('list')

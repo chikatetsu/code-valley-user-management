@@ -41,12 +41,11 @@ export class GroupService implements IGroupService {
   async removeUserFromGroup(
     groupId: number,
     userId: number,
-  ): Promise<GroupResponseDTO> {
-    const group = await this.groupRepository.removeUserFromGroup(
+  ): Promise<void> {
+    await this.groupRepository.removeUserFromGroup(
       groupId,
       userId,
     );
-    return this.toGroupResponseDTO(group);
   }
 
   async listGroups(): Promise<GroupResponseDTO[]> {

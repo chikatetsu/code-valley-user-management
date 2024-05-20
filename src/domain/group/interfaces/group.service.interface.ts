@@ -6,7 +6,7 @@ export interface IGroupService {
   removeUserFromGroup(
     groupId: number,
     userId: number,
-  ): Promise<GroupResponseDTO>;
+  ): Promise<void>;
   listGroups(): Promise<GroupResponseDTO[]>;
   getGroupDetails(groupId: number): Promise<GroupResponseDTO | null>;
 }
