@@ -1,4 +1,10 @@
-import { Injectable, NestInterceptor, ExecutionContext, CallHandler, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NestInterceptor,
+  ExecutionContext,
+  CallHandler,
+  NotFoundException,
+} from '@nestjs/common';
 import { Observable, from } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { Repository } from 'typeorm';
@@ -21,25 +27,45 @@ export class ExistsInterceptor implements NestInterceptor {
     const body = request.body;
 
     const checks = [
-      { id: params.senderId, repository: this.userRepository, message: 'Sender not found' },
-      { id: params.receiverId, repository: this.userRepository, message: 'Receiver not found' },
-      { id: params.friendshipId, repository: this.friendshipRepository, message: 'Friendship not found' },
-      { id: body.userId, repository: this.userRepository, message: 'User not found' },
-      { id: body.friendId, repository: this.userRepository, message: 'Friend not found' }
+      {
+        id: params.senderId,
+        repository: this.userRepository,
+        message: 'Sender not found',
+      },
+      {
+        id: params.receiverId,
+        repository: this.userRepository,
+        message: 'Receiver not found',
+      },
+      {
+        id: params.friendshipId,
+        repository: this.friendshipRepository,
+        message: 'Friendship not found',
+      },
+      {
+        id: body.userId,
+        repository: this.userRepository,
+        message: 'User not found',
+      },
+      {
+        id: body.friendId,
+        repository: this.userRepository,
+        message: 'Friend not found',
+      },
     ];
 
     const checkPromises = checks
-      .filter(check => check.id !== undefined && check.id !== null)
-      .map(check => check.repository.findOne({ where: { id: check.id } })
-        .then(entity => {
+      .filter((check) => check.id !== undefined && check.id !== null)
+      .map((check) =>
+        check.repository.findOne({ where: { id: check.id } }).then((entity) => {
           if (!entity) {
             throw new NotFoundException(check.message);
           }
-        })
+        }),
       );
 
     return from(Promise.all(checkPromises)).pipe(
-      switchMap(() => next.handle())
+      switchMap(() => next.handle()),
     );
   }
 }

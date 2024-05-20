@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { IFriendshipService } from '@domain/friendship/interfaces/friendship.service.interface';
@@ -8,6 +8,7 @@ import {
   FriendshipDTO,
   FriendshipResponseDTO,
 } from '@application/friendship/dto';
+import { UserQueryDTO } from '@application/user/dto';
 
 @Injectable()
 export class FriendshipService implements IFriendshipService {
@@ -22,6 +23,10 @@ export class FriendshipService implements IFriendshipService {
     senderId: number,
     receiverId: number,
   ): Promise<FriendshipResponseDTO> {
+    if (senderId === receiverId) {
+      throw new BadRequestException('Cannot send friend request to yourself');
+    }
+
     const friendship = this.friendshipRepository.create({
       senderId,
       receiverId,
@@ -67,7 +72,7 @@ export class FriendshipService implements IFriendshipService {
     });
   }
 
-  async listFriends(userId: number): Promise<User[]> {
+  async listFriends(userId: number): Promise<UserQueryDTO[]> {
     const friendships = await this.friendshipRepository.find({
       where: [
         { senderId: userId, status: 'accepted' },

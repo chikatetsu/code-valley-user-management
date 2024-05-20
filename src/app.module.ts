@@ -13,8 +13,7 @@ import { ApiModule } from '@infra/web/api.module';
       ...configService.getTypeOrmConfig(),
       autoLoadEntities: true,
       synchronize: true,
-    }
-  ),
+    }),
     ApiModule,
   ],
 })

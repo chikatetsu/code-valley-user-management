@@ -7,68 +7,89 @@ import {
   Get,
   ParseIntPipe,
   UseInterceptors,
-  Logger,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { FriendshipService } from '@domain/friendship/services/friendship.service';
 import {
   FriendshipResponseDTO,
   FriendshipDTO,
 } from '@application/friendship/dto';
-import { User } from '@domain/user/entities/user.entity';
-import { ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ExistsInterceptor } from './exists.interceptor';
+import { AuthGuard } from '@nestjs/passport';
+import { UserQueryDTO } from '@application/user/dto';
 
 @Controller('friendships')
 @ApiTags('friendships')
+@ApiBearerAuth()
+@UseGuards(AuthGuard('jwt'))
 @UseInterceptors(ExistsInterceptor)
 export class FriendshipController {
   constructor(private readonly friendshipService: FriendshipService) {}
 
-  @Post('send/:senderId/:receiverId')
-  @ApiParam({ name: 'senderId', type: Number })
+  @Post('send/:receiverId')
   @ApiParam({ name: 'receiverId', type: Number })
+  @ApiResponse({ status: 201, type: FriendshipResponseDTO })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
   async sendFriendRequest(
-    @Param('senderId', ParseIntPipe) senderId: number,
+    @Req() req: any,
     @Param('receiverId', ParseIntPipe) receiverId: number,
   ): Promise<FriendshipResponseDTO> {
-    Logger.log(`sendFriendRequest: senderId=${senderId}, receiverId=${receiverId}`);
+    const senderId = req.user.id;
     return this.friendshipService.sendFriendRequest(senderId, receiverId);
   }
 
   @Post('accept/:friendshipId')
+  @ApiParam({ name: 'friendshipId', type: Number })
+  @ApiResponse({ status: 201, type: FriendshipResponseDTO })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
   async acceptFriendRequest(
+    @Req() req: any,
     @Param('friendshipId', ParseIntPipe) friendshipId: number,
   ): Promise<FriendshipResponseDTO> {
     return this.friendshipService.acceptFriendRequest(friendshipId);
   }
 
   @Post('decline/:friendshipId')
+  @ApiParam({ name: 'friendshipId', type: Number })
+  @ApiResponse({ status: 201 })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
   async declineFriendRequest(
+    @Req() req: any,
     @Param('friendshipId', ParseIntPipe) friendshipId: number,
   ): Promise<void> {
     return this.friendshipService.declineFriendRequest(friendshipId);
   }
 
-  @Delete('remove')
+  @Delete('remove/:friendId')
+  @ApiParam({ name: 'friendId', type: Number })
+  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
   async removeFriend(
-    @Body('userId', ParseIntPipe) userId: number,
-    @Body('friendId', ParseIntPipe) friendId: number,
+    @Req() req: any,
+    @Param('friendId', ParseIntPipe) friendId: number,
   ): Promise<void> {
+    const userId = req.user.id;
     return this.friendshipService.removeFriend(userId, friendId);
   }
 
-  @Get('list/:userId')
-  async listFriends(
-    @Param('userId', ParseIntPipe) userId: number,
-  ): Promise<User[]> {
+  @Get('list')
+  @ApiResponse({ status: 200, type: [UserQueryDTO] })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  async listFriends(@Req() req: any): Promise<UserQueryDTO[]> {
+    const userId = req.user.id;
     return this.friendshipService.listFriends(userId);
   }
 
   @Get('status')
+  @ApiResponse({ status: 200, type: FriendshipDTO })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
   async getFriendshipStatus(
-    @Body('userId', ParseIntPipe) userId: number,
+    @Req() req: any,
     @Body('friendId', ParseIntPipe) friendId: number,
   ): Promise<FriendshipDTO> {
+    const userId = req.user.id;
     return this.friendshipService.getFriendshipStatus(userId, friendId);
   }
 }

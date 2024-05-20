@@ -1,9 +1,8 @@
-import { Friendship } from '@domain/friendship/entities/friendship.entity';
-import { User } from '@domain/user/entities/user.entity';
 import {
   FriendshipDTO,
   FriendshipResponseDTO,
 } from '@application/friendship/dto';
+import { UserQueryDTO } from '@application/user/dto';
 
 export interface IFriendshipService {
   sendFriendRequest(
@@ -13,6 +12,6 @@ export interface IFriendshipService {
   acceptFriendRequest(friendshipId: number): Promise<FriendshipResponseDTO>;
   declineFriendRequest(friendshipId: number): Promise<void>;
   removeFriend(userId: number, friendId: number): Promise<void>;
-  listFriends(userId: number): Promise<User[]>;
+  listFriends(userId: number): Promise<UserQueryDTO[]>;
   getFriendshipStatus(userId: number, friendId: number): Promise<FriendshipDTO>;
 }
