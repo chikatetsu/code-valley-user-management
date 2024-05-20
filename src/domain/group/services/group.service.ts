@@ -58,7 +58,7 @@ export class GroupService implements IGroupService {
     return group ? this.toGroupResponseDTO(group) : null;
   }
 
-  private toGroupResponseDTO(group: Group): GroupResponseDTO {
+  private toGroupResponseDTO = (group: Group): GroupResponseDTO => {
     return {
       id: group.id,
       name: group.name,
@@ -66,7 +66,7 @@ export class GroupService implements IGroupService {
     };
   }
 
-  private toUserResponseDTO(user: User): UserResponseDTO {
+  private toUserResponseDTO = (user: User): UserResponseDTO => {
     return {
       id: user.id,
       email: user.email,
