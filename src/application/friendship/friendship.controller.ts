@@ -16,7 +16,7 @@ import {
   FriendshipDTO,
 } from '@application/friendship/dto';
 import { ApiBearerAuth, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ExistsInterceptor } from './exists.interceptor';
+import { FriendshipInterceptor } from './friendship.interceptor';
 import { AuthGuard } from '@nestjs/passport';
 import { UserQueryDTO } from '@application/user/dto';
 
@@ -24,7 +24,7 @@ import { UserQueryDTO } from '@application/user/dto';
 @ApiTags('friendships')
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
-@UseInterceptors(ExistsInterceptor)
+@UseInterceptors(FriendshipInterceptor)
 export class FriendshipController {
   constructor(private readonly friendshipService: FriendshipService) {}
 

@@ -13,7 +13,7 @@ import { User } from '@domain/user/entities/user.entity';
 import { Friendship } from '@domain/friendship/entities/friendship.entity';
 
 @Injectable()
-export class ExistsInterceptor implements NestInterceptor {
+export class FriendshipInterceptor implements NestInterceptor {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
