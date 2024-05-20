@@ -65,6 +65,19 @@ export class AuthController {
     return this.authService.logIn(signInDto);
   }
 
+  @Post('logout')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'User successfully logged out',
+  })
+  async logout(@Req() req, @Res() res: Response) {
+    const token = req.headers.authorization.split(' ')[1]; 
+    await this.authService.logout(token); 
+    res.json();
+  }
+
   @Get('profile')
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
