@@ -1,7 +1,24 @@
-import { Controller, Post, Param, Body, Delete, Get, ParseIntPipe, UseGuards, Req, Logger, UseInterceptors } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Param,
+  Body,
+  Delete,
+  Get,
+  ParseIntPipe,
+  UseGuards,
+  Req,
+  UseInterceptors,
+} from '@nestjs/common';
 import { GroupService } from '@domain/group/services/group.service';
 import { GroupResponseDTO, GroupDTO } from '@application/group/dto';
-import { ApiBearerAuth, ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { NotFoundInterceptor, CreateGroupInterceptor } from './interceptors';
 
@@ -17,8 +34,12 @@ export class GroupController {
   @ApiBody({ type: GroupDTO })
   @ApiResponse({ status: 201, type: GroupResponseDTO })
   @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
   @UseInterceptors(CreateGroupInterceptor)
-  async createGroup(@Req() req: any, @Body() groupDTO: GroupDTO): Promise<GroupResponseDTO> {
+  async createGroup(
+    @Req() req: any,
+    @Body() groupDTO: GroupDTO,
+  ): Promise<GroupResponseDTO> {
     groupDTO.memberIds.push(req.user.id);
     return this.groupService.createGroup(groupDTO);
   }
@@ -26,6 +47,7 @@ export class GroupController {
   @Post('add/:groupId/:userId')
   @ApiResponse({ status: 200, type: GroupResponseDTO })
   @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
   @ApiParam({ name: 'groupId', type: Number })
   @ApiParam({ name: 'userId', type: Number })
   async addUserToGroup(
@@ -39,6 +61,7 @@ export class GroupController {
   @Delete('remove/:groupId/:userId')
   @ApiResponse({ status: 200, type: GroupResponseDTO })
   @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
   @ApiParam({ name: 'groupId', type: Number })
   @ApiParam({ name: 'userId', type: Number })
   async removeUserFromGroup(
@@ -50,11 +73,17 @@ export class GroupController {
   }
 
   @Get('list')
+  @ApiResponse({ status: 200, type: [GroupResponseDTO] })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
   async listGroups(@Req() req: any): Promise<GroupResponseDTO[]> {
     return this.groupService.listGroups();
   }
 
   @Get('details/:groupId')
+  @ApiResponse({ status: 200, type: GroupResponseDTO })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
   async getGroupDetails(
     @Req() req: any,
     @Param('groupId', ParseIntPipe) groupId: number,

@@ -1,4 +1,11 @@
-import { Injectable, NestInterceptor, ExecutionContext, CallHandler, BadRequestException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  NestInterceptor,
+  ExecutionContext,
+  CallHandler,
+  BadRequestException,
+  Logger,
+} from '@nestjs/common';
 import { Observable, from } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { Repository } from 'typeorm';
@@ -19,22 +26,25 @@ export class CreateGroupInterceptor implements NestInterceptor {
     const request = context.switchToHttp().getRequest();
     const body = request.body;
     const memberIds = body.memberIds;
- 
+
     const userId = request.user.id;
 
     return from(
-      this.groupRepository.createQueryBuilder('group')
+      this.groupRepository
+        .createQueryBuilder('group')
         .leftJoin('group.members', 'member')
         .where('member.id = :userId', { userId })
         .orWhere('member.id IN (:...memberIds)', { memberIds })
-        .getOne()
+        .getOne(),
     ).pipe(
-      switchMap(group => {
+      switchMap((group) => {
         if (group) {
-          throw new BadRequestException('User has already created or joined a group');
+          throw new BadRequestException(
+            'User has already created or joined a group',
+          );
         }
         return next.handle();
-      })
+      }),
     );
   }
 }

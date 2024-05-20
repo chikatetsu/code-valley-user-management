@@ -18,7 +18,7 @@ export class UserRepository extends Repository<User> {
       }
 
       users.push(user);
-  }
+    }
 
     return users;
   }

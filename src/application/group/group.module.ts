@@ -8,10 +8,15 @@ import { Group } from '@domain/group/entities/group.entity';
 import { User } from '@domain/user/entities/user.entity';
 import { NotFoundInterceptor, CreateGroupInterceptor } from './interceptors';
 
-
 @Module({
   imports: [TypeOrmModule.forFeature([Group, User])],
   controllers: [GroupController],
-  providers: [GroupService, GroupRepository, UserRepository, NotFoundInterceptor, CreateGroupInterceptor],
+  providers: [
+    GroupService,
+    GroupRepository,
+    UserRepository,
+    NotFoundInterceptor,
+    CreateGroupInterceptor,
+  ],
 })
 export class GroupModule {}

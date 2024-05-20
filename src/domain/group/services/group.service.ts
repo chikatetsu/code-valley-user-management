@@ -38,14 +38,8 @@ export class GroupService implements IGroupService {
     return this.toGroupResponseDTO(group);
   }
 
-  async removeUserFromGroup(
-    groupId: number,
-    userId: number,
-  ): Promise<void> {
-    await this.groupRepository.removeUserFromGroup(
-      groupId,
-      userId,
-    );
+  async removeUserFromGroup(groupId: number, userId: number): Promise<void> {
+    await this.groupRepository.removeUserFromGroup(groupId, userId);
   }
 
   async listGroups(): Promise<GroupResponseDTO[]> {
@@ -64,7 +58,7 @@ export class GroupService implements IGroupService {
       name: group.name,
       members: group.members.map(this.toUserResponseDTO),
     };
-  }
+  };
 
   private toUserResponseDTO = (user: User): UserResponseDTO => {
     return {
@@ -74,5 +68,5 @@ export class GroupService implements IGroupService {
       createdAt: user.createdAt,
       lastLoginAt: user.lastLoginAt,
     };
-  }
+  };
 }
