@@ -9,7 +9,12 @@ import { ApiModule } from '@infra/web/api.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    TypeOrmModule.forRoot(configService.getTypeOrmConfig()),
+    TypeOrmModule.forRoot({
+      ...configService.getTypeOrmConfig(),
+      autoLoadEntities: true,
+      synchronize: true,
+    }
+  ),
     ApiModule,
   ],
 })

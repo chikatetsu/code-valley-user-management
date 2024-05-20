@@ -6,6 +6,8 @@ import {
   Delete,
   Get,
   ParseIntPipe,
+  UseInterceptors,
+  Logger,
 } from '@nestjs/common';
 import { FriendshipService } from '@domain/friendship/services/friendship.service';
 import {
@@ -13,16 +15,23 @@ import {
   FriendshipDTO,
 } from '@application/friendship/dto';
 import { User } from '@domain/user/entities/user.entity';
+import { ApiParam, ApiTags } from '@nestjs/swagger';
+import { ExistsInterceptor } from './exists.interceptor';
 
 @Controller('friendships')
+@ApiTags('friendships')
+@UseInterceptors(ExistsInterceptor)
 export class FriendshipController {
   constructor(private readonly friendshipService: FriendshipService) {}
 
-  @Post('send')
+  @Post('send/:senderId/:receiverId')
+  @ApiParam({ name: 'senderId', type: Number })
+  @ApiParam({ name: 'receiverId', type: Number })
   async sendFriendRequest(
-    @Body('senderId', ParseIntPipe) senderId: number,
-    @Body('receiverId', ParseIntPipe) receiverId: number,
+    @Param('senderId', ParseIntPipe) senderId: number,
+    @Param('receiverId', ParseIntPipe) receiverId: number,
   ): Promise<FriendshipResponseDTO> {
+    Logger.log(`sendFriendRequest: senderId=${senderId}, receiverId=${receiverId}`);
     return this.friendshipService.sendFriendRequest(senderId, receiverId);
   }
 
