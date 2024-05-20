@@ -115,7 +115,7 @@ export class AuthController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt-2fa'))
   async turnOffTwoFactorAuthentication(@Req() request) {
-    if (!request.user.isTwoFactorAuthenticationEnabled) {
+    if (request.user.isTwoFactorAuthenticationEnabled === false) {
       throw new UnauthorizedException(
         'Two-factor authentication is already disabled',
       );

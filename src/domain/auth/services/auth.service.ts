@@ -115,7 +115,7 @@ export class AuthService implements IAuthService {
 
     return {
       email: payload.email,
-      access_token: this.jwtService.sign(payload),
+      accessToken: this.jwtService.sign(payload),
     };
   }
 
