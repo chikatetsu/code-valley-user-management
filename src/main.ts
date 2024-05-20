@@ -34,7 +34,9 @@ async function bootstrap() {
   let nestApplicationLogger = new Logger('NestApplication');
 
   const document = SwaggerModule.createDocument(app, configSwagger.build());
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('api', app, document, {
+    jsonDocumentUrl: 'docs-json',
+  });
   await app.listen(port, () => {
     nestApplicationLogger.log(
       `${packageJson.name} is listening on port ${port}`,
