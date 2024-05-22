@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from '@domain/user/entities/user.entity';
+import { FriendshipStatus } from '@application/friendship/types/friendship.status';
 
 @Entity()
 export class Friendship extends BaseEntity {
@@ -38,8 +39,11 @@ export class Friendship extends BaseEntity {
   public receiverId!: number;
 
   @ApiProperty()
-  @Column({ type: 'varchar', default: 'pending' })
-  public status!: 'pending' | 'accepted' | 'declined';
+  @Column({
+    type: 'text',
+    default: FriendshipStatus.pending,
+  })
+  public status!: FriendshipStatus;
 
   @ApiProperty()
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })

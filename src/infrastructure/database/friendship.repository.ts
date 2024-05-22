@@ -1,6 +1,7 @@
 import { DataSource, Repository } from 'typeorm';
 import { Friendship } from '@domain/friendship/entities/friendship.entity';
 import { Injectable } from '@nestjs/common';
+import { FriendshipStatus } from '@application/friendship/types/friendship.status';
 
 @Injectable()
 export class FriendshipRepository extends Repository<Friendship> {
@@ -23,7 +24,7 @@ export class FriendshipRepository extends Repository<Friendship> {
     const friendship = this.create({
       senderId,
       receiverId,
-      status: 'pending',
+      status: FriendshipStatus.pending,
       createdAt: new Date(),
     });
     return this.save(friendship);
@@ -31,7 +32,7 @@ export class FriendshipRepository extends Repository<Friendship> {
 
   async updateStatus(
     friendshipId: number,
-    status: 'accepted' | 'declined',
+    status: FriendshipStatus, 
   ): Promise<Friendship> {
     const friendship = await this.findOneById(friendshipId);
     if (!friendship) {
