@@ -8,6 +8,4 @@ export class BlackListRepository extends Repository<BlacklistedToken> {
   constructor(private dataSource: DataSource) {
     super(BlacklistedToken, dataSource.createEntityManager());
   }
-
-
 }

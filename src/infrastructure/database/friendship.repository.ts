@@ -32,7 +32,7 @@ export class FriendshipRepository extends Repository<Friendship> {
 
   async updateStatus(
     friendshipId: number,
-    status: FriendshipStatus, 
+    status: FriendshipStatus,
   ): Promise<Friendship> {
     const friendship = await this.findOneById(friendshipId);
     if (!friendship) {

@@ -96,7 +96,7 @@ export class FriendshipService implements IFriendshipService {
         { senderId: userId, receiverId: friendId },
         { senderId: friendId, receiverId: userId },
       ],
-    }); 
+    });
     if (!friendship) {
       throw new Error('Friendship not found');
     }

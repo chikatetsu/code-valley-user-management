@@ -8,7 +8,10 @@ import { IJwtService } from '../interfaces/jwt.service.interface';
 import { BlacklistService } from './blacklist.service';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) implements IJwtService {
+export class JwtStrategy
+  extends PassportStrategy(Strategy)
+  implements IJwtService
+{
   constructor(
     private userService: UserService,
     private blacklistService: BlacklistService,
@@ -40,7 +43,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) implements IJwtServi
       user.isTwoFactorAuthenticationEnabled &&
       !payload.isTwoFactorAuthenticated
     ) {
-      return done(new UnauthorizedException('2FA authentication required'), false);
+      return done(
+        new UnauthorizedException('2FA authentication required'),
+        false,
+      );
     }
 
     return done(null, user);

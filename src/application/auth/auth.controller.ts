@@ -75,8 +75,8 @@ export class AuthController {
     description: 'User successfully logged out',
   })
   async logout(@Req() req, @Res() res: Response) {
-    const token = req.headers.authorization.split(' ')[1]; 
-    await this.authService.logout(token); 
+    const token = req.headers.authorization.split(' ')[1];
+    await this.authService.logout(token);
     res.json();
   }
 
