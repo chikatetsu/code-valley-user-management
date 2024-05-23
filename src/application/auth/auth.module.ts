@@ -14,6 +14,7 @@ import { User } from '@domain/user/entities/user.entity';
 import { Jwt2faStrategy } from '@domain/auth/services/jwt-2fa.strategy';
 import { BlacklistService } from '@domain/auth/services/blacklist.service';
 import { BlacklistedToken } from '@domain/auth/entities/blacklisted-token.entity';
+import { NotFoundInterceptor } from './interceptors/found.interceptor';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { BlacklistedToken } from '@domain/auth/entities/blacklisted-token.entity
     GoogleStrategy,
     JwtStrategy,
     Jwt2faStrategy,
+    NotFoundInterceptor,
   ],
   controllers: [AuthController],
 })

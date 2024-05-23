@@ -11,6 +11,7 @@ import {
   Res,
   UnauthorizedException,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthService } from '@domain/auth/services/auth.service';
 import {
@@ -26,12 +27,14 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiOkResponse,
+  ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
 import { User } from '@domain/user/entities/user.entity';
 import { configService } from '@infra/config/config.service';
 import { UserService } from '@domain/user/services/user.service';
 import { UserResponseDTO } from '@application/user/dto';
+import { NotFoundInterceptor } from './interceptors/found.interceptor';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -69,7 +72,7 @@ export class AuthController {
 
   @Post('logout')
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt') || AuthGuard('jwt-2fa'))
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     description: 'User successfully logged out',
@@ -95,11 +98,13 @@ export class AuthController {
   @Get('profile/:id')
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(NotFoundInterceptor)
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     description: 'User profile',
     type: UserResponseDTO,
   })
+  @ApiParam({ name: 'id', type: Number })
   async getProfile(
     @Req() req: any,
     @Param('id') id: number,
