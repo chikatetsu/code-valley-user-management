@@ -1,4 +1,4 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
 
 export class PostResponseDto {
   @ApiProperty()
@@ -18,4 +18,7 @@ export class PostResponseDto {
 
   @ApiProperty()
   avatar: string;
+
+  @ApiProperty()
+  likes: number;
 }

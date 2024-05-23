@@ -1,3 +1,1 @@
-
-export interface IPostRepository {
-}
+export interface IPostRepository {}

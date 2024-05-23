@@ -8,15 +8,18 @@ import { PostController } from './post.controller';
 import { UserService } from '@domain/user/services/user.service';
 import { User } from '@domain/user/entities/user.entity';
 import { UserRepository } from '@infra/database/user.repository';
+import { PostLike } from '@domain/post/entities/post.like.entity';
+import { PostLikeRepository } from '@infra/database/post.like.repository';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Post])],
+  imports: [TypeOrmModule.forFeature([Post, PostLike])],
   controllers: [PostController],
   providers: [
     PostService,
     UserService,
     UserRepository,
     PostRepository,
+    PostLikeRepository,
   ],
 })
 export class PostModule {}

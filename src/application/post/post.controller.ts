@@ -1,11 +1,28 @@
 import { PostResponseDto, CreatePostDto } from './dto';
-import { Controller, Get, Post, Delete, Body, Param, UseGuards, Req, BadRequestException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+  Req,
+  BadRequestException,
+} from '@nestjs/common';
 import { PostService } from '@domain/post/services/post.service';
 
 import { JwtAuthGuard } from '@application/auth/guards/jwt-auth.guard';
 
 import { Request } from 'express';
-import { ApiBearerAuth, ApiBody, ApiResponse, ApiParam, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiResponse,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
+import { LikePostResponseDto } from './dto/LikePostResponse.dto';
 
 @Controller('posts')
 @ApiBearerAuth()
@@ -25,12 +42,15 @@ export class PostController {
   @ApiResponse({ status: 201, type: PostResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiBody({ type: CreatePostDto })
-  async createPost(@Req() req: Request, @Body() createPostDto: CreatePostDto): Promise<PostResponseDto> {
+  async createPost(
+    @Req() req: Request,
+    @Body() createPostDto: CreatePostDto,
+  ): Promise<PostResponseDto> {
     const userId = req.user['id'];
     if (!createPostDto.content) {
       throw new BadRequestException('Content must not be empty');
     }
-    
+
     return this.postService.createPost(userId, createPostDto);
   }
 
@@ -40,5 +60,31 @@ export class PostController {
   @ApiParam({ name: 'id', type: Number })
   async deletePost(@Param('id') id: number): Promise<void> {
     return this.postService.deletePost(id);
+  }
+
+  @Post(':id/like')
+  @ApiResponse({ status: 200, type: LikePostResponseDto })
+  @ApiResponse({ status: 404, description: 'Post not found' })
+  @ApiParam({ name: 'id', type: Number })
+  async likePost(
+    @Req() req: Request,
+    @Param('id') id: number,
+  ): Promise<LikePostResponseDto> {
+    let userId = req.user['id'];
+    console.log('userId', userId);
+    console.log('postId', id);
+    return this.postService.likePost(id, userId);
+  }
+
+  @Delete(':id/unlike')
+  @ApiResponse({ status: 200, type: LikePostResponseDto })
+  @ApiResponse({ status: 404, description: 'Post not found' })
+  @ApiParam({ name: 'id', type: Number })
+  async unlikePost(
+    @Req() req: Request,
+    @Param('id') id: number,
+  ): Promise<LikePostResponseDto> {
+    let userId = req.user['id'];
+    return this.postService.unlikePost(id, userId);
   }
 }
