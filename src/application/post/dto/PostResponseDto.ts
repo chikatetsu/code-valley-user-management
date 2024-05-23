@@ -11,5 +11,8 @@ export class PostResponseDto {
   userId: number;
 
   @ApiProperty()
+  username: string;
+
+  @ApiProperty()
   createdAt: Date;
 }

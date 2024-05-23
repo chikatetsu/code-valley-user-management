@@ -1,5 +1,5 @@
 import { PostResponseDto, CreatePostDto } from './dto';
-import { Controller, Get, Post, Delete, Body, Param, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, UseGuards, Req, BadRequestException } from '@nestjs/common';
 import { PostService } from '@domain/post/services/post.service';
 
 import { JwtAuthGuard } from '@application/auth/guards/jwt-auth.guard';
@@ -27,6 +27,10 @@ export class PostController {
   @ApiBody({ type: CreatePostDto })
   async createPost(@Req() req: Request, @Body() createPostDto: CreatePostDto): Promise<PostResponseDto> {
     const userId = req.user['id'];
+    if (!createPostDto.content) {
+      throw new BadRequestException('Content must not be empty');
+    }
+    
     return this.postService.createPost(userId, createPostDto);
   }
 

@@ -3,12 +3,14 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Post } from '../entities/post.entity';
+import { UserService } from '@domain/user/services/user.service';
 
 @Injectable()
 export class PostService {
   constructor(
     @InjectRepository(Post)
     private readonly postRepository: Repository<Post>,
+    private readonly userService: UserService,
   ) {}
 
   async createPost(userId: number, createPostDto: CreatePostDto): Promise<PostResponseDto> {
@@ -23,14 +25,16 @@ export class PostService {
 
   async getPosts(): Promise<PostResponseDto[]> {
     const posts = await this.postRepository.find();
-    return posts.map(this.toPostResponseDto);
+    return Promise.all(posts.map((post) => this.toPostResponseDto(post)));
   }
 
-  private toPostResponseDto(post: Post): PostResponseDto {
+  private async toPostResponseDto(post: Post): Promise<PostResponseDto> {
+    let user = await this.userService.findOneById(post.userId);
     return {
       id: post.id,
       content: post.content,
       userId: post.userId,
+      username: user.username,
       createdAt: post.createdAt,
     };
   }
