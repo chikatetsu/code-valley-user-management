@@ -8,6 +8,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { Friendship } from '@domain/friendship/entities/friendship.entity';
+import { Post } from '@domain/post/entities/post.entity';
 
 @Entity()
 export class User extends BaseEntity {
@@ -48,6 +49,9 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Friendship, (friendship) => friendship.receiver)
   public receivedFriendships!: Friendship[];
+
+  @OneToMany(() => Post, (post) => post.user)
+  posts: Post[];
 
   constructor(obj = {}) {
     super();

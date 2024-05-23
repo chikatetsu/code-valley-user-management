@@ -1,14 +1,11 @@
 import {
-  HttpStatus,
   Injectable,
-  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { configService } from '@infra/config/config.service';
 import { UserService } from '@domain/user/services/user.service';
-import { User } from '@domain/user/entities/user.entity';
 import { IJwtService } from '../interfaces/jwt.service.interface';
 import { BlacklistService } from './blacklist.service';
 
