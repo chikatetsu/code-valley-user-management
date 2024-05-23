@@ -21,4 +21,7 @@ export class PostResponseDto {
 
   @ApiProperty()
   likes: number;
+
+  @ApiProperty()
+  userHasLiked: boolean;
 }

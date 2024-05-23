@@ -1,19 +1,25 @@
-import { CreatePostDto, PostResponseDto } from '@application/post/dto';
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Post } from '../entities/post.entity';
-import { UserService } from '@domain/user/services/user.service';
-import { PostRepository } from '@infra/database/post.repository';
-import { PostLikeRepository } from '@infra/database/post.like.repository';
-import { LikePostResponseDto } from '@application/post/dto';
-import { ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Post } from '../entities/post.entity';
 import { PostLike } from '../entities/post.like.entity';
+import {
+  CreatePostDto,
+  PostResponseDto,
+  LikePostResponseDto,
+} from '@application/post/dto';
+import { UserService } from '@domain/user/services/user.service';
+import { PostRepository } from '@infra/database/post.repository';
 
 @Injectable()
 export class PostService {
   constructor(
-    private readonly postLikeRepository: PostLikeRepository,
+    @InjectRepository(PostLike)
+    private readonly postLikeRepository: Repository<PostLike>,
     private readonly postRepository: PostRepository,
     private readonly userService: UserService,
   ) {}
@@ -24,24 +30,29 @@ export class PostService {
   ): Promise<PostResponseDto> {
     const post = this.postRepository.create({ ...createPostDto, userId });
     await this.postRepository.save(post);
-    return this.toPostResponseDto(post);
+    return this.toPostResponseDto(post, userId);
   }
 
   async deletePost(postId: number): Promise<void> {
     await this.postRepository.delete(postId);
   }
 
-  async getPosts(): Promise<PostResponseDto[]> {
+  async getPosts(currentUserId: number): Promise<PostResponseDto[]> {
     const posts = await this.postRepository.findAll();
-    return Promise.all(posts.map((post) => this.toPostResponseDto(post)));
+    return Promise.all(
+      posts.map((post) => this.toPostResponseDto(post, currentUserId)),
+    );
   }
 
-  async getPostById(postId: number): Promise<PostResponseDto> {
+  async getPostById(
+    postId: number,
+    currentUserId: number,
+  ): Promise<PostResponseDto> {
     const post = await this.postRepository.findOneById(postId);
     if (!post) {
       throw new NotFoundException(`Post with id ${postId} not found`);
     }
-    return this.toPostResponseDto(post);
+    return this.toPostResponseDto(post, currentUserId);
   }
 
   async likePost(postId: number, userId: number): Promise<LikePostResponseDto> {
@@ -90,22 +101,19 @@ export class PostService {
     return { id: postId, likes: likeCount };
   }
 
-  private async toLikePostResponseDto(
+  private async toPostResponseDto(
     post: Post,
-  ): Promise<LikePostResponseDto> {
-    const likeCount = await this.postLikeRepository.count({
-      where: { postId: post.id },
-    });
-    return {
-      id: post.id,
-      likes: likeCount,
-    };
-  }
-  private async toPostResponseDto(post: Post): Promise<PostResponseDto> {
+    currentUserId: number,
+  ): Promise<PostResponseDto> {
     const user = await this.userService.findOneById(post.userId);
     const likeCount = await this.postLikeRepository.count({
       where: { postId: post.id },
     });
+
+    const userHasLiked = await this.postLikeRepository.findOne({
+      where: { postId: post.id, userId: currentUserId },
+    });
+
     return {
       id: post.id,
       content: post.content,
@@ -114,6 +122,7 @@ export class PostService {
       createdAt: post.createdAt,
       avatar: user.avatar,
       likes: likeCount,
+      userHasLiked: !!userHasLiked,
     };
   }
 }

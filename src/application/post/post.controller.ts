@@ -1,4 +1,3 @@
-import { PostResponseDto, CreatePostDto } from './dto';
 import {
   Controller,
   Get,
@@ -11,9 +10,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PostService } from '@domain/post/services/post.service';
-
 import { JwtAuthGuard } from '@application/auth/guards/jwt-auth.guard';
-
 import { Request } from 'express';
 import {
   ApiBearerAuth,
@@ -22,7 +19,7 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
-import { LikePostResponseDto } from './dto/LikePostResponse.dto';
+import { CreatePostDto, PostResponseDto, LikePostResponseDto } from './dto';
 
 @Controller('posts')
 @ApiBearerAuth()
@@ -34,8 +31,9 @@ export class PostController {
   @Get()
   @ApiResponse({ status: 200, type: PostResponseDto, isArray: true })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getPosts(): Promise<PostResponseDto[]> {
-    return this.postService.getPosts();
+  async getPosts(@Req() req: Request): Promise<PostResponseDto[]> {
+    const userId = req.user['id'];
+    return this.postService.getPosts(userId);
   }
 
   @Post()
@@ -70,13 +68,11 @@ export class PostController {
     @Req() req: Request,
     @Param('id') id: number,
   ): Promise<LikePostResponseDto> {
-    let userId = req.user['id'];
-    console.log('userId', userId);
-    console.log('postId', id);
+    const userId = req.user['id'];
     return this.postService.likePost(id, userId);
   }
 
-  @Delete(':id/unlike')
+  @Delete(':id/like')
   @ApiResponse({ status: 200, type: LikePostResponseDto })
   @ApiResponse({ status: 404, description: 'Post not found' })
   @ApiParam({ name: 'id', type: Number })
@@ -84,7 +80,7 @@ export class PostController {
     @Req() req: Request,
     @Param('id') id: number,
   ): Promise<LikePostResponseDto> {
-    let userId = req.user['id'];
+    const userId = req.user['id'];
     return this.postService.unlikePost(id, userId);
   }
 }
