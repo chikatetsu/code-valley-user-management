@@ -36,6 +36,7 @@ export class PostService {
       userId: post.userId,
       username: user.username,
       createdAt: post.createdAt,
+      avatar: user.avatar,
     };
   }
 }

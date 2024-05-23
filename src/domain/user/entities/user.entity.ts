@@ -38,6 +38,10 @@ export class User extends BaseEntity {
 
   @ApiProperty()
   @Column({ type: 'varchar', nullable: true })
+  public avatar: string;
+
+  @ApiProperty()
+  @Column({ type: 'varchar', nullable: true })
   public twoFactorAuthenticationSecret: string;
 
   @ApiProperty()

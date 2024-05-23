@@ -21,4 +21,8 @@ export class UserResponseDTO {
   @ApiProperty()
   @IsDate()
   createdAt: Date;
+
+  @ApiProperty()
+  @IsString()
+  avatar: string;
 }

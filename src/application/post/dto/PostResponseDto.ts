@@ -15,4 +15,7 @@ export class PostResponseDto {
 
   @ApiProperty()
   createdAt: Date;
+
+  @ApiProperty()
+  avatar: string;
 }

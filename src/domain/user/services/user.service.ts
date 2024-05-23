@@ -127,6 +127,7 @@ export class UserService implements IUserService {
       username: user.username,
       lastLoginAt: user.lastLoginAt,
       createdAt: user.createdAt,
+      avatar: user.avatar,
     };
   }
 

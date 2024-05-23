@@ -67,6 +67,7 @@ export class GroupService implements IGroupService {
       username: user.username,
       createdAt: user.createdAt,
       lastLoginAt: user.lastLoginAt,
+      avatar: user.avatar,
     };
   };
 }
