@@ -7,6 +7,7 @@ import {
   UserCreateDTO,
   UserIdDTO,
 } from '@application/user/dto';
+import { GoogleUser } from 'interfaces/google-user.interface';
 import { UserRepository } from '@infra/database/user.repository';
 
 @Injectable()
@@ -75,8 +76,10 @@ export class UserService implements IUserService {
     return username;
   }
 
-  public async findOrCreate(googleUser: any): Promise<User> {
-    let user: User = await this.findOneByEmail(googleUser.email);
+  public async findOrCreate(googleUser: GoogleUser): Promise<User> {
+    let userQuery = new UserQueryDTO();
+    userQuery.email = googleUser.email;
+    let user: User = await this.findOneByEmail(userQuery);
 
     if (!user) {
       user = new UserBuilder()
