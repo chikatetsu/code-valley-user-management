@@ -29,7 +29,7 @@ async function bootstrap() {
   };
   app.useGlobalPipes(new ValidationPipe(validationOptions));
 
-  configureSwagger(app); 
+  configureSwagger(app);
 
   await app.listen(port, () => {
     logger.log(`${packageJson.name} is listening on port ${port}`);

@@ -1,4 +1,9 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import {
+  HttpStatus,
+  Injectable,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { configService } from '@infra/config/config.service';
@@ -24,7 +29,11 @@ export class JwtStrategy
     });
   }
 
-  async validate(req: any, payload: any, done: Function): Promise<any> {
+  async validate(
+    req: any,
+    payload: any,
+    done: (error: any, user: any) => void,
+  ): Promise<any> {
     const token = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
     const isBlacklisted = await this.blacklistService.isTokenBlacklisted(token);
     if (isBlacklisted) {
@@ -48,7 +57,6 @@ export class JwtStrategy
         false,
       );
     }
-
     return done(null, user);
   }
 }

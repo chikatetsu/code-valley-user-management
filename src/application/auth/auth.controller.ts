@@ -72,7 +72,7 @@ export class AuthController {
 
   @Post('logout')
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt') || AuthGuard('jwt-2fa'))
+  @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     description: 'User successfully logged out',
