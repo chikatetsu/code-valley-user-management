@@ -19,6 +19,7 @@ import { ApiBearerAuth, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FriendshipInterceptor } from './friendship.interceptor';
 import { AuthGuard } from '@nestjs/passport';
 import { UserQueryDTO } from '@application/user/dto';
+import { UserFriendDTO } from '@application/user/dto/UserFriend.dto';
 
 @Controller('friendships')
 @ApiTags('friendships')
@@ -74,10 +75,18 @@ export class FriendshipController {
     return this.friendshipService.removeFriend(userId, friendId);
   }
 
+  @Get('requests')
+  @ApiResponse({ status: 200, type: [UserFriendDTO] })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  async listPendingRequests(@Req() req: any): Promise<UserFriendDTO[]> {
+    const userId = req.user.id;
+    return this.friendshipService.listPendingRequests(userId);
+  }
+
   @Get('list')
   @ApiResponse({ status: 200, type: [UserQueryDTO] })
   @ApiResponse({ status: 400, description: 'Bad Request' })
-  async listFriends(@Req() req: any): Promise<UserQueryDTO[]> {
+  async listFriends(@Req() req: any): Promise<UserFriendDTO[]> {
     const userId = req.user.id;
     return this.friendshipService.listFriends(userId);
   }

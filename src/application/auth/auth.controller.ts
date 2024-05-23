@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
   Req,
   Res,
@@ -30,6 +31,7 @@ import {
 import { User } from '@domain/user/entities/user.entity';
 import { configService } from '@infra/config/config.service';
 import { UserService } from '@domain/user/services/user.service';
+import { UserResponseDTO } from '@application/user/dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -73,12 +75,12 @@ export class AuthController {
     description: 'User successfully logged out',
   })
   async logout(@Req() req, @Res() res: Response) {
-    const token = req.headers.authorization.split(' ')[1]; 
-    await this.authService.logout(token); 
+    const token = req.headers.authorization.split(' ')[1];
+    await this.authService.logout(token);
     res.json();
   }
 
-  @Get('profile')
+  @Get('me')
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.OK)
@@ -86,8 +88,23 @@ export class AuthController {
     description: "Connected user's information",
     type: User,
   })
-  getProfile(@Req() req: any): User {
+  getMe(@Req() req: any): User {
     return req.user as User;
+  }
+
+  @Get('profile/:id')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'User profile',
+    type: UserResponseDTO,
+  })
+  async getProfile(
+    @Req() req: any,
+    @Param('id') id: number,
+  ): Promise<UserResponseDTO> {
+    return this.userService.findOneById(id);
   }
 
   @Get('google')

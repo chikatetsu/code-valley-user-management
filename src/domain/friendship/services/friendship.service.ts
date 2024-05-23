@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { IFriendshipService } from '@domain/friendship/interfaces/friendship.service.interface';
@@ -9,6 +9,8 @@ import {
   FriendshipResponseDTO,
 } from '@application/friendship/dto';
 import { UserQueryDTO } from '@application/user/dto';
+import { FriendshipStatus } from '@application/friendship/types/friendship.status';
+import { UserFriendDTO } from '@application/user/dto/UserFriend.dto';
 
 @Injectable()
 export class FriendshipService implements IFriendshipService {
@@ -30,7 +32,7 @@ export class FriendshipService implements IFriendshipService {
     const friendship = this.friendshipRepository.create({
       senderId,
       receiverId,
-      status: 'pending',
+      status: FriendshipStatus.pending,
     });
     await this.friendshipRepository.save(friendship);
     return this.toFriendshipResponseDTO(friendship);
@@ -45,7 +47,7 @@ export class FriendshipService implements IFriendshipService {
     if (!friendship) {
       throw new Error('Friendship not found');
     }
-    friendship.status = 'accepted';
+    friendship.status = FriendshipStatus.accepted;
     await this.friendshipRepository.save(friendship);
     return this.toFriendshipResponseDTO(friendship);
   }
@@ -57,7 +59,7 @@ export class FriendshipService implements IFriendshipService {
     if (!friendship) {
       throw new Error('Friendship not found');
     }
-    friendship.status = 'declined';
+    friendship.status = FriendshipStatus.declined;
     await this.friendshipRepository.save(friendship);
   }
 
@@ -72,11 +74,11 @@ export class FriendshipService implements IFriendshipService {
     });
   }
 
-  async listFriends(userId: number): Promise<UserQueryDTO[]> {
+  async listFriends(userId: number): Promise<UserFriendDTO[]> {
     const friendships = await this.friendshipRepository.find({
       where: [
-        { senderId: userId, status: 'accepted' },
-        { receiverId: userId, status: 'accepted' },
+        { senderId: userId, status: FriendshipStatus.accepted },
+        { receiverId: userId, status: FriendshipStatus.accepted },
       ],
       relations: ['sender', 'receiver'],
     });
@@ -99,6 +101,14 @@ export class FriendshipService implements IFriendshipService {
       throw new Error('Friendship not found');
     }
     return this.toFriendshipDTO(friendship);
+  }
+
+  async listPendingRequests(userId: number): Promise<UserFriendDTO[]> {
+    const friendships = await this.friendshipRepository.find({
+      where: { receiverId: userId, status: FriendshipStatus.pending },
+      relations: ['sender'],
+    });
+    return friendships.map((f) => f.sender);
   }
 
   private toFriendshipResponseDTO(
