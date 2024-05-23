@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import { IFriendshipService } from '@domain/friendship/interfaces/friendship.service.interface';
 import { Friendship } from '@domain/friendship/entities/friendship.entity';
 import { User } from '@domain/user/entities/user.entity';
@@ -27,6 +27,14 @@ export class FriendshipService implements IFriendshipService {
   ): Promise<FriendshipResponseDTO> {
     if (senderId === receiverId) {
       throw new BadRequestException('Cannot send friend request to yourself');
+    }
+
+    if (
+      await this.friendshipRepository.findOne({
+        where: { senderId, receiverId, status: FriendshipStatus.pending },
+      })
+    ) {
+      throw new BadRequestException('Friend request already sent');
     }
 
     const friendship = this.friendshipRepository.create({
@@ -111,6 +119,23 @@ export class FriendshipService implements IFriendshipService {
     return friendships.map((f) => f.sender);
   }
 
+  async listFriendSuggestions(userId: number): Promise<UserFriendDTO[]> {
+    const friends = await this.listFriends(userId);
+    const friendIds = friends.map((f) => f.id);
+
+    const sentRequests = await this.friendshipRepository.find({
+      where: { senderId: userId },
+    });
+    const sentRequestIds = sentRequests.map((req) => req.receiverId);
+
+    const suggestions = await this.userRepository.find({
+      where: {
+        id: Not(In([...friendIds, ...sentRequestIds, userId])),
+      },
+    });
+
+    return suggestions.map((user) => this.toUserFriendDTO(user));
+  }
   private toFriendshipResponseDTO(
     friendship: Friendship,
   ): FriendshipResponseDTO {
@@ -120,6 +145,21 @@ export class FriendshipService implements IFriendshipService {
       receiverId: friendship.receiverId,
       status: friendship.status,
       createdAt: friendship.createdAt,
+    };
+  }
+
+  private toUserQueryDTO(user: User): UserQueryDTO {
+    return {
+      username: user.username,
+      email: user.email,
+    };
+  }
+
+  private toUserFriendDTO(user: User): UserFriendDTO {
+    return {
+      id: user.id,
+      email: user.email,
+      username: user.username,
     };
   }
 

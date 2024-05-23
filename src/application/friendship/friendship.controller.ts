@@ -30,6 +30,7 @@ export class FriendshipController {
   constructor(private readonly friendshipService: FriendshipService) {}
 
   @Post('send/:receiverId')
+  @UseInterceptors(FriendshipInterceptor)
   @ApiParam({ name: 'receiverId', type: Number })
   @ApiResponse({ status: 201, type: FriendshipResponseDTO })
   @ApiResponse({ status: 400, description: 'Bad Request' })
@@ -100,5 +101,13 @@ export class FriendshipController {
   ): Promise<FriendshipDTO> {
     const userId = req.user.id;
     return this.friendshipService.getFriendshipStatus(userId, friendId);
+  }
+
+  @Get('suggestions')
+  @ApiResponse({ status: 200, type: [UserQueryDTO] })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  async listFriendSuggestions(@Req() req: any): Promise<UserQueryDTO[]> {
+    const userId = req.user.id;
+    return this.friendshipService.listFriendSuggestions(userId);
   }
 }
