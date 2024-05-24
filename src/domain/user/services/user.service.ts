@@ -90,6 +90,7 @@ export class UserService implements IUserService {
             googleUser.lastName,
           ),
         )
+        .withAvatar(googleUser.picture)
         .withCreatedAt(new Date())
         .build();
 

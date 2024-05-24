@@ -93,6 +93,11 @@ export class UserBuilder {
     return this;
   }
 
+  public withAvatar(avatar: string): this {
+    this.user.avatar = avatar;
+    return this;
+  }
+
   public withCreatedAt(createdAt: Date): this {
     this.user.createdAt = createdAt;
     return this;
