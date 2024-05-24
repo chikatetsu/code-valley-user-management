@@ -1,6 +1,14 @@
-import { Exclude } from 'class-transformer';
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
+import { Friendship } from '@domain/friendship/entities/friendship.entity';
+import { Post } from '@domain/post/entities/post.entity';
 
 @Entity()
 export class User extends BaseEntity {
@@ -30,11 +38,24 @@ export class User extends BaseEntity {
 
   @ApiProperty()
   @Column({ type: 'varchar', nullable: true })
+  public avatar: string;
+
+  @ApiProperty()
+  @Column({ type: 'varchar', nullable: true })
   public twoFactorAuthenticationSecret: string;
 
   @ApiProperty()
   @Column({ type: 'boolean', default: false })
   public isTwoFactorAuthenticationEnabled: boolean;
+
+  @OneToMany(() => Friendship, (friendship) => friendship.sender)
+  public sentFriendships!: Friendship[];
+
+  @OneToMany(() => Friendship, (friendship) => friendship.receiver)
+  public receivedFriendships!: Friendship[];
+
+  @OneToMany(() => Post, (post) => post.user)
+  posts: Post[];
 
   constructor(obj = {}) {
     super();
@@ -69,6 +90,11 @@ export class UserBuilder {
 
   public withLastLoginAt(lastLoginAt: Date): this {
     this.user.lastLoginAt = lastLoginAt;
+    return this;
+  }
+
+  public withAvatar(avatar: string): this {
+    this.user.avatar = avatar;
     return this;
   }
 

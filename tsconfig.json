@@ -24,6 +24,7 @@
       "@domain/*": ["src/domain/*"],
       "interfaces/*": ["src/interfaces/*"],
       "@infra/*": ["src/infrastructure/*"],
+      "@/package.json": ["package.json"],
     }
   }
 }
