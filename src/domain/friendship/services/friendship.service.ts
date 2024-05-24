@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Not, Repository } from 'typeorm';
 import { IFriendshipService } from '@domain/friendship/interfaces/friendship.service.interface';
@@ -58,6 +58,13 @@ export class FriendshipService implements IFriendshipService {
     friendship.status = FriendshipStatus.accepted;
     await this.friendshipRepository.save(friendship);
     return this.toFriendshipResponseDTO(friendship);
+  }
+
+  async cancelFriendRequest(senderId: number, receiverId: number): Promise<void> {
+    const friendship = await this.friendshipRepository.findOne({
+      where: { senderId, receiverId, status: FriendshipStatus.pending },
+    });
+    await this.friendshipRepository.delete(friendship.id);
   }
 
   async declineFriendRequest(friendshipId: number): Promise<void> {
