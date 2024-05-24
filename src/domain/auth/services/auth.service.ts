@@ -15,6 +15,7 @@ import { GoogleUser } from 'interfaces/google-user.interface';
 
 import { authenticator } from 'otplib';
 import { toDataURL } from 'qrcode';
+import { BlacklistService } from './blacklist.service';
 
 const USER_ALREADY_EXISTS_ERROR =
   "Cet email ou nom d'utilisateur est déjà utilisé";
@@ -28,6 +29,7 @@ export class AuthService implements IAuthService {
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
+    private blacklistService: BlacklistService,
   ) {}
 
   public async register(dto: RegisterDto): Promise<TokenResponse> {
@@ -113,8 +115,12 @@ export class AuthService implements IAuthService {
 
     return {
       email: payload.email,
-      access_token: this.jwtService.sign(payload),
+      accessToken: this.jwtService.sign(payload),
     };
+  }
+
+  async logout(token: string): Promise<void> {
+    await this.blacklistService.addTokenToBlacklist(token);
   }
   async getGoogleAuthUrl(): Promise<string> {
     const googleConfig = configService.getGoogleConfig();

@@ -1,15 +1,19 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
   Req,
   Res,
   UnauthorizedException,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthService } from '@domain/auth/services/auth.service';
 import {
@@ -24,12 +28,19 @@ import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiBody,
+  ApiConsumes,
   ApiOkResponse,
+  ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
 import { User } from '@domain/user/entities/user.entity';
 import { configService } from '@infra/config/config.service';
 import { UserService } from '@domain/user/services/user.service';
+import { UserResponseDTO } from '@application/user/dto';
+import { NotFoundInterceptor } from './interceptors/found.interceptor';
+import { extname } from 'path';
+import { diskStorage } from 'multer';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -65,7 +76,20 @@ export class AuthController {
     return this.authService.logIn(signInDto);
   }
 
-  @Get('profile')
+  @Post('logout')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'User successfully logged out',
+  })
+  async logout(@Req() req, @Res() res: Response) {
+    const token = req.headers.authorization.split(' ')[1];
+    await this.authService.logout(token);
+    res.json();
+  }
+
+  @Get('me')
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.OK)
@@ -73,8 +97,25 @@ export class AuthController {
     description: "Connected user's information",
     type: User,
   })
-  getProfile(@Req() req: any): User {
+  getMe(@Req() req: any): User {
     return req.user as User;
+  }
+
+  @Get('profile/:id')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(NotFoundInterceptor)
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'User profile',
+    type: UserResponseDTO,
+  })
+  @ApiParam({ name: 'id', type: Number })
+  async getProfile(
+    @Req() req: any,
+    @Param('id') id: number,
+  ): Promise<UserResponseDTO> {
+    return this.userService.findOneById(id);
   }
 
   @Get('google')
@@ -102,7 +143,7 @@ export class AuthController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt-2fa'))
   async turnOffTwoFactorAuthentication(@Req() request) {
-    if (!request.user.isTwoFactorAuthenticationEnabled) {
+    if (request.user.isTwoFactorAuthenticationEnabled === false) {
       throw new UnauthorizedException(
         'Two-factor authentication is already disabled',
       );
@@ -171,5 +212,34 @@ export class AuthController {
     const jwt = await this.authService.loginWithGoogle(req.user);
     const frontendUrl = configService.getFrontendUrl();
     res.redirect(`${frontendUrl}/?token=${jwt.accessToken}`);
+  }
+
+  @Post('avatar')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(
+    FileInterceptor('file', {
+      fileFilter: (req, file, callback) => {
+        if (!RegExp(/\/(jpg|jpeg|png)$/).exec(file.mimetype)) {
+          callback(new BadRequestException('Unsupported file type'), false);
+        }
+        callback(null, true);
+      },
+    }),
+  )
+  @HttpCode(HttpStatus.OK)
+  @ApiConsumes('multipart/form-data')
+  @ApiOkResponse({ description: 'Avatar uploaded successfully' })
+  async uploadAvatar(@Req() req, @UploadedFile() file: Express.Multer.File) {
+    const userId = req.user.id;
+    if (!file) {
+      throw new BadRequestException('File is required');
+    }
+
+    if (file.size === 0) {
+      throw new BadRequestException('File is empty');
+    }
+    const avatarUrl = await this.userService.uploadAvatar(userId, file);
+    return { avatarUrl };
   }
 }

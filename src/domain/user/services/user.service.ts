@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { User, UserBuilder } from '@domain/user/entities/user.entity';
 import { IUserService } from '../interfaces/user.service.interface';
 import {
@@ -7,17 +7,33 @@ import {
   UserCreateDTO,
   UserIdDTO,
 } from '@application/user/dto';
+import { GoogleUser } from 'interfaces/google-user.interface';
 import { UserRepository } from '@infra/database/user.repository';
+import { Storage } from '@google-cloud/storage';
+import * as admin from 'firebase-admin';
+import path from 'path';
+import * as fs from 'fs';
 
 @Injectable()
 export class UserService implements IUserService {
-  constructor(private userRepository: UserRepository) {}
+  private storage: Storage;
+  private bucketName: string;
+
+  constructor(
+    private userRepository: UserRepository,
+    @Inject('FIREBASE_ADMIN') private readonly firebaseAdmin: admin.app.App,
+  ) {}
 
   async findOne(dto: UserIdDTO): Promise<User | null> {
     if (!dto.id) {
       return null;
     }
     return await this.userRepository.findOneById(dto.id);
+  }
+
+  async findOneById(id: number): Promise<UserResponseDTO> {
+    const user = await this.userRepository.findOneById(id);
+    return this.toResponseDto(user);
   }
 
   async remove(dto: UserIdDTO): Promise<void> {
@@ -46,6 +62,7 @@ export class UserService implements IUserService {
           )),
       )
       .withPassword(createDto.password ?? null)
+      .withAvatar(createDto.avatar)
       .build();
 
     const savedUser = await this.userRepository.save(user);
@@ -70,8 +87,10 @@ export class UserService implements IUserService {
     return username;
   }
 
-  public async findOrCreate(googleUser: any): Promise<User> {
-    let user: User = await this.findOneByEmail(googleUser.email);
+  public async findOrCreate(googleUser: GoogleUser): Promise<User> {
+    let userQuery = new UserQueryDTO();
+    userQuery.email = googleUser.email;
+    let user: User = await this.findOneByEmail(userQuery);
 
     if (!user) {
       user = new UserBuilder()
@@ -82,6 +101,7 @@ export class UserService implements IUserService {
             googleUser.lastName,
           ),
         )
+        .withAvatar(googleUser.picture)
         .withCreatedAt(new Date())
         .build();
 
@@ -115,6 +135,41 @@ export class UserService implements IUserService {
     });
   }
 
+  async uploadAvatar(
+    userId: number,
+    file: Express.Multer.File,
+  ): Promise<string> {
+    const user = await this.findOneById(userId);
+    const bucket = admin.storage().bucket();
+    const fileName = `avatars/${userId}-${Date.now()}${path.extname(file.originalname)}`;
+    const fileUpload = bucket.file(fileName);
+    const stream = fileUpload.createWriteStream({
+      metadata: {
+        contentType: file.mimetype,
+      },
+    });
+
+    return new Promise<string>((resolve, reject) => {
+      stream.on('error', (err) => {
+        console.error('Blob stream error:', err);
+        reject(new BadRequestException('Failed to upload avatar to Firebase'));
+      });
+
+      stream.on('finish', async () => {
+        const [signedUrl] = await fileUpload.getSignedUrl({
+          action: 'read',
+          expires: '03-17-2025',
+        });
+        user.avatar = signedUrl;
+        await this.userRepository.save(user);
+        resolve(signedUrl);
+      });
+
+      stream.end(file.buffer);
+    });
+  }
+
+  /** Private methods */
   private toResponseDto(user: User): UserResponseDTO {
     return {
       id: user.id,
@@ -122,6 +177,7 @@ export class UserService implements IUserService {
       username: user.username,
       lastLoginAt: user.lastLoginAt,
       createdAt: user.createdAt,
+      avatar: user.avatar,
     };
   }
 
@@ -130,6 +186,7 @@ export class UserService implements IUserService {
       email: user.email,
       username: user.username,
       password: user.password,
+      avatar: user.avatar,
     };
   }
 }

@@ -53,6 +53,21 @@ class ConfigService {
     };
   }
 
+  public getGoogleCloudConfig() {
+    return {
+      projectId: this.getValue('GOOGLE_CLOUD_PROJECT_ID'),
+      keyFilename: this.getValue('GOOGLE_CLOUD_KEY_FILE'),
+      bucketName: this.getValue('GOOGLE_CLOUD_BUCKET_NAME'),
+    };
+  }
+
+  public getFirebaseConfig() {
+    return {
+      storageBucket: this.getValue('FIREBASE_STORAGE_BUCKET'),
+      privateKey: this.getValue('FIREBASE_PRIVATE_KEY'),
+    };
+  }
+
   public getAppPort() {
     return this.getValue('APP_PORT');
   }
