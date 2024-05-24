@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   ForbiddenException,
@@ -10,6 +11,7 @@ import {
   Req,
   Res,
   UnauthorizedException,
+  UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -26,6 +28,7 @@ import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiBody,
+  ApiConsumes,
   ApiOkResponse,
   ApiParam,
   ApiTags,
@@ -35,6 +38,9 @@ import { configService } from '@infra/config/config.service';
 import { UserService } from '@domain/user/services/user.service';
 import { UserResponseDTO } from '@application/user/dto';
 import { NotFoundInterceptor } from './interceptors/found.interceptor';
+import { extname } from 'path';
+import { diskStorage } from 'multer';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -206,5 +212,32 @@ export class AuthController {
     const jwt = await this.authService.loginWithGoogle(req.user);
     const frontendUrl = configService.getFrontendUrl();
     res.redirect(`${frontendUrl}/?token=${jwt.accessToken}`);
+  }
+
+  @Post('avatar')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(FileInterceptor('file', {
+    fileFilter: (req, file, callback) => {
+      if (!RegExp(/\/(jpg|jpeg|png)$/).exec(file.mimetype)) {
+        callback(new BadRequestException('Unsupported file type'), false);
+      }
+      callback(null, true);
+    },
+  }))
+  @HttpCode(HttpStatus.OK)
+  @ApiConsumes('multipart/form-data')
+  @ApiOkResponse({ description: 'Avatar uploaded successfully' })
+  async uploadAvatar(@Req() req, @UploadedFile() file: Express.Multer.File) {
+    const userId = req.user.id;
+    if (!file) {
+      throw new BadRequestException('File is required');
+    }
+
+    if (file.size === 0) {
+      throw new BadRequestException('File is empty');
+    }
+    const avatarUrl = await this.userService.uploadAvatar(userId, file);
+    return { avatarUrl };
   }
 }

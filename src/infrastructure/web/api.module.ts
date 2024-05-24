@@ -4,8 +4,9 @@ import { UserModule } from '@application/user/user.module';
 import { FriendshipModule } from '@application/friendship/friendship.module';
 import { GroupModule } from '@application/group/group.module';
 import { PostModule } from '@application/post/post.module';
+import { FirebaseModule } from '@application/firebase/firebase.module';
 
 @Module({
-  imports: [AuthModule, UserModule, FriendshipModule, GroupModule, PostModule],
+  imports: [AuthModule, UserModule, FriendshipModule, GroupModule, PostModule, FirebaseModule],
 })
 export class ApiModule {}

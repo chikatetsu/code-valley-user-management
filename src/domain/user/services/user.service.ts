@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { User, UserBuilder } from '@domain/user/entities/user.entity';
 import { IUserService } from '../interfaces/user.service.interface';
 import {
@@ -9,10 +9,21 @@ import {
 } from '@application/user/dto';
 import { GoogleUser } from 'interfaces/google-user.interface';
 import { UserRepository } from '@infra/database/user.repository';
+import { Storage } from '@google-cloud/storage';
+import * as admin from 'firebase-admin';
+import path from 'path';
+import * as fs from 'fs';
+
 
 @Injectable()
 export class UserService implements IUserService {
-  constructor(private userRepository: UserRepository) {}
+  private storage: Storage;
+  private bucketName: string;
+
+  constructor(
+    private userRepository: UserRepository,
+    @Inject('FIREBASE_ADMIN') private readonly firebaseAdmin: admin.app.App,
+  ) {}
 
   async findOne(dto: UserIdDTO): Promise<User | null> {
     if (!dto.id) {
@@ -124,6 +135,35 @@ export class UserService implements IUserService {
     });
   }
 
+  async uploadAvatar(userId: number, file: Express.Multer.File): Promise<string> {
+    const user = await this.findOneById(userId);
+    const bucket = admin.storage().bucket();
+    const fileName = `avatars/${userId}-${Date.now()}${path.extname(file.originalname)}`;
+    const fileUpload = bucket.file(fileName);
+    const stream = fileUpload.createWriteStream({
+      metadata: { 
+        contentType: file.mimetype,
+      },
+    });
+
+    return new Promise<string>((resolve, reject) => {
+      stream.on('error', (err) => {
+        console.error('Blob stream error:', err);
+        reject(new BadRequestException('Failed to upload avatar to Firebase'));
+      });
+   
+      stream.on('finish', async () => {
+        const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileUpload.name}`;
+        user.avatar = publicUrl;
+        await this.userRepository.save(user);
+        resolve(publicUrl);
+      });
+   
+      stream.end(file.buffer);
+    });
+  }
+
+  /** Private methods */
   private toResponseDto(user: User): UserResponseDTO {
     return {
       id: user.id,

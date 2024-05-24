@@ -15,6 +15,7 @@ import { Jwt2faStrategy } from '@domain/auth/services/jwt-2fa.strategy';
 import { BlacklistService } from '@domain/auth/services/blacklist.service';
 import { BlacklistedToken } from '@domain/auth/entities/blacklisted-token.entity';
 import { NotFoundInterceptor } from './interceptors/found.interceptor';
+import { FirebaseModule } from '@application/firebase/firebase.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { NotFoundInterceptor } from './interceptors/found.interceptor';
     JwtModule.register(configService.getJwtConfig()),
     TypeOrmModule.forFeature([User, BlacklistedToken]),
     PassportModule.register({ defaultStrategy: 'google' }),
+    FirebaseModule
   ],
   providers: [
     UserRepository,

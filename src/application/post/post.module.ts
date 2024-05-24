@@ -10,9 +10,10 @@ import { User } from '@domain/user/entities/user.entity';
 import { UserRepository } from '@infra/database/user.repository';
 import { PostLike } from '@domain/post/entities/post.like.entity';
 import { PostLikeRepository } from '@infra/database/post.like.repository';
+import { FirebaseModule } from '@application/firebase/firebase.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Post, PostLike])],
+  imports: [TypeOrmModule.forFeature([Post, PostLike]), FirebaseModule],
   controllers: [PostController],
   providers: [
     PostService,
