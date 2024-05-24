@@ -156,10 +156,13 @@ export class UserService implements IUserService {
       });
 
       stream.on('finish', async () => {
-        const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileUpload.name}`;
-        user.avatar = publicUrl;
+        const [signedUrl] = await fileUpload.getSignedUrl({
+          action: 'read',
+          expires: '03-17-2025',
+        });
+        user.avatar = signedUrl;
         await this.userRepository.save(user);
-        resolve(publicUrl);
+        resolve(signedUrl);
       });
 
       stream.end(file.buffer);
