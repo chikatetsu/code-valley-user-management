@@ -4,4 +4,5 @@ export class UserCreateDTO {
   password?: string;
   firstName?: string;
   lastName?: string;
+  avatar?: string;
 }

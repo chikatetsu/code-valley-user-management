@@ -217,14 +217,16 @@ export class AuthController {
   @Post('avatar')
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
-  @UseInterceptors(FileInterceptor('file', {
-    fileFilter: (req, file, callback) => {
-      if (!RegExp(/\/(jpg|jpeg|png)$/).exec(file.mimetype)) {
-        callback(new BadRequestException('Unsupported file type'), false);
-      }
-      callback(null, true);
-    },
-  }))
+  @UseInterceptors(
+    FileInterceptor('file', {
+      fileFilter: (req, file, callback) => {
+        if (!RegExp(/\/(jpg|jpeg|png)$/).exec(file.mimetype)) {
+          callback(new BadRequestException('Unsupported file type'), false);
+        }
+        callback(null, true);
+      },
+    }),
+  )
   @HttpCode(HttpStatus.OK)
   @ApiConsumes('multipart/form-data')
   @ApiOkResponse({ description: 'Avatar uploaded successfully' })

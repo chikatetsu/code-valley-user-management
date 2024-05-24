@@ -14,7 +14,6 @@ import * as admin from 'firebase-admin';
 import path from 'path';
 import * as fs from 'fs';
 
-
 @Injectable()
 export class UserService implements IUserService {
   private storage: Storage;
@@ -63,6 +62,7 @@ export class UserService implements IUserService {
           )),
       )
       .withPassword(createDto.password ?? null)
+      .withAvatar(createDto.avatar)
       .build();
 
     const savedUser = await this.userRepository.save(user);
@@ -135,13 +135,16 @@ export class UserService implements IUserService {
     });
   }
 
-  async uploadAvatar(userId: number, file: Express.Multer.File): Promise<string> {
+  async uploadAvatar(
+    userId: number,
+    file: Express.Multer.File,
+  ): Promise<string> {
     const user = await this.findOneById(userId);
     const bucket = admin.storage().bucket();
     const fileName = `avatars/${userId}-${Date.now()}${path.extname(file.originalname)}`;
     const fileUpload = bucket.file(fileName);
     const stream = fileUpload.createWriteStream({
-      metadata: { 
+      metadata: {
         contentType: file.mimetype,
       },
     });
@@ -151,14 +154,14 @@ export class UserService implements IUserService {
         console.error('Blob stream error:', err);
         reject(new BadRequestException('Failed to upload avatar to Firebase'));
       });
-   
+
       stream.on('finish', async () => {
         const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileUpload.name}`;
         user.avatar = publicUrl;
         await this.userRepository.save(user);
         resolve(publicUrl);
       });
-   
+
       stream.end(file.buffer);
     });
   }
@@ -180,6 +183,7 @@ export class UserService implements IUserService {
       email: user.email,
       username: user.username,
       password: user.password,
+      avatar: user.avatar,
     };
   }
 }

@@ -7,6 +7,13 @@ import { PostModule } from '@application/post/post.module';
 import { FirebaseModule } from '@application/firebase/firebase.module';
 
 @Module({
-  imports: [AuthModule, UserModule, FriendshipModule, GroupModule, PostModule, FirebaseModule],
+  imports: [
+    AuthModule,
+    UserModule,
+    FriendshipModule,
+    GroupModule,
+    PostModule,
+    FirebaseModule,
+  ],
 })
 export class ApiModule {}

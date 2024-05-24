@@ -92,14 +92,16 @@ export class FriendshipController {
   }
 
   @Delete('requests/:receiverId')
-  @ApiResponse({ status: 204})
+  @ApiResponse({ status: 204 })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiParam({ name: 'receiverId', type: Number })
-  async cancelFriendRequest(@Req() req: any, @Param('receiverId') receiverId: number): Promise<void> {
+  async cancelFriendRequest(
+    @Req() req: any,
+    @Param('receiverId') receiverId: number,
+  ): Promise<void> {
     const userId = req.user.id;
     return this.friendshipService.cancelFriendRequest(userId, receiverId);
   }
-
 
   @Get('list')
   @ApiResponse({ status: 200, type: [UserQueryDTO] })

@@ -6,7 +6,6 @@ import { PostRepository } from '@infra/database/post.repository';
 import { PostService } from '@domain/post/services/post.service';
 import { PostController } from './post.controller';
 import { UserService } from '@domain/user/services/user.service';
-import { User } from '@domain/user/entities/user.entity';
 import { UserRepository } from '@infra/database/user.repository';
 import { PostLike } from '@domain/post/entities/post.like.entity';
 import { PostLikeRepository } from '@infra/database/post.like.repository';

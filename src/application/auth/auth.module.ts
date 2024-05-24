@@ -23,7 +23,7 @@ import { FirebaseModule } from '@application/firebase/firebase.module';
     JwtModule.register(configService.getJwtConfig()),
     TypeOrmModule.forFeature([User, BlacklistedToken]),
     PassportModule.register({ defaultStrategy: 'google' }),
-    FirebaseModule
+    FirebaseModule,
   ],
   providers: [
     UserRepository,
