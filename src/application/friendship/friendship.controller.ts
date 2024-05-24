@@ -75,13 +75,20 @@ export class FriendshipController {
     const userId = req.user.id;
     return this.friendshipService.removeFriend(userId, friendId);
   }
-
   @Get('requests')
   @ApiResponse({ status: 200, type: [UserFriendDTO] })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   async listPendingRequests(@Req() req: any): Promise<UserFriendDTO[]> {
     const userId = req.user.id;
     return this.friendshipService.listPendingRequests(userId);
+  }
+
+  @Get('sent-requests')
+  @ApiResponse({ status: 200, type: UserFriendDTO, isArray: true })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async listSentRequests(@Req() req: any): Promise<UserFriendDTO[]> {
+    const userId = req.user['id'];
+    return this.friendshipService.listSentFriendRequests(userId);
   }
 
   @Delete('requests/:receiverId')

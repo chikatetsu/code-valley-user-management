@@ -126,6 +126,17 @@ export class FriendshipService implements IFriendshipService {
     return friendships.map((f) => f.sender);
   }
 
+  async listSentFriendRequests(userId: number): Promise<UserFriendDTO[]> {
+    const sentRequests = await this.friendshipRepository.find({
+      where: { senderId: userId, status: FriendshipStatus.pending },
+      relations: ['receiver'],
+    });
+    return sentRequests.map((req) => ({
+      id: req.receiver.id,
+      email: req.receiver.email,
+      username: req.receiver.username,
+    }));
+  }
   async listFriendSuggestions(userId: number): Promise<UserFriendDTO[]> {
     const friends = await this.listFriends(userId);
     const friendIds = friends.map((f) => f.id);
