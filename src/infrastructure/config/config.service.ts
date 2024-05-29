@@ -28,8 +28,9 @@ class ConfigService {
       username: this.getValue('PGUSER'),
       password: this.getValue('PGPASSWORD'),
       database: this.getValue('PGDATABASE'),
-      entities: [User],
+      entities: ['dist/**/*.entity{.ts,.js}'],
       synchronize: true,
+      ssl: { rejectUnauthorized: false },
     };
   }
 
