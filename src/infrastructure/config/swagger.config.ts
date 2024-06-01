@@ -17,6 +17,6 @@ export function configureSwagger(app: INestApplication): void {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document, {
-    jsonDocumentUrl: 'docs-json',
+    jsonDocumentUrl: 'api-docs',
   });
 }
