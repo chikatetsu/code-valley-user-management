@@ -4,7 +4,7 @@ import { JwtModuleOptions } from '@nestjs/jwt';
 require('dotenv').config();
 
 class ConfigService {
-  constructor(private env: { [k: string]: string | undefined }) {}
+  constructor(private env: { [k: string]: string | undefined }) { }
 
   private getValue(key: string, throwOnMissing = true): string {
     const value = this.env[key];
@@ -30,7 +30,6 @@ class ConfigService {
       database: this.getValue('PGDATABASE'),
       entities: ['dist/**/*.entity{.ts,.js}'],
       synchronize: true,
-      ssl: { rejectUnauthorized: false },
     };
   }
 
