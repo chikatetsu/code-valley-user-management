@@ -4,7 +4,7 @@ import { JwtModuleOptions } from '@nestjs/jwt';
 require('dotenv').config();
 
 class ConfigService {
-  constructor(private env: { [k: string]: string | undefined }) { }
+  constructor(private env: { [k: string]: string | undefined }) {}
 
   private getValue(key: string, throwOnMissing = true): string {
     const value = this.env[key];
@@ -49,7 +49,7 @@ class ConfigService {
     return {
       clientId: this.getValue('GOOGLE_CLIENT_ID'),
       clientSecret: this.getValue('GOOGLE_CLIENT_SECRET'),
-      callbackURL: `http://localhost:${this.getAppPort()}/auth/google/callback`,
+      callbackURL: `http://${this.getAppHostname}:${this.getAppPort()}/auth/google/callback`,
     };
   }
 
@@ -64,7 +64,7 @@ class ConfigService {
   public getFirebaseConfig() {
     return {
       storageBucket: this.getValue('FIREBASE_STORAGE_BUCKET'),
-      privateKey: this.getValue('FIREBASE_PRIVATE_KEY'),
+      firebasePrivateKeyBase64: this.getValue('FIREBASE_PRIVATE_KEY_BASE64'),
     };
   }
 
@@ -72,8 +72,16 @@ class ConfigService {
     return this.getValue('APP_PORT');
   }
 
+  public getAppHostname() {
+    return this.getValue('APP_HOSTNAME');
+  }
+
   public getFrontendUrl() {
     return this.getValue('FRONTEND_URL');
+  }
+
+  public getDynoCodeUrl() {
+    return this.getValue('DYNO_CODE_URL');
   }
 }
 
@@ -89,6 +97,7 @@ const configService = new ConfigService(process.env).ensureValues([
   'GOOGLE_CLIENT_ID',
   'GOOGLE_CLIENT_SECRET',
   'FRONTEND_URL',
+  'DYNO_CODE_URL',
 ]);
 
 export { configService };

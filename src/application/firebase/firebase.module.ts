@@ -2,10 +2,20 @@ import { Module } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 import { configService } from '@infra/config/config.service';
 
-const firebaseConfig = configService.getFirebaseConfig();
+const firebasePrivateKeyBase64 =
+  configService.getFirebaseConfig().firebasePrivateKeyBase64;
+const firebasePrivateKey = Buffer.from(
+  firebasePrivateKeyBase64,
+  'base64',
+).toString('utf-8');
+
+const firebaseConfig = {
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  privateKey: firebasePrivateKey,
+};
 
 const firebaseAdmin = admin.initializeApp({
-  credential: admin.credential.cert(firebaseConfig.privateKey),
+  credential: admin.credential.cert(JSON.parse(firebaseConfig.privateKey)),
   storageBucket: firebaseConfig.storageBucket,
 });
 

@@ -5,6 +5,7 @@ import { FriendshipModule } from '@application/friendship/friendship.module';
 import { GroupModule } from '@application/group/group.module';
 import { PostModule } from '@application/post/post.module';
 import { FirebaseModule } from '@application/firebase/firebase.module';
+import { CodeModule } from '@application/code/code.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { FirebaseModule } from '@application/firebase/firebase.module';
     GroupModule,
     PostModule,
     FirebaseModule,
+    CodeModule,
   ],
 })
 export class ApiModule {}
