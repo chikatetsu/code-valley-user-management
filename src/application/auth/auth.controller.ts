@@ -119,6 +119,10 @@ export class AuthController {
   }
 
   @Get('google')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'Google authentication URL',
+  })
   async googleAuth() {
     const url = await this.authService.getGoogleAuthUrl();
     return { url };
@@ -127,6 +131,10 @@ export class AuthController {
   @Post('2fa/turn-on')
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
+  @ApiOkResponse({
+    description: 'Two-factor authentication successfully enabled',
+  })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
   async turnOnTwoFactorAuthentication(@Req() request) {
     if (request.user.isTwoFactorAuthenticationEnabled) {
       throw new UnauthorizedException(
@@ -142,6 +150,10 @@ export class AuthController {
   @Post('2fa/turn-off')
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt-2fa'))
+  @ApiOkResponse({
+    description: 'Two-factor authentication successfully disabled',
+  })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
   async turnOffTwoFactorAuthentication(@Req() request) {
     if (request.user.isTwoFactorAuthenticationEnabled === false) {
       throw new UnauthorizedException(
@@ -159,6 +171,11 @@ export class AuthController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt-2fa'))
   @ApiBody({ type: TfCodeAuthDto })
+  @ApiOkResponse({
+    description: 'Two-factor authentication successfully enabled',
+    type: TokenResponse,
+  })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
   async authenticate(@Req() request, @Body() body) {
     const isCodeValid = this.authService.isTwoFactorAuthenticationCodeValid(
       body.twoFactorAuthenticationCode,
@@ -175,6 +192,11 @@ export class AuthController {
   @Post('2fa/generate')
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt-2fa'))
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'QR code generated successfully',
+  })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
   async registerGenerate(@Res() response, @Req() request) {
     if (request.user.isTwoFactorAuthenticationEnabled) {
       if (
@@ -186,14 +208,14 @@ export class AuthController {
         );
       }
 
-      const { otpauthUrl } =
+      const { secret, otpauthUrl } =
         await this.authService.generateTwoFactorAuthenticationSecret(
           request.user,
         );
 
-      return response.json(
-        await this.authService.generateQrCodeDataURL(otpauthUrl),
-      );
+      const qrCodeUrl =
+        await this.authService.generateQrCodeDataURL(otpauthUrl);
+      return response.json({ qrCodeUrl, setupKey: secret });
     }
 
     throw new ForbiddenException(
@@ -208,6 +230,7 @@ export class AuthController {
     description: 'User successfully logged in with Google',
     type: TokenResponse,
   })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
   async googleAuthRedirect(@Req() req, @Res() res) {
     const jwt = await this.authService.loginWithGoogle(req.user);
     const frontendUrl = configService.getFrontendUrl();
@@ -230,6 +253,17 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiConsumes('multipart/form-data')
   @ApiOkResponse({ description: 'Avatar uploaded successfully' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
   async uploadAvatar(@Req() req, @UploadedFile() file: Express.Multer.File) {
     const userId = req.user.id;
     if (!file) {
