@@ -38,8 +38,6 @@ import { configService } from '@infra/config/config.service';
 import { UserService } from '@domain/user/services/user.service';
 import { UserResponseDTO } from '@application/user/dto';
 import { NotFoundInterceptor } from './interceptors/found.interceptor';
-import { extname } from 'path';
-import { diskStorage } from 'multer';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('auth')

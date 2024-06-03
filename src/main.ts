@@ -10,6 +10,7 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule);
   const configService: ConfigService = app.get(ConfigService);
+  const hostname = configService.get<string>('APP_HOSTNAME') || 'localhost';
   const port =
     Number.parseInt(process.env.PORT) ||
     configService.get<number>('PORT') ||
@@ -33,7 +34,7 @@ async function bootstrap() {
 
   await app.listen(port, () => {
     logger.log(`${packageJson.name} is listening on port ${port}`);
-    logger.log(`Swagger is available on http://localhost:${port}/api`);
+    logger.log(`Swagger is available on http://${hostname}:${port}/api`);
   });
 }
 bootstrap();
