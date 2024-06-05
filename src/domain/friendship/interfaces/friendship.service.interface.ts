@@ -12,6 +12,10 @@ export interface IFriendshipService {
   acceptFriendRequest(friendshipId: number): Promise<FriendshipResponseDTO>;
   declineFriendRequest(friendshipId: number): Promise<void>;
   removeFriend(userId: number, friendId: number): Promise<void>;
-  listFriends(userId: number): Promise<UserQueryDTO[]>;
+  listFriends(
+    userId: number,
+    limit: number,
+    offset: number,
+  ): Promise<UserQueryDTO[]>;
   getFriendshipStatus(userId: number, friendId: number): Promise<FriendshipDTO>;
 }

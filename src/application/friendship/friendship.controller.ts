@@ -9,13 +9,14 @@ import {
   UseInterceptors,
   UseGuards,
   Req,
+  Query,
 } from '@nestjs/common';
 import { FriendshipService } from '@domain/friendship/services/friendship.service';
 import {
   FriendshipResponseDTO,
   FriendshipDTO,
 } from '@application/friendship/dto';
-import { ApiBearerAuth, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FriendshipInterceptor } from './friendship.interceptor';
 import { AuthGuard } from '@nestjs/passport';
 import { UserQueryDTO } from '@application/user/dto';
@@ -27,7 +28,7 @@ import { UserFriendDTO } from '@application/user/dto/UserFriend.dto';
 @UseGuards(AuthGuard('jwt'))
 @UseInterceptors(FriendshipInterceptor)
 export class FriendshipController {
-  constructor(private readonly friendshipService: FriendshipService) {}
+  constructor(private readonly friendshipService: FriendshipService) { }
 
   @Post('send/:receiverId')
   @UseInterceptors(FriendshipInterceptor)
@@ -106,9 +107,15 @@ export class FriendshipController {
   @Get('list')
   @ApiResponse({ status: 200, type: [UserQueryDTO] })
   @ApiResponse({ status: 400, description: 'Bad Request' })
-  async listFriends(@Req() req: any): Promise<UserFriendDTO[]> {
+  @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'offset', required: false })
+  async listFriends(
+    @Req() req: any,
+    @Query('limit', ParseIntPipe) limit: number = 10,
+    @Query('offset', ParseIntPipe) offset: number = 0,
+  ): Promise<UserQueryDTO[]> {
     const userId = req.user.id;
-    return this.friendshipService.listFriends(userId);
+    return this.friendshipService.listFriends(userId, limit, offset);
   }
 
   @Get('status')

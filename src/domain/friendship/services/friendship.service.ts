@@ -19,7 +19,7 @@ export class FriendshipService implements IFriendshipService {
     private readonly friendshipRepository: Repository<Friendship>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-  ) {}
+  ) { }
 
   async sendFriendRequest(
     senderId: number,
@@ -92,13 +92,28 @@ export class FriendshipService implements IFriendshipService {
     });
   }
 
-  async listFriends(userId: number): Promise<UserFriendDTO[]> {
+  /**
+   * Retrieves a list of friends for a given user.
+   *
+   * @param userId - The ID of the user.
+   * @param limit - The maximum number of friends to retrieve.
+   * @param offset - The number of friends to skip before retrieving.
+   * @returns A promise that resolves to an array of UserFriendDTO objects representing the user's friends.
+   */
+  async listFriends(
+    userId: number,
+    limit: number,
+    offset: number,
+  ): Promise<UserFriendDTO[]> {
+    const maxLimit = Math.min(limit, 100);
     const friendships = await this.friendshipRepository.find({
       where: [
         { senderId: userId, status: FriendshipStatus.accepted },
         { receiverId: userId, status: FriendshipStatus.accepted },
       ],
       relations: ['sender', 'receiver'],
+      take: maxLimit,
+      skip: offset,
     });
     return friendships.map((f) =>
       f.senderId === userId ? f.receiver : f.sender,
@@ -141,7 +156,7 @@ export class FriendshipService implements IFriendshipService {
     }));
   }
   async listFriendSuggestions(userId: number): Promise<UserFriendDTO[]> {
-    const friends = await this.listFriends(userId);
+    const friends = await this.listFriends(userId, 100, 0);
     const friendIds = friends.map((f) => f.id);
 
     const sentRequests = await this.friendshipRepository.find({
