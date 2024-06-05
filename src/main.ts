@@ -34,7 +34,7 @@ async function bootstrap() {
 
   await app.listen(port, () => {
     logger.log(`${packageJson.name} is listening on port ${port}`);
-    logger.log(`Swagger is available on http://${hostname}:${port}/api`);
+    logger.log(`Swagger is available on ${hostname}/api`);
   });
 }
 bootstrap();
