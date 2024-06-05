@@ -1,0 +1,55 @@
+services:
+  - type: web
+    name: cv usermanagement api
+    runtime: node
+    repo: https://github.com/chikatetsu/code-valley-user-management
+    region: frankfurt # optional (defaults to oregon)
+    buildCommand: npm install
+    startCommand: npm start
+    plan: free # optional (defaults to starter instance type)
+    branch: main # optional (defaults to master)
+    envVars:
+      - key: PGDATABASE
+        value: postgres
+
+      - key: PGUSER
+        value: postgres
+
+      - key: PGPASSWORD
+        sync: false # provide PGPASSWORD in the Render Dashboard
+
+      - key: PGHOST
+        value: 176.134.7.134
+
+      - key: PGPORT
+        value: 5432
+
+      - key: APP_PORT
+        value: 3000
+
+      - key: APP_HOSTNAME
+        value: https://user-management.code-valley.xyz
+
+      - key: DYNO_CODE_URL
+        value: http://dyno-code.code-valley.xyz
+
+      - key: JWT_SECRET
+        sync: false # provide JWT_SECRET in the Render Dashboard
+
+      - key: JWT_EXPIRES
+        value: 1d
+
+      - key: GOOGLE_CLIENT_ID
+        value: 456906997933-lt62fb1rjn1t25k3p7otjf06tu0ttb8j.apps.googleusercontent.com
+
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false # provide GOOGLE_CLIENT_SECRET in the Render Dashboard
+
+      - key: FIREBASE_STORAGE_BUCKET
+        value: pa2024-free.appspot.com
+
+      - key: FIREBASE_PRIVATE_KEY_BASE64
+        sync: false # provide FIREBASE_PRIVATE_KEY_BASE64 in the Render Dashboard
+
+      - key: FRONTEND_URL
+        value: https://front.code-valley.xyz
