@@ -10,10 +10,11 @@ export class GoogleStrategy
   implements IGoogleService
 {
   constructor() {
+    let url = `${configService.getAppHostname()}/auth/google/callback`;
     super({
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: `http:${configService.getAppHostname}:${configService.getAppPort()}/auth/google/callback`,
+      callbackURL: `${url}`,
       scope: ['email', 'profile'],
     });
   }

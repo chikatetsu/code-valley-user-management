@@ -4,7 +4,6 @@ import {
   ExecutionContext,
   CallHandler,
   BadRequestException,
-  Logger,
 } from '@nestjs/common';
 import { Observable, from } from 'rxjs';
 import { switchMap } from 'rxjs/operators';

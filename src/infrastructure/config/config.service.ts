@@ -3,7 +3,7 @@ import { JwtModuleOptions } from '@nestjs/jwt';
 require('dotenv').config();
 
 class ConfigService {
-  constructor(private env: { [k: string]: string | undefined }) { }
+  constructor(private env: { [k: string]: string | undefined }) {}
 
   private getValue(key: string, throwOnMissing = true): string {
     const value = this.env[key];
@@ -44,12 +44,13 @@ class ConfigService {
     };
   }
 
-  public getGoogleConfig() {
-    const app_hostname = this.getAppHostname();
+  public async getGoogleConfig() {
+    const app_hostname = await this.getValue('APP_HOSTNAME');
+    const url = `${app_hostname}/auth/google/callback`;
     return {
       clientId: this.getValue('GOOGLE_CLIENT_ID'),
       clientSecret: this.getValue('GOOGLE_CLIENT_SECRET'),
-      callbackURL: `${app_hostname}/auth/google/callback`,
+      callbackURL: `${url}`,
     };
   }
 
