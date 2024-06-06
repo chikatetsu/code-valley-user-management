@@ -5,7 +5,7 @@ import { FriendshipRepository } from '@infra/database/friendship.repository';
 import { Friendship } from '@domain/friendship/entities/friendship.entity';
 import { User } from '@domain/user/entities/user.entity';
 import { FriendshipController } from './friendship.controller';
-import { FriendshipInterceptor } from './friendship.interceptor';
+import { FriendshipInterceptor } from './interceptors/friendship.interceptor';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Friendship, User])],

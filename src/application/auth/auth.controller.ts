@@ -235,6 +235,19 @@ export class AuthController {
     res.redirect(`${frontendUrl}/?token=${jwt.accessToken}`);
   }
 
+  @Get('google/callback/mobile')
+  @UseGuards(AuthGuard('google'))
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'User successfully logged in with Google',
+    type: TokenResponse,
+  })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  async googleAuthRedirectMobile(@Req() req, @Res() res) {
+    const jwt = await this.authService.loginWithGoogle(req.user);
+    res.json({ accessToken: jwt.accessToken });
+  }
+
   @Post('avatar')
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))

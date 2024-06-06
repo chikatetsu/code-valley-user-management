@@ -23,7 +23,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { FriendshipInterceptor } from './friendship.interceptor';
+import { FriendshipInterceptor } from './interceptors/friendship.interceptor';
 import { AuthGuard } from '@nestjs/passport';
 import { UserQueryDTO } from '@application/user/dto';
 import { UserFriendDTO } from '@application/user/dto/UserFriend.dto';
@@ -125,6 +125,7 @@ export class FriendshipController {
     name: 'friendId',
     required: true,
   })
+  @UseInterceptors(FriendshipInterceptor)
   async getFriendshipStatus(
     @Req() req: any,
     @Query('friendId', ParseIntPipe) friendId: number,

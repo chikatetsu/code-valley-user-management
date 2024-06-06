@@ -12,8 +12,8 @@ async function bootstrap() {
   const configService: ConfigService = app.get(ConfigService);
   const hostname = configService.get<string>('APP_HOSTNAME') || 'localhost';
   const port =
-    Number.parseInt(process.env.PORT) ||
-    configService.get<number>('PORT') ||
+    Number.parseInt(process.env.APP_PORT) ||
+    configService.get<number>('APP_PORT') ||
     3000;
 
   app.enableCors({
