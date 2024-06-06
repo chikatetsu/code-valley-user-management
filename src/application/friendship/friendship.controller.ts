@@ -9,13 +9,20 @@ import {
   UseInterceptors,
   UseGuards,
   Req,
+  Query,
 } from '@nestjs/common';
 import { FriendshipService } from '@domain/friendship/services/friendship.service';
 import {
   FriendshipResponseDTO,
   FriendshipDTO,
 } from '@application/friendship/dto';
-import { ApiBearerAuth, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { FriendshipInterceptor } from './friendship.interceptor';
 import { AuthGuard } from '@nestjs/passport';
 import { UserQueryDTO } from '@application/user/dto';
@@ -114,9 +121,13 @@ export class FriendshipController {
   @Get('status')
   @ApiResponse({ status: 200, type: FriendshipDTO })
   @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiQuery({
+    name: 'friendId',
+    required: true,
+  })
   async getFriendshipStatus(
     @Req() req: any,
-    @Body('friendId', ParseIntPipe) friendId: number,
+    @Query('friendId', ParseIntPipe) friendId: number,
   ): Promise<FriendshipDTO> {
     const userId = req.user.id;
     return this.friendshipService.getFriendshipStatus(userId, friendId);
