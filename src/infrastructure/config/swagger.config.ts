@@ -13,6 +13,7 @@ export function configureSwagger(app: INestApplication): void {
       packageJson.author.url,
       packageJson.author.email,
     )
+    .addServer('https://user-management.code-valley.xyz')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
