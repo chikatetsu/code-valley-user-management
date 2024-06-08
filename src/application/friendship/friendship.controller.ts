@@ -15,6 +15,7 @@ import { FriendshipService } from '@domain/friendship/services/friendship.servic
 import {
   FriendshipResponseDTO,
   FriendshipDTO,
+  FriendshipSentDTO,
 } from '@application/friendship/dto';
 import {
   ApiBearerAuth,
@@ -27,6 +28,7 @@ import { FriendshipInterceptor } from './interceptors/friendship.interceptor';
 import { AuthGuard } from '@nestjs/passport';
 import { UserQueryDTO } from '@application/user/dto';
 import { UserFriendDTO } from '@application/user/dto/UserFriend.dto';
+import { FriendshipPendingDTO } from './dto/FriendshipPending.dto';
 
 @Controller('friendships')
 @ApiTags('friendships')
@@ -82,18 +84,19 @@ export class FriendshipController {
     const userId = req.user.id;
     return this.friendshipService.removeFriend(userId, friendId);
   }
+
   @Get('requests')
-  @ApiResponse({ status: 200, type: [UserFriendDTO] })
+  @ApiResponse({ status: 200, type: [FriendshipPendingDTO] })
   @ApiResponse({ status: 400, description: 'Bad Request' })
-  async listPendingRequests(@Req() req: any): Promise<UserFriendDTO[]> {
+  async listPendingRequests(@Req() req: any): Promise<FriendshipPendingDTO[]> {
     const userId = req.user.id;
     return this.friendshipService.listPendingRequests(userId);
   }
 
   @Get('sent-requests')
-  @ApiResponse({ status: 200, type: UserFriendDTO, isArray: true })
+  @ApiResponse({ status: 200, type: FriendshipSentDTO, isArray: true })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async listSentRequests(@Req() req: any): Promise<UserFriendDTO[]> {
+  async listSentRequests(@Req() req: any): Promise<FriendshipSentDTO[]> {
     const userId = req.user['id'];
     return this.friendshipService.listSentFriendRequests(userId);
   }
