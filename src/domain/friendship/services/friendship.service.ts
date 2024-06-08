@@ -7,10 +7,12 @@ import { User } from '@domain/user/entities/user.entity';
 import {
   FriendshipDTO,
   FriendshipResponseDTO,
+  FriendshipSentDTO,
 } from '@application/friendship/dto';
 import { UserQueryDTO } from '@application/user/dto';
 import { FriendshipStatus } from '@application/friendship/types/friendship.status';
 import { UserFriendDTO } from '@application/user/dto/UserFriend.dto';
+import { FriendshipPendingDTO } from '@application/friendship/dto/FriendshipPending.dto';
 
 @Injectable()
 export class FriendshipService implements IFriendshipService {
@@ -19,7 +21,7 @@ export class FriendshipService implements IFriendshipService {
     private readonly friendshipRepository: Repository<Friendship>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-  ) {}
+  ) { }
 
   async sendFriendRequest(
     senderId: number,
@@ -121,21 +123,31 @@ export class FriendshipService implements IFriendshipService {
     return this.toFriendshipDTO(friendship);
   }
 
-  async listPendingRequests(userId: number): Promise<UserFriendDTO[]> {
+  async listPendingRequests(userId: number): Promise<FriendshipPendingDTO[]> {
     const friendships = await this.friendshipRepository.find({
       where: { receiverId: userId, status: FriendshipStatus.pending },
-      relations: ['sender'],
+      relations: ['sender', 'receiver'],
     });
-    return friendships.map((f) => f.sender);
+    return friendships.map((f) => ({
+      id: f.id,
+      senderId: f.sender.id,
+      status: f.status,
+      createdAt: f.createdAt,
+      email: f.sender.email,
+      username: f.sender.username,
+    }));
   }
 
-  async listSentFriendRequests(userId: number): Promise<UserFriendDTO[]> {
+  async listSentFriendRequests(userId: number): Promise<FriendshipSentDTO[]> {
     const sentRequests = await this.friendshipRepository.find({
       where: { senderId: userId, status: FriendshipStatus.pending },
       relations: ['receiver'],
     });
     return sentRequests.map((req) => ({
-      id: req.receiver.id,
+      id: req.id,
+      receiverId: req.receiver.id,
+      status: req.status,
+      createdAt: req.createdAt,
       email: req.receiver.email,
       username: req.receiver.username,
     }));

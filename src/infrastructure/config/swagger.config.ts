@@ -1,6 +1,7 @@
 import packageJson from '@/package.json';
 import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { configService } from './config.service';
 
 export function configureSwagger(app: INestApplication): void {
   const config = new DocumentBuilder()
@@ -13,7 +14,7 @@ export function configureSwagger(app: INestApplication): void {
       packageJson.author.url,
       packageJson.author.email,
     )
-    .addServer('https://user-management.code-valley.xyz')
+    .addServer(configService.getAppHostname())
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
