@@ -169,6 +169,23 @@ export class FriendshipService implements IFriendshipService {
 
     return suggestions.map((user) => this.toUserFriendDTO(user));
   }
+
+  async isFollowing(
+    currentUserId: number,
+    targetUserId: number,
+  ): Promise<boolean> {
+    const friendship = await this.friendshipRepository.findOne({
+      where: [
+        { senderId: currentUserId, receiverId: targetUserId },
+        { senderId: targetUserId, receiverId: currentUserId },
+      ],
+    });
+    return (
+      friendship?.status === FriendshipStatus.pending ||
+      friendship?.status === FriendshipStatus.accepted
+    );
+  }
+
   private toFriendshipResponseDTO(
     friendship: Friendship,
   ): FriendshipResponseDTO {

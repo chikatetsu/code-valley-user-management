@@ -156,4 +156,16 @@ export class FriendshipController {
     const userId = req.user.id;
     return this.friendshipService.listFriendSuggestions(userId);
   }
+
+  @Get('following/:currentUserId/:targetUserId')
+  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiParam({ name: 'currentUserId', type: Number })
+  @ApiParam({ name: 'targetUserId', type: Number })
+  async isFollowing(
+    @Param('currentUserId', ParseIntPipe) currentUserId: number,
+    @Param('targetUserId', ParseIntPipe) targetUserId: number,
+  ): Promise<boolean> {
+    return this.friendshipService.isFollowing(currentUserId, targetUserId);
+  }
 }
