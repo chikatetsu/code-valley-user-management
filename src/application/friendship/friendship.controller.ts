@@ -121,6 +121,18 @@ export class FriendshipController {
     return this.friendshipService.listFriends(userId);
   }
 
+  @Get('list/:userId')
+  @ApiResponse({ status: 200, type: [UserQueryDTO] })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiParam({ name: 'userId', type: Number })
+  async listFriendsById(
+    @Req()
+    req: any,
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<UserFriendDTO[]> {
+    return this.friendshipService.listFriends(userId);
+  }
+
   @Get('status')
   @ApiResponse({ status: 200, type: FriendshipDTO })
   @ApiResponse({ status: 400, description: 'Bad Request' })
