@@ -36,7 +36,7 @@ import { FriendshipPendingDTO } from './dto/FriendshipPending.dto';
 @UseGuards(AuthGuard('jwt'))
 @UseInterceptors(FriendshipInterceptor)
 export class FriendshipController {
-  constructor(private readonly friendshipService: FriendshipService) { }
+  constructor(private readonly friendshipService: FriendshipService) {}
 
   @Post('send/:receiverId')
   @UseInterceptors(FriendshipInterceptor)
@@ -164,9 +164,15 @@ export class FriendshipController {
   @Get('suggestions')
   @ApiResponse({ status: 200, type: [UserQueryDTO] })
   @ApiResponse({ status: 400, description: 'Bad Request' })
-  async listFriendSuggestions(@Req() req: any): Promise<UserQueryDTO[]> {
+  @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'offset', required: false })
+  async listFriendSuggestions(
+    @Req() req: any,
+    @Query('limit', ParseIntPipe) limit: number = 10,
+    @Query('offset', ParseIntPipe) offset: number = 0,
+  ): Promise<UserQueryDTO[]> {
     const userId = req.user.id;
-    return this.friendshipService.listFriendSuggestions(userId);
+    return this.friendshipService.listFriendSuggestions(userId, limit, offset);
   }
 
   @Get('following/:currentUserId/:targetUserId')

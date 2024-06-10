@@ -174,8 +174,12 @@ export class FriendshipService implements IFriendshipService {
       username: req.receiver.username,
     }));
   }
-  async listFriendSuggestions(userId: number): Promise<UserFriendDTO[]> {
-    const friends = await this.listFriends(userId, 100, 0);
+  async listFriendSuggestions(
+    userId: number,
+    limit: number,
+    offset: number,
+  ): Promise<UserFriendDTO[]> {
+    const friends = await this.listFriends(userId, 1000, 0);
     const friendIds = friends.map((f) => f.id);
 
     const sentRequests = await this.friendshipRepository.find({
@@ -187,6 +191,8 @@ export class FriendshipService implements IFriendshipService {
       where: {
         id: Not(In([...friendIds, ...sentRequestIds, userId])),
       },
+      take: limit,
+      skip: offset,
     });
 
     return suggestions.map((user) =>
