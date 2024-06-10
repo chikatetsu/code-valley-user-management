@@ -1,21 +1,20 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { FriendshipStatus } from '../types/friendship.status';
 
-export class FriendshipDTO {
+export class FriendshipPendingDTO {
   @ApiProperty({
     example: 1,
     description: 'The id of the friendship',
   })
+  id: number;
+  @ApiProperty({
+    example: 1,
+    description: 'The id of the sender',
+  })
   senderId: number;
 
   @ApiProperty({
-    example: 2,
-    description: 'The id of the receiver',
-  })
-  receiverId: number;
-
-  @ApiProperty({
-    example: 'accepted',
+    example: 'pending',
     description: 'The status of the friendship',
   })
   status: FriendshipStatus;
@@ -25,4 +24,16 @@ export class FriendshipDTO {
     description: 'The date the friendship was created',
   })
   createdAt: Date;
+
+  @ApiProperty({
+    example: 'example@example.com',
+    description: 'The email of the sender',
+  })
+  email: string;
+
+  @ApiProperty({
+    example: 'username',
+    description: 'The username of the sender',
+  })
+  username: string;
 }

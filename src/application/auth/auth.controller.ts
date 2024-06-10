@@ -116,6 +116,23 @@ export class AuthController {
     return this.userService.findOneById(id);
   }
 
+  @Get('profile/username/:username')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(NotFoundInterceptor)
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'User profile',
+    type: UserResponseDTO,
+  })
+  @ApiParam({ name: 'username', type: String })
+  async getProfileByUsername(
+    @Req() req: any,
+    @Param('username') username: string,
+  ): Promise<UserResponseDTO> {
+    return this.userService.findOneByUsername(username);
+  }
+
   @Get('google')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
@@ -233,6 +250,19 @@ export class AuthController {
     const jwt = await this.authService.loginWithGoogle(req.user);
     const frontendUrl = configService.getFrontendUrl();
     res.redirect(`${frontendUrl}/?token=${jwt.accessToken}`);
+  }
+
+  @Get('google/callback/mobile')
+  @UseGuards(AuthGuard('google'))
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'User successfully logged in with Google',
+    type: TokenResponse,
+  })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  async googleAuthRedirectMobile(@Req() req, @Res() res) {
+    const jwt = await this.authService.loginWithGoogle(req.user);
+    res.json({ accessToken: jwt.accessToken });
   }
 
   @Post('avatar')

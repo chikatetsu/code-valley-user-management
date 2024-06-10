@@ -1,3 +1,4 @@
+import { FriendshipStatus } from '@application/friendship/types/friendship.status';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsString } from 'class-validator';
 
@@ -13,4 +14,7 @@ export class UserFriendDTO {
   @ApiProperty()
   @IsString()
   username: string;
+
+  @ApiProperty()
+  status: FriendshipStatus;
 }

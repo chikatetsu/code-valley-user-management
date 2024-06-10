@@ -7,10 +7,12 @@ import { User } from '@domain/user/entities/user.entity';
 import {
   FriendshipDTO,
   FriendshipResponseDTO,
+  FriendshipSentDTO,
 } from '@application/friendship/dto';
 import { UserQueryDTO } from '@application/user/dto';
 import { FriendshipStatus } from '@application/friendship/types/friendship.status';
 import { UserFriendDTO } from '@application/user/dto/UserFriend.dto';
+import { FriendshipPendingDTO } from '@application/friendship/dto/FriendshipPending.dto';
 
 @Injectable()
 export class FriendshipService implements IFriendshipService {
@@ -19,7 +21,7 @@ export class FriendshipService implements IFriendshipService {
     private readonly friendshipRepository: Repository<Friendship>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-  ) { }
+  ) {}
 
   async sendFriendRequest(
     senderId: number,
@@ -47,11 +49,13 @@ export class FriendshipService implements IFriendshipService {
   }
 
   async acceptFriendRequest(
-    friendshipId: number,
+    senderId: number,
+    receiverId: number,
   ): Promise<FriendshipResponseDTO> {
-    const friendship = await this.friendshipRepository.findOneBy({
-      id: friendshipId,
+    const friendship = await this.friendshipRepository.findOne({
+      where: { senderId, receiverId, status: FriendshipStatus.pending },
     });
+
     if (!friendship) {
       throw new Error('Friendship not found');
     }
@@ -70,9 +74,14 @@ export class FriendshipService implements IFriendshipService {
     await this.friendshipRepository.delete(friendship.id);
   }
 
-  async declineFriendRequest(friendshipId: number): Promise<void> {
+  async declineFriendRequest(
+    senderId: number,
+    receiverId: number,
+  ): Promise<void> {
     const friendship = await this.friendshipRepository.findOneBy({
-      id: friendshipId,
+      senderId,
+      receiverId,
+      status: FriendshipStatus.pending,
     });
     if (!friendship) {
       throw new Error('Friendship not found');
@@ -115,9 +124,9 @@ export class FriendshipService implements IFriendshipService {
       take: maxLimit,
       skip: offset,
     });
-    return friendships.map((f) =>
-      f.senderId === userId ? f.receiver : f.sender,
-    );
+    return friendships
+      .map((f) => (f.senderId === userId ? f.receiver : f.sender))
+      .map((user) => this.toUserFriendDTO(user, FriendshipStatus.accepted));
   }
 
   async getFriendshipStatus(
@@ -136,21 +145,31 @@ export class FriendshipService implements IFriendshipService {
     return this.toFriendshipDTO(friendship);
   }
 
-  async listPendingRequests(userId: number): Promise<UserFriendDTO[]> {
+  async listPendingRequests(userId: number): Promise<FriendshipPendingDTO[]> {
     const friendships = await this.friendshipRepository.find({
       where: { receiverId: userId, status: FriendshipStatus.pending },
-      relations: ['sender'],
+      relations: ['sender', 'receiver'],
     });
-    return friendships.map((f) => f.sender);
+    return friendships.map((f) => ({
+      id: f.id,
+      senderId: f.sender.id,
+      status: f.status,
+      createdAt: f.createdAt,
+      email: f.sender.email,
+      username: f.sender.username,
+    }));
   }
 
-  async listSentFriendRequests(userId: number): Promise<UserFriendDTO[]> {
+  async listSentFriendRequests(userId: number): Promise<FriendshipSentDTO[]> {
     const sentRequests = await this.friendshipRepository.find({
       where: { senderId: userId, status: FriendshipStatus.pending },
       relations: ['receiver'],
     });
     return sentRequests.map((req) => ({
-      id: req.receiver.id,
+      id: req.id,
+      receiverId: req.receiver.id,
+      status: req.status,
+      createdAt: req.createdAt,
       email: req.receiver.email,
       username: req.receiver.username,
     }));
@@ -170,8 +189,80 @@ export class FriendshipService implements IFriendshipService {
       },
     });
 
-    return suggestions.map((user) => this.toUserFriendDTO(user));
+    return suggestions.map((user) =>
+      this.toUserFriendDTO(user, FriendshipStatus.none),
+    );
   }
+
+  async isFollowing(
+    currentUserId: number,
+    targetUserId: number,
+  ): Promise<boolean> {
+    const friendship = await this.friendshipRepository.findOne({
+      where: [
+        { senderId: currentUserId, receiverId: targetUserId },
+        { senderId: targetUserId, receiverId: currentUserId },
+      ],
+    });
+    return (
+      friendship?.status === FriendshipStatus.pending ||
+      friendship?.status === FriendshipStatus.accepted
+    );
+  }
+
+  async listFollowers(userId: number): Promise<UserFriendDTO[]> {
+    const friendships = await this.friendshipRepository.find({
+      where: {
+        receiverId: userId,
+        status: In([FriendshipStatus.accepted, FriendshipStatus.pending]),
+      },
+      relations: ['sender'],
+    });
+
+    friendships.push(
+      ...(await this.friendshipRepository.find({
+        where: {
+          senderId: userId,
+          status: FriendshipStatus.accepted,
+        },
+        relations: ['receiver'],
+      })),
+    );
+    return friendships.map((f) =>
+      this.toUserFriendDTO(
+        f.senderId === userId ? f.receiver : f.sender,
+        f.status,
+      ),
+    );
+  }
+
+  async listFollowings(userId: number): Promise<UserFriendDTO[]> {
+    const friendships = await this.friendshipRepository.find({
+      where: {
+        senderId: userId,
+        status: In([FriendshipStatus.accepted, FriendshipStatus.pending]),
+      },
+      relations: ['receiver'],
+    });
+
+    friendships.push(
+      ...(await this.friendshipRepository.find({
+        where: {
+          receiverId: userId,
+          status: FriendshipStatus.accepted,
+        },
+        relations: ['sender'],
+      })),
+    );
+
+    return friendships.map((f) =>
+      this.toUserFriendDTO(
+        f.receiverId === userId ? f.sender : f.receiver,
+        f.status,
+      ),
+    );
+  }
+
   private toFriendshipResponseDTO(
     friendship: Friendship,
   ): FriendshipResponseDTO {
@@ -191,11 +282,12 @@ export class FriendshipService implements IFriendshipService {
     };
   }
 
-  private toUserFriendDTO(user: User): UserFriendDTO {
+  private toUserFriendDTO(user: User, status: FriendshipStatus): UserFriendDTO {
     return {
       id: user.id,
       email: user.email,
       username: user.username,
+      status: status,
     };
   }
 

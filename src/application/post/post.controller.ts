@@ -36,6 +36,18 @@ export class PostController {
     return this.postService.getPosts(userId);
   }
 
+  @Get(':id')
+  @ApiResponse({ status: 200, type: PostResponseDto })
+  @ApiResponse({ status: 404, description: 'Post not found' })
+  @ApiParam({ name: 'id', type: Number })
+  async getPost(
+    @Req() req: any,
+    @Param('id') id: number,
+  ): Promise<PostResponseDto> {
+    let user = req.user;
+    return this.postService.getPostById(id, user.id);
+  }
+
   @Post()
   @ApiResponse({ status: 201, type: PostResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
