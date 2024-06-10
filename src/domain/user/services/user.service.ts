@@ -22,7 +22,7 @@ export class UserService implements IUserService {
   constructor(
     private userRepository: UserRepository,
     @Inject('FIREBASE_ADMIN') private readonly firebaseAdmin: admin.app.App,
-  ) {}
+  ) { }
 
   async findOne(dto: UserIdDTO): Promise<User | null> {
     if (!dto.id) {
@@ -33,6 +33,11 @@ export class UserService implements IUserService {
 
   async findOneById(id: number): Promise<UserResponseDTO> {
     const user = await this.userRepository.findOneById(id);
+    return this.toResponseDto(user);
+  }
+
+  async findOneByUsername(username: string): Promise<UserResponseDTO> {
+    const user = await this.userRepository.findOneByUsername(username);
     return this.toResponseDto(user);
   }
 
@@ -56,10 +61,10 @@ export class UserService implements IUserService {
       .withEmail(createDto.email)
       .withUsername(
         createDto.username ??
-          (await this.generateUsername(
-            createDto.firstName,
-            createDto.lastName,
-          )),
+        (await this.generateUsername(
+          createDto.firstName,
+          createDto.lastName,
+        )),
       )
       .withPassword(createDto.password ?? null)
       .withAvatar(createDto.avatar)
