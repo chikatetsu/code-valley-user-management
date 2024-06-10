@@ -21,7 +21,7 @@ export class FriendshipService implements IFriendshipService {
     private readonly friendshipRepository: Repository<Friendship>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-  ) {}
+  ) { }
 
   async sendFriendRequest(
     senderId: number,
@@ -104,6 +104,7 @@ export class FriendshipService implements IFriendshipService {
     });
     return friendships.map((f) =>
       f.senderId === userId ? f.receiver : f.sender,
+    ).map((user) => this.toUserFriendDTO(user, FriendshipStatus.accepted)
     );
   }
 
@@ -167,7 +168,7 @@ export class FriendshipService implements IFriendshipService {
       },
     });
 
-    return suggestions.map((user) => this.toUserFriendDTO(user));
+    return suggestions.map((user) => this.toUserFriendDTO(user, FriendshipStatus.none));
   }
 
   async isFollowing(
@@ -194,7 +195,22 @@ export class FriendshipService implements IFriendshipService {
       },
       relations: ['sender'],
     });
-    return friendships.map((f) => this.toUserFriendDTO(f.sender));
+
+    friendships.push(
+      ...(await this.friendshipRepository.find({
+        where: {
+          senderId: userId,
+          status: FriendshipStatus.accepted,
+        },
+        relations: ['receiver'],
+      })),
+    );
+    return friendships.map((f) =>
+      this.toUserFriendDTO(
+        f.senderId === userId ? f.receiver : f.sender,
+        f.status,
+      ),
+    );
   }
 
   async listFollowings(userId: number): Promise<UserFriendDTO[]> {
@@ -205,7 +221,23 @@ export class FriendshipService implements IFriendshipService {
       },
       relations: ['receiver'],
     });
-    return friendships.map((f) => this.toUserFriendDTO(f.receiver));
+
+    friendships.push(
+      ...(await this.friendshipRepository.find({
+        where: {
+          receiverId: userId,
+          status: FriendshipStatus.accepted,
+        },
+        relations: ['sender'],
+      })),
+    );
+
+    return friendships.map((f) =>
+      this.toUserFriendDTO(
+        f.receiverId === userId ? f.sender : f.receiver,
+        f.status,
+      ),
+    );
   }
 
   private toFriendshipResponseDTO(
@@ -227,11 +259,12 @@ export class FriendshipService implements IFriendshipService {
     };
   }
 
-  private toUserFriendDTO(user: User): UserFriendDTO {
+  private toUserFriendDTO(user: User, status: FriendshipStatus): UserFriendDTO {
     return {
       id: user.id,
       email: user.email,
       username: user.username,
+      status: status,
     };
   }
 
