@@ -291,17 +291,32 @@ export class FriendshipService implements IFriendshipService {
   async getFollowersAndFollowingsCount(
     userId: number,
   ): Promise<{ followers: number; followings: number }> {
-    const followersCount = await this.friendshipRepository.count({
+    let followersCount = await this.friendshipRepository.count({
       where: {
         receiverId: userId,
         status: In([FriendshipStatus.accepted, FriendshipStatus.pending]),
       },
     });
 
-    const followingsCount = await this.friendshipRepository.count({
+    followersCount += await this.friendshipRepository.count({
+      where: {
+        senderId: userId,
+        status: FriendshipStatus.accepted,
+      },
+    });
+
+    let followingsCount = await this.friendshipRepository.count({
       where: {
         senderId: userId,
         status: In([FriendshipStatus.accepted, FriendshipStatus.pending]),
+      },
+      relations: ['receiver'],
+    });
+
+    followingsCount += await this.friendshipRepository.count({
+      where: {
+        receiverId: userId,
+        status: FriendshipStatus.accepted,
       },
     });
 
