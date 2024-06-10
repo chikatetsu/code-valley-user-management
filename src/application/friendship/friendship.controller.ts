@@ -168,4 +168,24 @@ export class FriendshipController {
   ): Promise<boolean> {
     return this.friendshipService.isFollowing(currentUserId, targetUserId);
   }
+
+  @Get('followers/:userId')
+  @ApiResponse({ status: 200, type: [UserQueryDTO] })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiParam({ name: 'userId', type: Number })
+  async listFollowersByUserId(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<UserQueryDTO[]> {
+    return this.friendshipService.listFollowers(userId);
+  }
+
+  @Get('followings/:userId')
+  @ApiResponse({ status: 200, type: [UserQueryDTO] })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiParam({ name: 'userId', type: Number })
+  async listFollowingsByUserId(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<UserQueryDTO[]> {
+    return this.friendshipService.listFollowings(userId);
+  }
 }

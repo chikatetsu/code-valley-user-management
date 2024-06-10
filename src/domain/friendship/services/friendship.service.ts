@@ -186,6 +186,28 @@ export class FriendshipService implements IFriendshipService {
     );
   }
 
+  async listFollowers(userId: number): Promise<UserFriendDTO[]> {
+    const friendships = await this.friendshipRepository.find({
+      where: {
+        receiverId: userId,
+        status: In([FriendshipStatus.accepted, FriendshipStatus.pending]),
+      },
+      relations: ['sender'],
+    });
+    return friendships.map((f) => this.toUserFriendDTO(f.sender));
+  }
+
+  async listFollowings(userId: number): Promise<UserFriendDTO[]> {
+    const friendships = await this.friendshipRepository.find({
+      where: {
+        senderId: userId,
+        status: In([FriendshipStatus.accepted, FriendshipStatus.pending]),
+      },
+      relations: ['receiver'],
+    });
+    return friendships.map((f) => this.toUserFriendDTO(f.receiver));
+  }
+
   private toFriendshipResponseDTO(
     friendship: Friendship,
   ): FriendshipResponseDTO {
