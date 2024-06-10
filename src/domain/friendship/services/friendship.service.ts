@@ -21,7 +21,7 @@ export class FriendshipService implements IFriendshipService {
     private readonly friendshipRepository: Repository<Friendship>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-  ) { }
+  ) {}
 
   async sendFriendRequest(
     senderId: number,
@@ -49,11 +49,13 @@ export class FriendshipService implements IFriendshipService {
   }
 
   async acceptFriendRequest(
-    friendshipId: number,
+    senderId: number,
+    receiverId: number,
   ): Promise<FriendshipResponseDTO> {
-    const friendship = await this.friendshipRepository.findOneBy({
-      id: friendshipId,
+    const friendship = await this.friendshipRepository.findOne({
+      where: { senderId, receiverId, status: FriendshipStatus.pending },
     });
+
     if (!friendship) {
       throw new Error('Friendship not found');
     }
@@ -72,9 +74,14 @@ export class FriendshipService implements IFriendshipService {
     await this.friendshipRepository.delete(friendship.id);
   }
 
-  async declineFriendRequest(friendshipId: number): Promise<void> {
+  async declineFriendRequest(
+    senderId: number,
+    receiverId: number,
+  ): Promise<void> {
     const friendship = await this.friendshipRepository.findOneBy({
-      id: friendshipId,
+      senderId,
+      receiverId,
+      status: FriendshipStatus.pending,
     });
     if (!friendship) {
       throw new Error('Friendship not found');
@@ -102,10 +109,9 @@ export class FriendshipService implements IFriendshipService {
       ],
       relations: ['sender', 'receiver'],
     });
-    return friendships.map((f) =>
-      f.senderId === userId ? f.receiver : f.sender,
-    ).map((user) => this.toUserFriendDTO(user, FriendshipStatus.accepted)
-    );
+    return friendships
+      .map((f) => (f.senderId === userId ? f.receiver : f.sender))
+      .map((user) => this.toUserFriendDTO(user, FriendshipStatus.accepted));
   }
 
   async getFriendshipStatus(
@@ -168,7 +174,9 @@ export class FriendshipService implements IFriendshipService {
       },
     });
 
-    return suggestions.map((user) => this.toUserFriendDTO(user, FriendshipStatus.none));
+    return suggestions.map((user) =>
+      this.toUserFriendDTO(user, FriendshipStatus.none),
+    );
   }
 
   async isFollowing(

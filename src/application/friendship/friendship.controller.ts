@@ -51,26 +51,28 @@ export class FriendshipController {
     return this.friendshipService.sendFriendRequest(senderId, receiverId);
   }
 
-  @Post('accept/:friendshipId')
-  @ApiParam({ name: 'friendshipId', type: Number })
+  @Post('accept/:senderId')
+  @ApiParam({ name: 'senderId', type: Number })
   @ApiResponse({ status: 201, type: FriendshipResponseDTO })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   async acceptFriendRequest(
     @Req() req: any,
-    @Param('friendshipId', ParseIntPipe) friendshipId: number,
+    @Param('senderId', ParseIntPipe) senderId: number,
   ): Promise<FriendshipResponseDTO> {
-    return this.friendshipService.acceptFriendRequest(friendshipId);
+    const userId = req.user.id;
+    return this.friendshipService.acceptFriendRequest(senderId, userId);
   }
 
   @Post('decline/:friendshipId')
-  @ApiParam({ name: 'friendshipId', type: Number })
+  @ApiParam({ name: 'senderId', type: Number })
   @ApiResponse({ status: 201 })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   async declineFriendRequest(
     @Req() req: any,
-    @Param('friendshipId', ParseIntPipe) friendshipId: number,
+    @Param('senderId', ParseIntPipe) senderId: number,
   ): Promise<void> {
-    return this.friendshipService.declineFriendRequest(friendshipId);
+    const userId = req.user.id;
+    return this.friendshipService.declineFriendRequest(senderId, userId);
   }
 
   @Delete('remove/:friendId')
