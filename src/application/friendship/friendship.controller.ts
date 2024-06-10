@@ -191,19 +191,27 @@ export class FriendshipController {
   @ApiResponse({ status: 200, type: [UserQueryDTO] })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiParam({ name: 'userId', type: Number })
+  @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'offset', required: false })
   async listFollowersByUserId(
     @Param('userId', ParseIntPipe) userId: number,
+    @Query('limit', ParseIntPipe) limit: number = 10,
+    @Query('offset', ParseIntPipe) offset: number = 0,
   ): Promise<UserQueryDTO[]> {
-    return this.friendshipService.listFollowers(userId);
+    return this.friendshipService.listFollowers(userId, limit, offset);
   }
 
   @Get('followings/:userId')
   @ApiResponse({ status: 200, type: [UserQueryDTO] })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiParam({ name: 'userId', type: Number })
+  @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'offset', required: false })
   async listFollowingsByUserId(
     @Param('userId', ParseIntPipe) userId: number,
+    @Query('limit', ParseIntPipe) limit: number = 10,
+    @Query('offset', ParseIntPipe) offset: number = 0,
   ): Promise<UserQueryDTO[]> {
-    return this.friendshipService.listFollowings(userId);
+    return this.friendshipService.listFollowings(userId, limit, offset);
   }
 }

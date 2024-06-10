@@ -216,13 +216,21 @@ export class FriendshipService implements IFriendshipService {
     );
   }
 
-  async listFollowers(userId: number): Promise<UserFriendDTO[]> {
+  async listFollowers(
+    userId: number,
+    limit: number,
+    offset: number,
+  ): Promise<UserFriendDTO[]> {
+    const maxLimit = Math.min(limit, 100);
+
     const friendships = await this.friendshipRepository.find({
       where: {
         receiverId: userId,
         status: In([FriendshipStatus.accepted, FriendshipStatus.pending]),
       },
       relations: ['sender'],
+      take: maxLimit,
+      skip: offset,
     });
 
     friendships.push(
@@ -232,6 +240,8 @@ export class FriendshipService implements IFriendshipService {
           status: FriendshipStatus.accepted,
         },
         relations: ['receiver'],
+        take: maxLimit,
+        skip: offset,
       })),
     );
     return friendships.map((f) =>
@@ -242,13 +252,20 @@ export class FriendshipService implements IFriendshipService {
     );
   }
 
-  async listFollowings(userId: number): Promise<UserFriendDTO[]> {
+  async listFollowings(
+    userId: number,
+    limit: number,
+    offset: number,
+  ): Promise<UserFriendDTO[]> {
+    const maxLimit = Math.min(limit, 100);
     const friendships = await this.friendshipRepository.find({
       where: {
         senderId: userId,
         status: In([FriendshipStatus.accepted, FriendshipStatus.pending]),
       },
       relations: ['receiver'],
+      take: maxLimit,
+      skip: offset,
     });
 
     friendships.push(
@@ -258,6 +275,8 @@ export class FriendshipService implements IFriendshipService {
           status: FriendshipStatus.accepted,
         },
         relations: ['sender'],
+        take: maxLimit,
+        skip: offset,
       })),
     );
 
