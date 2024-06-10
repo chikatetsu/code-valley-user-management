@@ -29,6 +29,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { UserQueryDTO } from '@application/user/dto';
 import { UserFriendDTO } from '@application/user/dto/UserFriend.dto';
 import { FriendshipPendingDTO } from './dto/FriendshipPending.dto';
+import { FollowersAndFollowingsCountDTO } from './dto/FollowersAndFollowingsCount.dto';
 
 @Controller('friendships')
 @ApiTags('friendships')
@@ -213,5 +214,15 @@ export class FriendshipController {
     @Query('offset', ParseIntPipe) offset: number = 0,
   ): Promise<UserQueryDTO[]> {
     return this.friendshipService.listFollowings(userId, limit, offset);
+  }
+
+  @Get('count/:userId')
+  @ApiResponse({ status: 200, type: [FollowersAndFollowingsCountDTO] })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiParam({ name: 'userId', type: Number })
+  async getFollowersAndFollowingsCount(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<FollowersAndFollowingsCountDTO> {
+    return this.friendshipService.getFollowersAndFollowingsCount(userId);
   }
 }
