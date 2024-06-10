@@ -26,7 +26,7 @@ import { CreatePostDto, PostResponseDto, LikePostResponseDto } from './dto';
 @UseGuards(JwtAuthGuard)
 @ApiTags('posts')
 export class PostController {
-  constructor(private readonly postService: PostService) {}
+  constructor(private readonly postService: PostService) { }
 
   @Get()
   @ApiResponse({ status: 200, type: PostResponseDto, isArray: true })
@@ -34,6 +34,15 @@ export class PostController {
   async getPosts(@Req() req: Request): Promise<PostResponseDto[]> {
     const userId = req.user['id'];
     return this.postService.getPosts(userId);
+  }
+
+  @Get(':id')
+  @ApiResponse({ status: 200, type: PostResponseDto })
+  @ApiResponse({ status: 404, description: 'Post not found' })
+  @ApiParam({ name: 'id', type: Number })
+  async getPost(@Req() req: any, @Param('id') id: number): Promise<PostResponseDto> {
+    let user = req.user;
+    return this.postService.getPostById(id, user.id);
   }
 
   @Post()

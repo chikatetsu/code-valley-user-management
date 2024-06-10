@@ -22,7 +22,7 @@ export class PostService {
     private readonly postLikeRepository: Repository<PostLike>,
     private readonly postRepository: PostRepository,
     private readonly userService: UserService,
-  ) {}
+  ) { }
 
   async createPost(
     userId: number,
@@ -43,6 +43,7 @@ export class PostService {
       posts.map((post) => this.toPostResponseDto(post, currentUserId)),
     );
   }
+
 
   async getPostById(
     postId: number,
