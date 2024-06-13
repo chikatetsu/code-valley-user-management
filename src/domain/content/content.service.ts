@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import FormData from 'form-data';
 import { firstValueFrom } from 'rxjs';
@@ -8,7 +12,7 @@ import { ContentDto } from '@application/file/dto/content.dto';
 
 @Injectable()
 export class ContentService {
-  constructor(private readonly httpService: HttpService) { }
+  constructor(private readonly httpService: HttpService) {}
 
   async uploadFileToMicroservice(
     file: Express.Multer.File,
@@ -38,7 +42,9 @@ export class ContentService {
   async getContentById(id: string): Promise<ContentDto> {
     try {
       const response = await firstValueFrom(
-        this.httpService.get(`${configService.getContentCraftersUrl()}/v1/content/${id}`)
+        this.httpService.get(
+          `${configService.getContentCraftersUrl()}/v1/content/${id}`,
+        ),
       );
 
       if (!response.data) {
@@ -51,12 +57,14 @@ export class ContentService {
     }
   }
 
-
   /** TO IMPROVE BECAUSE NO TESTED */
   async updateContentById(id: string, updateData: any): Promise<any> {
     try {
       const response = await firstValueFrom(
-        this.httpService.put(`${configService.getContentCraftersUrl()}/v1/content/${id}`, updateData)
+        this.httpService.put(
+          `${configService.getContentCraftersUrl()}/v1/content/${id}`,
+          updateData,
+        ),
       );
 
       return response.data;
@@ -68,7 +76,9 @@ export class ContentService {
   async deleteContentById(id: string): Promise<any> {
     try {
       const response = await firstValueFrom(
-        this.httpService.delete(`${configService.getContentCraftersUrl()}/v1/content/${id}`)
+        this.httpService.delete(
+          `${configService.getContentCraftersUrl()}/v1/content/${id}`,
+        ),
       );
 
       return response.data;

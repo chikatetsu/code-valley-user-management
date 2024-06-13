@@ -59,8 +59,15 @@ export class PostService {
 
   async getPosts(currentUserId: number): Promise<PostResponseDto[]> {
     const posts = await this.postRepository.findAll();
+
     return Promise.all(
-      posts.map((post) => this.toPostResponseDto(post, currentUserId)),
+      posts.map(async (post) => {
+        if (post.fileId) {
+          const content = await this.contentService.getContentById(post.fileId);
+          return this.toPostResponseDto(post, currentUserId, content.code_url);
+        }
+        return this.toPostResponseDto(post, currentUserId);
+      }),
     );
   }
 
@@ -71,6 +78,11 @@ export class PostService {
     const post = await this.postRepository.findOneById(postId);
     if (!post) {
       throw new NotFoundException(`Post with id ${postId} not found`);
+    }
+
+    if (post.fileId) {
+      const content = await this.contentService.getContentById(post.fileId);
+      return this.toPostResponseDto(post, currentUserId, content.code_url);
     }
     return this.toPostResponseDto(post, currentUserId);
   }

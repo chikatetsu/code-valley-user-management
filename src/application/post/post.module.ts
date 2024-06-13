@@ -31,4 +31,4 @@ import { ContentService } from '@domain/content/content.service';
     PostLikeRepository,
   ],
 })
-export class PostModule { }
+export class PostModule {}
