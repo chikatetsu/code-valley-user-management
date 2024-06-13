@@ -10,25 +10,25 @@ import { UserRepository } from '@infra/database/user.repository';
 import { PostLike } from '@domain/post/entities/post.like.entity';
 import { PostLikeRepository } from '@infra/database/post.like.repository';
 import { FirebaseModule } from '@application/firebase/firebase.module';
-import { FileUploadService } from '@domain/file/file-upload.service';
-import { FileUploadModule } from '@application/file/fileUpload.module';
 import { HttpModule } from '@nestjs/axios';
+import { ContentModule } from '@application/file/content.module';
+import { ContentService } from '@domain/content/content.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Post, PostLike]),
     FirebaseModule,
     HttpModule,
-    FileUploadModule,
+    ContentModule,
   ],
   controllers: [PostController],
   providers: [
     PostService,
     UserService,
-    FileUploadService,
+    ContentService,
     UserRepository,
     PostRepository,
     PostLikeRepository,
   ],
 })
-export class PostModule {}
+export class PostModule { }

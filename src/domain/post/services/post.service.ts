@@ -15,8 +15,8 @@ import {
 } from '@application/post/dto';
 import { UserService } from '@domain/user/services/user.service';
 import { PostRepository } from '@infra/database/post.repository';
-import { FileUploadService } from '@domain/file/file-upload.service';
 import { ObjectId } from 'mongodb';
+import { ContentService } from '@domain/content/content.service';
 
 @Injectable()
 export class PostService {
@@ -25,7 +25,7 @@ export class PostService {
     private readonly postLikeRepository: Repository<PostLike>,
     private readonly postRepository: PostRepository,
     private readonly userService: UserService,
-    private readonly fileUploadService: FileUploadService,
+    private readonly contentService: ContentService,
   ) {}
 
   async createPost(
@@ -37,7 +37,7 @@ export class PostService {
     let code_url: string | null = null;
     if (file) {
       const fileResponse =
-        await this.fileUploadService.uploadFileToMicroservice(file);
+        await this.contentService.uploadFileToMicroservice(file);
       [fileId, code_url] = [fileResponse.id, fileResponse.code_url];
 
       if (!ObjectId.isValid(fileId)) {
