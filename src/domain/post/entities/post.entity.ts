@@ -23,6 +23,9 @@ export class Post extends BaseEntity {
   @Column()
   userId: number;
 
+  @Column({ type: 'text', nullable: true })
+  fileId: string;
+
   @OneToMany(() => PostLike, (postLike) => postLike.post)
   likes: PostLike[];
 

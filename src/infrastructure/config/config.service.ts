@@ -84,6 +84,10 @@ class ConfigService {
   public getDynoCodeUrl() {
     return this.getValue('DYNO_CODE_URL');
   }
+
+  public getContentCraftersUrl() {
+    return this.getValue('CONTENT_CRAFTERS_URL');
+  }
 }
 
 const configService = new ConfigService(process.env).ensureValues([
@@ -99,6 +103,7 @@ const configService = new ConfigService(process.env).ensureValues([
   'GOOGLE_CLIENT_SECRET',
   'FRONTEND_URL',
   'DYNO_CODE_URL',
+  'CONTENT_CRAFTERS_URL',
 ]);
 
 export { configService };

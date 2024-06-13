@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -14,6 +15,8 @@ import {
 } from '@application/post/dto';
 import { UserService } from '@domain/user/services/user.service';
 import { PostRepository } from '@infra/database/post.repository';
+import { FileUploadService } from '@domain/file/file-upload.service';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class PostService {
@@ -22,15 +25,32 @@ export class PostService {
     private readonly postLikeRepository: Repository<PostLike>,
     private readonly postRepository: PostRepository,
     private readonly userService: UserService,
-  ) { }
+    private readonly fileUploadService: FileUploadService,
+  ) {}
 
   async createPost(
     userId: number,
     createPostDto: CreatePostDto,
+    file: Express.Multer.File,
   ): Promise<PostResponseDto> {
-    const post = this.postRepository.create({ ...createPostDto, userId });
+    let fileId: string | null = null;
+    let code_url: string | null = null;
+    if (file) {
+      const fileResponse =
+        await this.fileUploadService.uploadFileToMicroservice(file);
+      [fileId, code_url] = [fileResponse.id, fileResponse.code_url];
+
+      if (!ObjectId.isValid(fileId)) {
+        throw new BadRequestException('File id is not valid');
+      }
+    }
+    const post = this.postRepository.create({
+      ...createPostDto,
+      userId,
+      fileId,
+    });
     await this.postRepository.save(post);
-    return this.toPostResponseDto(post, userId);
+    return this.toPostResponseDto(post, userId, code_url);
   }
 
   async deletePost(postId: number): Promise<void> {
@@ -43,7 +63,6 @@ export class PostService {
       posts.map((post) => this.toPostResponseDto(post, currentUserId)),
     );
   }
-
 
   async getPostById(
     postId: number,
@@ -105,6 +124,7 @@ export class PostService {
   private async toPostResponseDto(
     post: Post,
     currentUserId: number,
+    codeUrl?: string,
   ): Promise<PostResponseDto> {
     const user = await this.userService.findOneById(post.userId);
     const likeCount = await this.postLikeRepository.count({
@@ -119,6 +139,8 @@ export class PostService {
       id: post.id,
       content: post.content,
       userId: post.userId,
+      fileId: post.fileId,
+      code_url: codeUrl,
       username: user.username,
       createdAt: post.createdAt,
       avatar: user.avatar,

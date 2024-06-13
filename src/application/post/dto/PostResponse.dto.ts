@@ -11,6 +11,12 @@ export class PostResponseDto {
   userId: number;
 
   @ApiProperty()
+  fileId: string;
+
+  @ApiProperty()
+  code_url?: string;
+
+  @ApiProperty()
   username: string;
 
   @ApiProperty()
