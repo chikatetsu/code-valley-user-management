@@ -13,6 +13,7 @@ import { Storage } from '@google-cloud/storage';
 import * as admin from 'firebase-admin';
 import path from 'path';
 import * as fs from 'fs';
+import { UserSearchDTO } from '@application/user/dto/UserSearch.dto';
 
 @Injectable()
 export class UserService implements IUserService {
@@ -39,6 +40,11 @@ export class UserService implements IUserService {
   async findOneByUsername(username: string): Promise<UserResponseDTO> {
     const user = await this.userRepository.findOneByUsername(username);
     return this.toResponseDto(user);
+  }
+
+  async findManyByUsername(username: string): Promise<UserSearchDTO> {
+    const users = await this.userRepository.findManyByUsername(username);
+    return { users : users };
   }
 
   async remove(dto: UserIdDTO): Promise<void> {

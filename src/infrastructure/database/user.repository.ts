@@ -48,4 +48,10 @@ export class UserRepository extends Repository<User> {
       })
       .getOne();
   }
+
+  async findManyByUsername(username: string): Promise<User[] | null> {
+    return this.createQueryBuilder('user')
+      .where('user.username LIKE :username', { username: `%${username}%` })
+      .getMany();
+  }
 }

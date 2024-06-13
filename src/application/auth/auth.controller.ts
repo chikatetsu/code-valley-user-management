@@ -39,6 +39,7 @@ import { UserService } from '@domain/user/services/user.service';
 import { UserResponseDTO } from '@application/user/dto';
 import { NotFoundInterceptor } from './interceptors/found.interceptor';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { UserSearchDTO } from '@application/user/dto/UserSearch.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -131,6 +132,23 @@ export class AuthController {
     @Param('username') username: string,
   ): Promise<UserResponseDTO> {
     return this.userService.findOneByUsername(username);
+  }
+
+  @Get('search/:username')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(NotFoundInterceptor)
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'Search user',
+    type: UserSearchDTO,
+  })
+  @ApiParam({ name: 'username', type: String })
+  async searchProfile(
+    @Req() req: any,
+    @Param('username') username: string,
+  ): Promise<UserSearchDTO> {
+    return this.userService.findManyByUsername(username);
   }
 
   @Get('google')
