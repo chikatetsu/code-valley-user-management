@@ -8,4 +8,4 @@ import { HttpModule } from '@nestjs/axios';
   providers: [ContentService],
   exports: [ContentService],
 })
-export class ContentModule { }
+export class ContentModule {}

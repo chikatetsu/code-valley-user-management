@@ -58,7 +58,9 @@ export class PostController {
   @UseInterceptors(
     FileInterceptor('file', {
       fileFilter: (req, file, callback) => {
-        if (!RegExp(/(javascript|rust|lua|python)$/).exec(file.mimetype)) {
+        if (
+          !RegExp(/(javascript|js|rust|rs|lua|python|py)$/).exec(file.mimetype)
+        ) {
           callback(new BadRequestException('Unsupported file type'), false);
         }
         callback(null, true);

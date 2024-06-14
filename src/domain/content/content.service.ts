@@ -7,8 +7,8 @@ import { HttpService } from '@nestjs/axios';
 import FormData from 'form-data';
 import { firstValueFrom } from 'rxjs';
 import { configService } from '@infra/config/config.service';
-import { FileUploadedDto } from '@application/file/dto/file-uploaded.dto';
-import { ContentDto } from '@application/file/dto/content.dto';
+import { FileUploadedDto } from '@application/content/dto/file-uploaded.dto';
+import { ContentDto } from '@application/content/dto/content.dto';
 
 @Injectable()
 export class ContentService {

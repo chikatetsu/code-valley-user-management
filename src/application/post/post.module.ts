@@ -9,13 +9,13 @@ import { UserRepository } from '@infra/database/user.repository';
 import { PostLike } from '@domain/post/entities/post.like.entity';
 import { PostLikeRepository } from '@infra/database/post.like.repository';
 import { FirebaseModule } from '@application/firebase/firebase.module';
-/*import { ContentModule } from '@application/file/content.module';*/
+import { ContentModule } from '@application/content/content.module';
 
 @Module({
   imports: [
+    ContentModule,
     TypeOrmModule.forFeature([Post, PostLike]),
     FirebaseModule,
-    /*  ContentModule, */
   ],
   controllers: [PostController],
   providers: [
