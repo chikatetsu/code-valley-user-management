@@ -116,6 +116,23 @@ export class AuthController {
     return this.userService.findOneById(id);
   }
 
+  @Get('profile/username/:username')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(NotFoundInterceptor)
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'User profile',
+    type: UserResponseDTO,
+  })
+  @ApiParam({ name: 'username', type: String })
+  async getProfileByUsername(
+    @Req() req: any,
+    @Param('username') username: string,
+  ): Promise<UserResponseDTO> {
+    return this.userService.findOneByUsername(username);
+  }
+
   @Get('google')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({

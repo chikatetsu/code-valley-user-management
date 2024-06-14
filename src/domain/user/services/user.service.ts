@@ -36,6 +36,11 @@ export class UserService implements IUserService {
     return this.toResponseDto(user);
   }
 
+  async findOneByUsername(username: string): Promise<UserResponseDTO> {
+    const user = await this.userRepository.findOneByUsername(username);
+    return this.toResponseDto(user);
+  }
+
   async remove(dto: UserIdDTO): Promise<void> {
     await this.userRepository.delete({ id: dto.id });
   }

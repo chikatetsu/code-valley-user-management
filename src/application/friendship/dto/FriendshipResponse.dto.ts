@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDate, IsNumber, IsString } from 'class-validator';
+import { FriendshipStatus } from '../types/friendship.status';
 
 export class FriendshipResponseDTO {
   @ApiProperty({
@@ -28,7 +29,7 @@ export class FriendshipResponseDTO {
     description: 'The status of the friendship',
   })
   @IsString()
-  status: 'pending' | 'accepted' | 'declined';
+  status: FriendshipStatus;
 
   @ApiProperty({
     example: '2024-03-22T00:00:00.000Z',
