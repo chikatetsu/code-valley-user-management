@@ -8,6 +8,8 @@ import {
   UseGuards,
   Req,
   BadRequestException,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { PostService } from '@domain/post/services/post.service';
 import { JwtAuthGuard } from '@application/auth/guards/jwt-auth.guard';
@@ -18,8 +20,10 @@ import {
   ApiResponse,
   ApiParam,
   ApiTags,
+  ApiConsumes,
 } from '@nestjs/swagger';
 import { CreatePostDto, PostResponseDto, LikePostResponseDto } from './dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('posts')
 @ApiBearerAuth()
@@ -51,17 +55,35 @@ export class PostController {
   @Post()
   @ApiResponse({ status: 201, type: PostResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @UseInterceptors(
+    FileInterceptor('file', {
+      fileFilter: (req, file, callback) => {
+        let ext = file.originalname.toLowerCase().split('.').pop();
+        if (!RegExp(/(javascript|js|rust|rs|lua|python|py)$/).exec(ext)) {
+          callback(
+            new BadRequestException(
+              `Extension '${ext}' is not allowed, only .js, .rs, .lua, .py`,
+            ),
+            false,
+          );
+        }
+        callback(null, true);
+      },
+    }),
+  )
+  @ApiConsumes('multipart/form-data')
   @ApiBody({ type: CreatePostDto })
   async createPost(
     @Req() req: Request,
     @Body() createPostDto: CreatePostDto,
+    @UploadedFile() file: Express.Multer.File,
   ): Promise<PostResponseDto> {
     const userId = req.user['id'];
     if (!createPostDto.content) {
       throw new BadRequestException('Content must not be empty');
     }
 
-    return this.postService.createPost(userId, createPostDto);
+    return this.postService.createPost(userId, createPostDto, file);
   }
 
   @Delete(':id')
