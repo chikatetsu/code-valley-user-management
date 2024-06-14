@@ -58,10 +58,14 @@ export class PostController {
   @UseInterceptors(
     FileInterceptor('file', {
       fileFilter: (req, file, callback) => {
-        if (
-          !RegExp(/(javascript|js|rust|rs|lua|python|py)$/).exec(file.mimetype)
-        ) {
-          callback(new BadRequestException('Unsupported file type'), false);
+        let ext = file.originalname.toLowerCase().split('.').pop();
+        if (!RegExp(/(javascript|js|rust|rs|lua|python|py)$/).exec(ext)) {
+          callback(
+            new BadRequestException(
+              `Extension '${ext}' is not allowed, only .js, .rs, .lua, .py`,
+            ),
+            false,
+          );
         }
         callback(null, true);
       },
