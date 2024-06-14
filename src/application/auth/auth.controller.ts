@@ -39,7 +39,6 @@ import { UserService } from '@domain/user/services/user.service';
 import { UserResponseDTO } from '@application/user/dto';
 import { NotFoundInterceptor } from './interceptors/found.interceptor';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { UserSearchDTO } from '@application/user/dto/UserSearch.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -141,13 +140,13 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     description: 'Search user',
-    type: UserSearchDTO,
+    type: UserResponseDTO,
   })
   @ApiParam({ name: 'username', type: String })
   async searchProfile(
     @Req() req: any,
     @Param('username') username: string,
-  ): Promise<UserSearchDTO> {
+  ): Promise<UserResponseDTO[]> {
     return this.userService.findManyByUsername(username);
   }
 
