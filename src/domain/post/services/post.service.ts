@@ -2,7 +2,6 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
-  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -16,7 +15,7 @@ import {
 import { UserService } from '@domain/user/services/user.service';
 import { PostRepository } from '@infra/database/post.repository';
 import { ObjectId } from 'mongodb';
-import { ContentService } from '@domain/content/content.service';
+/*import { ContentService } from '@domain/content/content.service';*/
 
 @Injectable()
 export class PostService {
@@ -25,7 +24,7 @@ export class PostService {
     private readonly postLikeRepository: Repository<PostLike>,
     private readonly postRepository: PostRepository,
     private readonly userService: UserService,
-    private readonly contentService: ContentService,
+    /*private readonly contentService: ContentService,*/
   ) {}
 
   async createPost(
@@ -35,7 +34,7 @@ export class PostService {
   ): Promise<PostResponseDto> {
     let fileId: string | null = null;
     let code_url: string | null = null;
-    if (file) {
+    /**if (file) {
       const fileResponse =
         await this.contentService.uploadFileToMicroservice(file);
       [fileId, code_url] = [fileResponse.id, fileResponse.code_url];
@@ -43,7 +42,8 @@ export class PostService {
       if (!ObjectId.isValid(fileId)) {
         throw new BadRequestException('File id is not valid');
       }
-    }
+            //"mongodb": "^5.9.2",
+    }*/
     const post = this.postRepository.create({
       ...createPostDto,
       userId,
@@ -62,10 +62,10 @@ export class PostService {
 
     return Promise.all(
       posts.map(async (post) => {
-        if (post.fileId) {
+        /*if (post.fileId) {
           const content = await this.contentService.getContentById(post.fileId);
           return this.toPostResponseDto(post, currentUserId, content.code_url);
-        }
+        }*/
         return this.toPostResponseDto(post, currentUserId);
       }),
     );
@@ -80,10 +80,10 @@ export class PostService {
       throw new NotFoundException(`Post with id ${postId} not found`);
     }
 
-    if (post.fileId) {
+    /*if (post.fileId) {
       const content = await this.contentService.getContentById(post.fileId);
       return this.toPostResponseDto(post, currentUserId, content.code_url);
-    }
+    }*/
     return this.toPostResponseDto(post, currentUserId);
   }
 

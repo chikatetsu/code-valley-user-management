@@ -6,7 +6,7 @@ import { GroupModule } from '@application/group/group.module';
 import { PostModule } from '@application/post/post.module';
 import { FirebaseModule } from '@application/firebase/firebase.module';
 import { CodeModule } from '@application/code/code.module';
-import { ContentModule } from '@application/file/content.module';
+//import { ContentModule } from '@application/file/content.module';
 
 @Module({
   imports: [
@@ -14,7 +14,7 @@ import { ContentModule } from '@application/file/content.module';
     UserModule,
     FriendshipModule,
     GroupModule,
-    ContentModule,
+    /*ContentModule,*/
     PostModule,
     FirebaseModule,
     CodeModule,
