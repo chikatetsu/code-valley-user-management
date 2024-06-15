@@ -25,7 +25,7 @@ export class PostService {
     private readonly postRepository: PostRepository,
     private readonly userService: UserService,
     private readonly contentService: ContentService,
-  ) {}
+  ) { }
 
   async createPost(
     userId: number,
@@ -54,6 +54,7 @@ export class PostService {
 
   async getPosts(currentUserId: number): Promise<PostResponseDto[]> {
     const posts = await this.postRepository.findAll();
+    const sortedPosts = this.sortPostsByDate(posts);
 
     return Promise.all(
       posts.map(async (post) => {
@@ -154,5 +155,9 @@ export class PostService {
       likes: likeCount,
       userHasLiked: !!userHasLiked,
     };
+  }
+
+  private sortPostsByDate(posts: Post[]): Post[] {
+    return posts.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 }
