@@ -23,4 +23,4 @@ import { ApiController } from '@application/api.controller';
   ],
   controllers: [ApiController],
 })
-export class ApiModule { }
+export class ApiModule {}
