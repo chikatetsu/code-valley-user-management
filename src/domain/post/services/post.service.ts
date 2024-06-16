@@ -54,14 +54,15 @@ export class PostService {
 
   async getPosts(currentUserId: number): Promise<PostResponseDto[]> {
     const posts = await this.postRepository.findAll();
+    const sortedPosts = this.sortPostsByDate(posts);
 
     return Promise.all(
-      posts.map(async (post) => {
+      sortedPosts.map(async (post) => {
         if (post.fileId) {
           const content = await this.contentService.getContentById(post.fileId);
           return this.toPostResponseDto(post, currentUserId, content.code_url);
         }
-        return this.toPostResponseDto(post, currentUserId);
+        return this.toPostResponseDto(post, currentUserId, null);
       }),
     );
   }
@@ -79,7 +80,7 @@ export class PostService {
       const content = await this.contentService.getContentById(post.fileId);
       return this.toPostResponseDto(post, currentUserId, content.code_url);
     }
-    return this.toPostResponseDto(post, currentUserId);
+    return this.toPostResponseDto(post, currentUserId, null);
   }
 
   async likePost(postId: number, userId: number): Promise<LikePostResponseDto> {
@@ -131,7 +132,7 @@ export class PostService {
   private async toPostResponseDto(
     post: Post,
     currentUserId: number,
-    codeUrl?: string,
+    codeUrl: string,
   ): Promise<PostResponseDto> {
     const user = await this.userService.findOneById(post.userId);
     const likeCount = await this.postLikeRepository.count({
@@ -154,5 +155,9 @@ export class PostService {
       likes: likeCount,
       userHasLiked: !!userHasLiked,
     };
+  }
+
+  private sortPostsByDate(posts: Post[]): Post[] {
+    return posts.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 }

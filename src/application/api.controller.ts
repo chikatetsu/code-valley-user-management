@@ -7,17 +7,17 @@ import { ApiResponse } from '@nestjs/swagger';
 @Controller('api')
 @ApiTags('api')
 export class ApiController {
-    constructor() { }
+  constructor() {}
 
-    @Get('health')
-    @ApiResponse({ status: 200, type: String })
-    async health(): Promise<string> {
-        return 'OK';
-    }
+  @Get('health')
+  @ApiResponse({ status: 200, type: String })
+  async health(): Promise<string> {
+    return 'OK';
+  }
 
-    @Get('version')
-    @ApiResponse({ status: 200, type: String })
-    async version(): Promise<string> {
-        return packageJson.version;
-    }
+  @Get('version')
+  @ApiResponse({ status: 200, type: String })
+  async version(): Promise<string> {
+    return packageJson.version;
+  }
 }
