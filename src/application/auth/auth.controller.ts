@@ -133,6 +133,23 @@ export class AuthController {
     return this.userService.findOneByUsername(username);
   }
 
+  @Get('search/:username')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(NotFoundInterceptor)
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'Search user',
+    type: UserResponseDTO,
+  })
+  @ApiParam({ name: 'username', type: String })
+  async searchProfile(
+    @Req() req: any,
+    @Param('username') username: string,
+  ): Promise<UserResponseDTO[]> {
+    return this.userService.findManyByUsername(username);
+  }
+
   @Get('google')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
