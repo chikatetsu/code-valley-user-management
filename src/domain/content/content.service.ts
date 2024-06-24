@@ -12,7 +12,7 @@ import { ContentDto } from '@application/content/dto/content.dto';
 
 @Injectable()
 export class ContentService {
-  constructor(private readonly httpService: HttpService) { }
+  constructor(private readonly httpService: HttpService) {}
 
   async uploadFileToMicroservice(
     file: Express.Multer.File,
@@ -59,7 +59,7 @@ export class ContentService {
     }
   }
 
-  async getContentByOwnerId(owner_id: number): Promise<ContentDto[]> {
+  async getContentsByOwnerId(owner_id: number): Promise<ContentDto[]> {
     try {
       const response = await firstValueFrom(
         this.httpService.get(
@@ -69,7 +69,9 @@ export class ContentService {
 
       return response.data;
     } catch (error) {
-      throw new NotFoundException(`Content with owner_id ${owner_id} not found`);
+      throw new NotFoundException(
+        `Content with owner_id ${owner_id} not found`,
+      );
     }
   }
 
