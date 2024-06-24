@@ -16,10 +16,12 @@ export class ContentService {
 
   async uploadFileToMicroservice(
     file: Express.Multer.File,
+    owner_id: number,
   ): Promise<FileUploadedDto> {
     try {
       const formData = new FormData();
       formData.append('file', file.buffer, file.originalname);
+      formData.append('owner_id', owner_id);
 
       const response = await firstValueFrom(
         this.httpService.post(
