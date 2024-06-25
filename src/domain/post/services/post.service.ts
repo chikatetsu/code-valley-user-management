@@ -25,7 +25,7 @@ export class PostService {
     private readonly postRepository: PostRepository,
     private readonly userService: UserService,
     private readonly contentService: ContentService,
-  ) {}
+  ) { }
 
   async createPost(
     userId: number,
@@ -54,12 +54,20 @@ export class PostService {
     await this.postRepository.delete(postId);
   }
 
-  async getPosts(currentUserId: number): Promise<PostResponseDto[]> {
-    const posts = await this.postRepository.findAll();
-    const sortedPosts = this.sortPostsByDate(posts);
+  async getPosts(
+    currentUserId: number,
+    limit: number,
+    offset: number,
+  ): Promise<PostResponseDto[]> {
+    const maxLimit = Math.min(limit, 100);
+    const posts = await this.postRepository.find({
+      take: maxLimit,
+      skip: offset,
+      order: { createdAt: 'DESC' },
+    });
 
     return Promise.all(
-      sortedPosts.map(async (post) => {
+      posts.map(async (post) => {
         if (post.fileId) {
           const content = await this.contentService.getContentById(post.fileId);
           return this.toPostResponseDto(post, currentUserId, content.code_url);
