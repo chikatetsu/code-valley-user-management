@@ -35,8 +35,10 @@ export class PostService {
     let fileId: string | null = null;
     let code_url: string | null = null;
     if (file) {
-      const fileResponse =
-        await this.contentService.uploadFileToMicroservice(file);
+      const fileResponse = await this.contentService.uploadFileToMicroservice(
+        file,
+        userId,
+      );
       [fileId, code_url] = [fileResponse.id, fileResponse.code_url];
     }
     const post = this.postRepository.create({

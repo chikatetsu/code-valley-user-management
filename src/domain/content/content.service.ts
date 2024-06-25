@@ -16,10 +16,12 @@ export class ContentService {
 
   async uploadFileToMicroservice(
     file: Express.Multer.File,
+    owner_id: number,
   ): Promise<FileUploadedDto> {
     try {
       const formData = new FormData();
       formData.append('file', file.buffer, file.originalname);
+      formData.append('owner_id', owner_id);
 
       const response = await firstValueFrom(
         this.httpService.post(
@@ -54,6 +56,22 @@ export class ContentService {
       return response.data;
     } catch (error) {
       throw new NotFoundException(`Content with id ${id} not found`);
+    }
+  }
+
+  async getContentsByOwnerId(owner_id: number): Promise<ContentDto[]> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get(
+          `${configService.getContentCraftersUrl()}/v1/content/owner/${owner_id}`,
+        ),
+      );
+
+      return response.data;
+    } catch (error) {
+      throw new NotFoundException(
+        `Content with owner_id ${owner_id} not found`,
+      );
     }
   }
 
