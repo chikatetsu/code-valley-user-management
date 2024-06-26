@@ -9,6 +9,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { Friendship } from '@domain/friendship/entities/friendship.entity';
 import { Post } from '@domain/post/entities/post.entity';
+import { Notification } from '@domain/notification/entities/notification.entity'
 
 @Entity()
 export class User extends BaseEntity {
@@ -55,7 +56,10 @@ export class User extends BaseEntity {
   public receivedFriendships!: Friendship[];
 
   @OneToMany(() => Post, (post) => post.user)
-  posts: Post[];
+  public posts: Post[];
+
+  @OneToMany(() => Notification, (notification) => notification.user)
+  public notifications: Notification[];
 
   constructor(obj = {}) {
     super();
@@ -64,13 +68,13 @@ export class User extends BaseEntity {
 }
 
 export class UserBuilder {
-  private user: User;
-  private currentDateTime: Date = new Date();
+  private readonly user: User;
 
   constructor() {
     this.user = new User();
-    this.user.createdAt = this.currentDateTime;
-    this.user.lastLoginAt = this.currentDateTime;
+    const currentDateTime: Date = new Date();
+    this.user.createdAt = currentDateTime;
+    this.user.lastLoginAt = currentDateTime;
   }
 
   public withEmail(email: string): this {
