@@ -1,9 +1,4 @@
-import {
-  BaseEntity,
-  Column,
-  Entity, JoinColumn, ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from '@domain/user/entities/user.entity';
 import { NotificationType } from '@domain/notification/types/notification.type';
@@ -20,14 +15,14 @@ export class Notification extends BaseEntity {
 
   @ApiProperty()
   @Column({ type: 'boolean', default: false })
-  public hasBeenRead: boolean;
+  public hasBeenRead!: boolean;
 
   @ApiProperty()
-  @Column({ type: 'enum', default: NotificationType.unknown })
-  public notificationType: NotificationType;
+  @Column({ type: 'enum', enum: NotificationType, default: NotificationType.unknown })
+  public notificationType!: NotificationType;
 
   @ApiProperty()
-  @Column({ type: 'string'})
+  @Column({ type: 'text'})
   public message!: string;
 
   @ApiProperty({ type: () => User })
@@ -50,9 +45,12 @@ export class Notification extends BaseEntity {
 export class NotificationBuilder {
   private readonly notification: Notification;
 
-  constructor() {
+  constructor(message: string) {
     this.notification = new Notification();
     this.notification.createdAt = new Date();
+    this.notification.hasBeenRead = false;
+    this.notification.notificationType = NotificationType.unknown;
+    this.notification.message = message;
   }
 
   public withCreatedAt(createdAt: Date): this {

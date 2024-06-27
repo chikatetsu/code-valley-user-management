@@ -1,11 +1,17 @@
 import { DataSource, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { Notification } from '@domain/notification/entities/notification.entity'
+import { Friendship } from '@domain/friendship/entities/friendship.entity';
+import { FriendshipStatus } from '@application/friendship/types/friendship.status';
 
 @Injectable()
 export class NotificationRepository extends Repository<Notification> {
   constructor(private dataSource: DataSource) {
     super(Notification, dataSource.createEntityManager());
+  }
+
+  async createNotification(notification: Notification): Promise<Notification> {
+    return this.save(notification);
   }
 
   async findOneById(id: number): Promise<Notification | null> {
@@ -19,9 +25,12 @@ export class NotificationRepository extends Repository<Notification> {
     });
   }
 
-  async countByUserId(id: number): Promise<number> {
+  async countUnseenByUserId(id: number): Promise<number> {
     return this.count({
-      where: { userId: id }
+      where: {
+        userId: id,
+        hasBeenRead: false
+      }
     });
   }
 

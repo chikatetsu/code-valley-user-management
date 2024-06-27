@@ -8,6 +8,7 @@ import { FirebaseModule } from '@application/firebase/firebase.module';
 import { CodeModule } from '@application/code/code.module';
 import { ContentModule } from '@application/content/content.module';
 import { ApiController } from '@application/api.controller';
+import { NotificationModule } from '@application/notification/notification.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ApiController } from '@application/api.controller';
     PostModule,
     FirebaseModule,
     CodeModule,
+    NotificationModule,
   ],
   controllers: [ApiController],
 })

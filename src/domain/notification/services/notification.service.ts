@@ -3,6 +3,7 @@ import { INotificationService } from '@domain/notification/interfaces/notificati
 import { Notification } from '@domain/notification/entities/notification.entity';
 import { NotificationResponseDTO } from '@application/notification/dto/notification.response.dto';
 import { NotificationRepository } from '@infra/database/notification.repository';
+import { NotificationCountDTO } from '@application/notification/dto/notification.count.dto';
 
 @Injectable()
 export class NotificationService implements INotificationService {
@@ -16,12 +17,16 @@ export class NotificationService implements INotificationService {
     return this.toManyResponseDto(notifications);
   }
 
-  async getNotificationCount(userId: number): Promise<number> {
-    return await this.notificationRepository.countByUserId(userId);
+  async getNotificationCount(userId: number): Promise<NotificationCountDTO> {
+    const countValue = await this.notificationRepository.countUnseenByUserId(userId);
+    return this.toCountDto(countValue);
   }
 
   async seeNotification(notificationId: number): Promise<NotificationResponseDTO> {
     const notification = await this.notificationRepository.findOneById(notificationId);
+    if (notification == null) {
+      return null;
+    }
     notification.hasBeenRead = true;
     const saveResult = await notification.save();
     return this.toResponseDto(saveResult);
@@ -29,6 +34,9 @@ export class NotificationService implements INotificationService {
 
   async unseeNotification(notificationId: number): Promise<NotificationResponseDTO> {
     const notification = await this.notificationRepository.findOneById(notificationId);
+    if (notification == null) {
+      return null;
+    }
     notification.hasBeenRead = false;
     const saveResult = await notification.save();
     return this.toResponseDto(saveResult);
@@ -57,5 +65,11 @@ export class NotificationService implements INotificationService {
       response.push(this.toResponseDto(notification));
     }
     return response;
+  }
+
+  private toCountDto(value: number): NotificationCountDTO {
+    return {
+      count: value
+    }
   }
 }

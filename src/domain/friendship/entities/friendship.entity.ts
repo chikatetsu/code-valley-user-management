@@ -40,7 +40,8 @@ export class Friendship extends BaseEntity {
 
   @ApiProperty()
   @Column({
-    type: 'text',
+    type: 'enum',
+    enum: FriendshipStatus,
     default: FriendshipStatus.pending,
   })
   public status!: FriendshipStatus;

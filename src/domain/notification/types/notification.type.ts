@@ -3,5 +3,5 @@ export enum NotificationType {
   friendship = 'friendship',
   like = 'like',
   post = 'post',
-  comment = 'comment'
+  comment = 'comment',
 }
