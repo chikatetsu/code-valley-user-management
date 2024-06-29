@@ -25,7 +25,7 @@ export class PostService {
     private readonly postRepository: PostRepository,
     private readonly userService: UserService,
     private readonly contentService: ContentService,
-  ) { }
+  ) {}
 
   async createPost(
     userId: number,

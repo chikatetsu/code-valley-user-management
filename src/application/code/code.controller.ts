@@ -1,20 +1,48 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+  Res,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { CodeService } from '../../domain/code/code.service';
-import { ExecutionPayloadDto } from './dto/execution-payload.dto';
 import { ExecutionResultDto } from './dto/execution-result.dto';
-import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ExecutionPayloadDto } from './dto';
+import { Response } from 'express';
+import { createReadStream } from 'fs';
+import { join } from 'path';
 
 @Controller('code')
 @ApiTags('code')
 export class CodeController {
-  constructor(private readonly codeService: CodeService) {}
+  constructor(private readonly codeService: CodeService) { }
 
   @Post('execute')
+  @UseInterceptors(FileInterceptor('input_file'))
+  @ApiConsumes('multipart/form-data')
   @ApiBody({ type: ExecutionPayloadDto })
   @ApiResponse({ status: 200, type: ExecutionResultDto })
   async executeCode(
-    @Body() payload: ExecutionPayloadDto,
-  ): Promise<ExecutionResultDto> {
-    return this.codeService.executeCode(payload);
+    @Body() body: ExecutionPayloadDto,
+    @UploadedFile() file: Express.Multer.File,
+    @Res() res: Response,
+  ): Promise<void> {
+    const payload = {
+      language: body.language,
+      code: body.code,
+      input_file: file,
+    };
+
+    const result = await this.codeService.executeCode(payload);
+
+    if (result.outputFile && result.outputFileContent) {
+      const fileContent = Buffer.from(result.outputFileContent, 'base64');
+      result.outputFileContent = fileContent.toString('base64');
+    }
+
+    res.json(result);
   }
 }
