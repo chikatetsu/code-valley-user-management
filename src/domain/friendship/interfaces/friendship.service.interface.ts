@@ -7,13 +7,15 @@ import { UserQueryDTO } from '@application/user/dto';
 export interface IFriendshipService {
   sendFriendRequest(
     senderId: number,
+    senderUsername: string,
     receiverId: number,
   ): Promise<FriendshipResponseDTO>;
   acceptFriendRequest(
     senderId: number,
+    senderUsername: string,
     receiverId: number,
   ): Promise<FriendshipResponseDTO>;
-  declineFriendRequest(senderId: number, receiverId: number): Promise<void>;
+  declineFriendRequest(senderId: number, senderUsername: string, receiverId: number): Promise<void>;
   removeFriend(userId: number, friendId: number): Promise<void>;
   listFriends(
     userId: number,

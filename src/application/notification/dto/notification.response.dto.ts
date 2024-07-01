@@ -25,14 +25,14 @@ export class NotificationResponseDTO {
   public hasBeenRead: boolean;
 
   @ApiProperty({
-    example: NotificationType.comment,
+    example: NotificationType.friendship,
     description: 'The type of notification',
   })
   @IsEnum(NotificationType)
   public notificationType: NotificationType;
 
   @ApiProperty({
-    example: 'thierrymaillard has comment your post',
+    example: 'thierrymaillard has send you a friend request!',
     description: 'The content of the notification',
   })
   @IsString()

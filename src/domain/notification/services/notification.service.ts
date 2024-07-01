@@ -4,11 +4,14 @@ import { Notification } from '@domain/notification/entities/notification.entity'
 import { NotificationResponseDTO } from '@application/notification/dto/notification.response.dto';
 import { NotificationRepository } from '@infra/database/notification.repository';
 import { NotificationCountDTO } from '@application/notification/dto/notification.count.dto';
+import { NotificationType } from '@domain/notification/types/notification.type';
+import { FriendshipService } from '@domain/friendship/services/friendship.service';
 
 @Injectable()
 export class NotificationService implements INotificationService {
   constructor(
     private notificationRepository: NotificationRepository,
+    private friendShipService: FriendshipService
   ) {}
 
   async getNotifications(userId: number, limit: number): Promise<NotificationResponseDTO[]> {
@@ -44,6 +47,18 @@ export class NotificationService implements INotificationService {
 
   async removeNotification(notificationId: number): Promise<void> {
     await this.notificationRepository.deleteOneById(notificationId);
+  }
+
+  async notifyFollowers(notificationType: NotificationType, message: string, senderId: number): Promise<void> {
+    const followers = await this.friendShipService.listFollowers(senderId)
+    followers.forEach(followers => {
+      this.notifyUser(notificationType, message, followers.id);
+    });
+  }
+
+  async notifyUser(notificationType: NotificationType, message: string, receiverId: number): Promise<void> {
+    const notification = new Notification(notificationType, message, receiverId);
+    await this.notificationRepository.createNotification(notification);
   }
 
   //Private methods
