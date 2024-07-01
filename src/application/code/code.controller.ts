@@ -18,7 +18,7 @@ import { join } from 'path';
 @Controller('code')
 @ApiTags('code')
 export class CodeController {
-  constructor(private readonly codeService: CodeService) { }
+  constructor(private readonly codeService: CodeService) {}
 
   @Post('execute')
   @UseInterceptors(FileInterceptor('input_file'))

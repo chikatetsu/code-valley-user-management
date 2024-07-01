@@ -49,4 +49,11 @@ export class GroupRepository extends Repository<Group> {
       relations: ['members'],
     });
   }
+
+  async findManyByName(name: string): Promise<Group[] | null> {
+    return this.createQueryBuilder('group')
+      .leftJoinAndSelect('group.members', 'member')
+      .where('group.name LIKE :name', { name: `%${name}%` })
+      .getMany();
+  }
 }
