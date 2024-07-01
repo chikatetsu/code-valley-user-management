@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { INotificationService } from '@domain/notification/interfaces/notification.service.interface';
 import { Notification } from '@domain/notification/entities/notification.entity';
 import { NotificationResponseDTO } from '@application/notification/dto/notification.response.dto';
@@ -11,7 +11,7 @@ import { FriendshipService } from '@domain/friendship/services/friendship.servic
 export class NotificationService implements INotificationService {
   constructor(
     private notificationRepository: NotificationRepository,
-    private friendShipService: FriendshipService
+    @Inject(forwardRef(() => FriendshipService)) private friendShipService: FriendshipService,
   ) {}
 
   async getNotifications(userId: number, limit: number): Promise<NotificationResponseDTO[]> {
@@ -49,15 +49,15 @@ export class NotificationService implements INotificationService {
     await this.notificationRepository.deleteOneById(notificationId);
   }
 
-  async notifyFollowers(notificationType: NotificationType, message: string, senderId: number): Promise<void> {
-    const followers = await this.friendShipService.listFollowers(senderId)
+  async notifyFollowers(notificationType: NotificationType, fromUserId: number): Promise<void> {
+    const followers = await this.friendShipService.listFollowers(fromUserId)
     followers.forEach(followers => {
-      this.notifyUser(notificationType, message, followers.id);
+      this.notifyUser(notificationType, fromUserId, followers.id);
     });
   }
 
-  async notifyUser(notificationType: NotificationType, message: string, receiverId: number): Promise<void> {
-    const notification = new Notification(notificationType, message, receiverId);
+  async notifyUser(notificationType: NotificationType, fromUserId: number, receiverId: number): Promise<void> {
+    const notification = new Notification(notificationType, fromUserId, receiverId);
     await this.notificationRepository.createNotification(notification);
   }
 
@@ -69,8 +69,7 @@ export class NotificationService implements INotificationService {
       createdAt: notification.createdAt,
       hasBeenRead: notification.hasBeenRead,
       notificationType: notification.notificationType,
-      message: notification.message,
-      userId: notification.user.id
+      fromUsername: notification.fromUser.username,
     };
   }
 

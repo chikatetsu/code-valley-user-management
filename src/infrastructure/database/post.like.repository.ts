@@ -5,7 +5,7 @@ import { DataSource, Repository } from 'typeorm';
 
 @Injectable()
 export class PostLikeRepository extends Repository<PostLike> {
-  constructor(private dataSource: DataSource) {
+  constructor(private readonly dataSource: DataSource) {
     super(PostLike, dataSource.createEntityManager());
   }
 

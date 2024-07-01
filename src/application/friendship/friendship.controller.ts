@@ -48,8 +48,7 @@ export class FriendshipController {
     @Param('receiverId', ParseIntPipe) receiverId: number,
   ): Promise<FriendshipResponseDTO> {
     const senderId = req.user.id;
-    const senderUsername = req.user.username;
-    return this.friendshipService.sendFriendRequest(senderId, senderUsername, receiverId);
+    return this.friendshipService.sendFriendRequest(senderId, receiverId);
   }
 
   @Post('accept/:senderId')
@@ -61,8 +60,7 @@ export class FriendshipController {
     @Param('senderId', ParseIntPipe) senderId: number,
   ): Promise<FriendshipResponseDTO> {
     const receiverId = req.user.id;
-    const receiverUsername = req.user.username;
-    return this.friendshipService.acceptFriendRequest(senderId, receiverUsername, receiverId);
+    return this.friendshipService.acceptFriendRequest(senderId, receiverId);
   }
 
   @Post('decline/:friendshipId')
@@ -74,8 +72,7 @@ export class FriendshipController {
     @Param('senderId', ParseIntPipe) senderId: number,
   ): Promise<void> {
     const receiverId = req.user.id;
-    const receiverUsername = req.user.username;
-    return this.friendshipService.declineFriendRequest(senderId, receiverUsername, receiverId);
+    return this.friendshipService.declineFriendRequest(senderId, receiverId);
   }
 
   @Delete('remove/:friendId')

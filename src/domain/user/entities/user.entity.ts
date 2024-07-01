@@ -58,7 +58,7 @@ export class User extends BaseEntity {
   @OneToMany(() => Post, (post) => post.user)
   public posts: Post[];
 
-  @OneToMany(() => Notification, (notification) => notification.user)
+  @OneToMany(() => Notification, (notification) => notification.toUser)
   public notifications: Notification[];
 
   constructor(obj = {}) {

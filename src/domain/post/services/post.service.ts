@@ -23,7 +23,6 @@ export class PostService {
 
   async createPost(
     userId: number,
-    creatorUsername: string,
     createPostDto: CreatePostDto,
     file: Express.Multer.File,
   ): Promise<PostResponseDto> {
@@ -42,7 +41,7 @@ export class PostService {
       fileId,
     });
     await this.postRepository.save(post);
-    await this.notificationService.notifyFollowers(NotificationType.post, "Check the new post of " + creatorUsername + " !", userId);
+    await this.notificationService.notifyFollowers(NotificationType.post, userId);
     return this.toPostResponseDto(post, userId, code_url);
   }
 
@@ -89,7 +88,7 @@ export class PostService {
     return this.toPostResponseDto(post, currentUserId, null);
   }
 
-  async likePost(postId: number, likerUsername: string, userId: number): Promise<LikePostResponseDto> {
+  async likePost(postId: number, userId: number): Promise<LikePostResponseDto> {
     const post = await this.postRepository.findOneById(postId);
     if (!post) {
       throw new NotFoundException(`Post with id ${postId} not found`);
@@ -108,7 +107,7 @@ export class PostService {
     const likeCount = await this.postLikeRepository.count({
       where: { postId },
     });
-    await this.notificationService.notifyUser(NotificationType.like, likerUsername + " liked your post!", post.userId);
+    await this.notificationService.notifyUser(NotificationType.like, userId, post.userId);
     return { id: postId, likes: likeCount };
   }
 

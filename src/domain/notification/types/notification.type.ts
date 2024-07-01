@@ -1,5 +1,7 @@
 export enum NotificationType {
-  friendship = 'friendship',
+  friendshipReceived = 'friendshipReceived',
+  friendshipAccepted = 'friendshipAccepted',
+  friendshipRefused = 'friendshipRefused',
   like = 'like',
   post = 'post',
 }

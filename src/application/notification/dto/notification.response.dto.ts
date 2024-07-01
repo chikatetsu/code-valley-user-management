@@ -25,23 +25,16 @@ export class NotificationResponseDTO {
   public hasBeenRead: boolean;
 
   @ApiProperty({
-    example: NotificationType.friendship,
+    example: 'thierrymaillard91',
+    description: 'The username of the user',
+  })
+  @IsString()
+  public fromUsername: string;
+
+  @ApiProperty({
+    example: NotificationType.like,
     description: 'The type of notification',
   })
   @IsEnum(NotificationType)
   public notificationType: NotificationType;
-
-  @ApiProperty({
-    example: 'thierrymaillard has send you a friend request!',
-    description: 'The content of the notification',
-  })
-  @IsString()
-  public message: string;
-
-  @ApiProperty({
-    example: 1,
-    description: 'The id of the user',
-  })
-  @IsNumber()
-  public userId: number;
 }

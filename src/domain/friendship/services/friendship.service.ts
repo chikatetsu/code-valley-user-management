@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Not, Repository } from 'typeorm';
 import { IFriendshipService } from '@domain/friendship/interfaces/friendship.service.interface';
@@ -23,12 +23,11 @@ export class FriendshipService implements IFriendshipService {
     private readonly friendshipRepository: Repository<Friendship>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly notificationService: NotificationService
+    @Inject(forwardRef(() => NotificationService)) private readonly notificationService: NotificationService
   ) {}
 
   async sendFriendRequest(
     senderId: number,
-    senderUsername: string,
     receiverId: number,
   ): Promise<FriendshipResponseDTO> {
     if (senderId === receiverId) {
@@ -49,13 +48,12 @@ export class FriendshipService implements IFriendshipService {
       status: FriendshipStatus.pending,
     });
     await this.friendshipRepository.save(friendship);
-    await this.notificationService.notifyUser(NotificationType.friendship, senderUsername + " has send you a friend request!", receiverId);
+    await this.notificationService.notifyUser(NotificationType.friendshipReceived, senderId, receiverId);
     return this.toFriendshipResponseDTO(friendship);
   }
 
   async acceptFriendRequest(
     senderId: number,
-    receiverUsername: string,
     receiverId: number,
   ): Promise<FriendshipResponseDTO> {
     const friendship = await this.friendshipRepository.findOne({
@@ -67,7 +65,7 @@ export class FriendshipService implements IFriendshipService {
     }
     friendship.status = FriendshipStatus.accepted;
     await this.friendshipRepository.save(friendship);
-    await this.notificationService.notifyUser(NotificationType.friendship, receiverUsername + " accepted your friend request!", receiverId);
+    await this.notificationService.notifyUser(NotificationType.friendshipAccepted, receiverId, senderId);
     return this.toFriendshipResponseDTO(friendship);
   }
 
@@ -83,7 +81,6 @@ export class FriendshipService implements IFriendshipService {
 
   async declineFriendRequest(
     senderId: number,
-    receiverUsername: string,
     receiverId: number,
   ): Promise<void> {
     const friendship = await this.friendshipRepository.findOneBy({
@@ -96,7 +93,7 @@ export class FriendshipService implements IFriendshipService {
     }
     friendship.status = FriendshipStatus.declined;
     await this.friendshipRepository.save(friendship);
-    await this.notificationService.notifyUser(NotificationType.friendship, receiverUsername + " refused to be your friend...", senderId);
+    await this.notificationService.notifyUser(NotificationType.friendshipRefused, receiverId, senderId);
   }
 
   async removeFriend(userId: number, friendId: number): Promise<void> {

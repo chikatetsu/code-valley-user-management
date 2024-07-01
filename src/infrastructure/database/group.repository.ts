@@ -6,7 +6,7 @@ import { User } from '@domain/user/entities/user.entity';
 
 @Injectable()
 export class GroupRepository extends Repository<Group> {
-  constructor(private dataSource: DataSource) {
+  constructor(private readonly dataSource: DataSource) {
     super(Group, dataSource.createEntityManager());
   }
 

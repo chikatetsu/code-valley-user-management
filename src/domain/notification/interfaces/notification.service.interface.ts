@@ -8,6 +8,6 @@ export interface INotificationService {
   seeNotification(notificationId: number): Promise<NotificationResponseDTO>;
   unseeNotification(notificationId: number): Promise<NotificationResponseDTO>;
   removeNotification(notificationId: number): Promise<void>;
-  notifyFollowers(notificationType: NotificationType, message: string, senderId: number): Promise<void>;
-  notifyUser(notificationType: NotificationType, message: string, receiverId: number): Promise<void>;
+  notifyFollowers(notificationType: NotificationType, fromUserId: number, senderId: number): Promise<void>;
+  notifyUser(notificationType: NotificationType, fromUserId: number, receiverId: number): Promise<void>;
 }

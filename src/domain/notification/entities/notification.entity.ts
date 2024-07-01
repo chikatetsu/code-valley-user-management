@@ -21,26 +21,31 @@ export class Notification extends BaseEntity {
   @Column({ type: 'enum', enum: NotificationType })
   public notificationType!: NotificationType;
 
+  @ApiProperty({ type: () => User })
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'fromUserId' })
+  public fromUser!: User;
+
   @ApiProperty()
-  @Column({ type: 'text'})
-  public message!: string;
+  @Column()
+  public fromUserId!: number;
 
   @ApiProperty({ type: () => User })
   @ManyToOne(() => User, (user) => user.notifications, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'senderId' })
-  public user!: User;
+  @JoinColumn({ name: 'toUserId' })
+  public toUser!: User;
 
   @ApiProperty()
   @Column()
-  public userId!: number;
+  public toUserId!: number;
 
-  constructor(notificationType: NotificationType, message: string, userId: number) {
+  constructor(notificationType: NotificationType, fromUserId: number, toUserId: number) {
     super();
     this.notificationType = notificationType;
-    this.message = message;
-    this.userId = userId
+    this.fromUserId = fromUserId;
+    this.toUserId = toUserId
     this.hasBeenRead = false;
     this.createdAt = new Date();
   }
