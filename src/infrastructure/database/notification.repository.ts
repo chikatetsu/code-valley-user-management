@@ -13,13 +13,17 @@ export class NotificationRepository extends Repository<Notification> {
   }
 
   async findOneById(id: number): Promise<Notification | null> {
-    return this.findOneBy({ id: id });
+    return this.findOne({
+      where: { id: id },
+      relations: ['fromUser', 'toUser'],
+    });
   }
 
   async findManyByUserId(id: number, limit: number): Promise<Notification[]> {
     return await this.find({
       where: { toUserId: id },
       take: limit,
+      relations: ['fromUser', 'toUser'],
     });
   }
 
