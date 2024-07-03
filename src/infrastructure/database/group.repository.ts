@@ -10,8 +10,12 @@ export class GroupRepository extends Repository<Group> {
     super(Group, dataSource.createEntityManager());
   }
 
-  async createGroup(name: string, members: User[]): Promise<Group> {
-    const group = this.create({ name, members });
+  async createGroup(
+    name: string,
+    description: string,
+    members: User[],
+  ): Promise<Group> {
+    const group = this.create({ name, description, members });
     return await this.save(group);
   }
 

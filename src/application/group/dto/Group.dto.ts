@@ -7,6 +7,10 @@ export class GroupDTO {
   name!: string;
 
   @ApiProperty()
+  @IsString()
+  description?: string;
+
+  @ApiProperty()
   @IsString({ each: true })
   memberIds!: number[];
 }

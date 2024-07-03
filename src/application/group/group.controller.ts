@@ -39,7 +39,6 @@ export class GroupController {
   @ApiResponse({ status: 201, type: GroupResponseDTO })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 404, description: 'Not Found' })
-  @UseInterceptors(CreateGroupInterceptor)
   async createGroup(
     @Req() req: any,
     @Body() groupDTO: GroupDTO,

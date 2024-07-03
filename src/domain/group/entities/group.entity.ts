@@ -19,6 +19,10 @@ export class Group extends BaseEntity {
   @Column({ type: 'varchar', unique: true })
   public name!: string;
 
+  @ApiProperty()
+  @Column({ type: 'varchar', nullable: true })
+  public description: string;
+
   @ApiProperty({ type: () => User, isArray: true })
   @ManyToMany(() => User)
   @JoinTable()

@@ -21,6 +21,7 @@ export class GroupService implements IGroupService {
     const members = await this.userRepository.findManyByIds(groupDTO.memberIds);
     const group = await this.groupRepository.createGroup(
       groupDTO.name,
+      groupDTO.description,
       members,
     );
     return this.toGroupResponseDTO(group);
@@ -61,6 +62,7 @@ export class GroupService implements IGroupService {
     return {
       id: group.id,
       name: group.name,
+      description: group.description,
       members: group.members.map(this.toUserResponseDTO),
     };
   };
