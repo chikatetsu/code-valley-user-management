@@ -24,8 +24,6 @@ import {
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { NotFoundInterceptor, CreateGroupInterceptor } from './interceptors';
-import { UserResponseDTO } from '@application/user/dto';
-
 @Controller('groups')
 @ApiTags('groups')
 @ApiBearerAuth()
