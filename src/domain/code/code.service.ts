@@ -7,7 +7,7 @@ import FormData from 'form-data';
 
 @Injectable()
 export class CodeService {
-  constructor(private readonly httpService: HttpService) { }
+  constructor(private readonly httpService: HttpService) {}
 
   async executeCode(payload: ExecutionPayloadDto): Promise<ExecutionResultDto> {
     try {

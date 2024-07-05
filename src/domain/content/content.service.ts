@@ -9,6 +9,7 @@ import { firstValueFrom } from 'rxjs';
 import { configService } from '@infra/config/config.service';
 import { FileUploadedDto } from '@application/content/dto/file-uploaded.dto';
 import { ContentDto } from '@application/content/dto/content.dto';
+import { CodeContentFileDto } from '@application/content/dto/content-file.dto';
 
 @Injectable()
 export class ContentService {
@@ -39,6 +40,27 @@ export class ContentService {
     } catch (error) {
       throw new BadRequestException('Failed to upload file');
     }
+  }
+
+  async codeContentToMultersFile(
+    content: CodeContentFileDto,
+  ): Promise<Express.Multer.File> {
+    const buffer = Buffer.from(content.content, 'base64');
+
+    const multerFile: Express.Multer.File = {
+      fieldname: 'file',
+      originalname: content.filename,
+      encoding: '7bit',
+      mimetype: content.content_type,
+      size: content.file_size,
+      buffer,
+      stream: null,
+      destination: '',
+      filename: content.filename,
+      path: '',
+    };
+
+    return multerFile;
   }
 
   async getContentById(id: string): Promise<ContentDto> {
@@ -76,6 +98,7 @@ export class ContentService {
   }
 
   /** TO IMPROVE BECAUSE NO TESTED */
+
   async updateContentById(id: string, updateData: any): Promise<any> {
     try {
       const response = await firstValueFrom(
