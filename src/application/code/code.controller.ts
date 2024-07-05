@@ -12,8 +12,6 @@ import { ExecutionResultDto } from './dto/execution-result.dto';
 import { ApiBody, ApiConsumes, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ExecutionPayloadDto } from './dto';
 import { Response } from 'express';
-import { createReadStream } from 'fs';
-import { join } from 'path';
 
 @Controller('code')
 @ApiTags('code')
