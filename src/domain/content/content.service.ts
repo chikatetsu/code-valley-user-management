@@ -97,6 +97,20 @@ export class ContentService {
     }
   }
 
+  async deleteContentById(id: string): Promise<any> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.delete(
+          `${configService.getContentCraftersUrl()}/v1/content/${id}`,
+        ),
+      );
+
+      return response.data;
+    } catch (error) {
+      throw new NotFoundException(`Failed to delete content with id ${id}`);
+    }
+  }
+
   /** TO IMPROVE BECAUSE NO TESTED */
 
   async updateContentById(id: string, updateData: any): Promise<any> {
@@ -111,20 +125,6 @@ export class ContentService {
       return response.data;
     } catch (error) {
       throw new NotFoundException(`Failed to update content with id ${id}`);
-    }
-  }
-
-  async deleteContentById(id: string): Promise<any> {
-    try {
-      const response = await firstValueFrom(
-        this.httpService.delete(
-          `${configService.getContentCraftersUrl()}/v1/content/${id}`,
-        ),
-      );
-
-      return response.data;
-    } catch (error) {
-      throw new NotFoundException(`Failed to delete content with id ${id}`);
     }
   }
 }

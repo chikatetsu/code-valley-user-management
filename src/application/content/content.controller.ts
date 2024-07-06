@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -85,5 +86,12 @@ export class ContentController {
       userId,
     );
     return this.contentService.getContentById(file_uploaded.id);
+  }
+
+  @Delete(':id')
+  @ApiParam({ name: 'id', type: String })
+  @ApiResponse({ status: 200, description: 'Deleted' })
+  async deleteContent(@Param('id') id: string): Promise<void> {
+    await this.contentService.deleteContentById(id);
   }
 }
