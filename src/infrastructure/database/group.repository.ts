@@ -13,16 +13,23 @@ export class GroupRepository extends Repository<Group> {
   async createGroup(
     name: string,
     description: string,
-    members: User[],
+    isPublic: boolean,
+    user: User,
   ): Promise<Group> {
-    const group = this.create({ name, description, members });
+    const group = this.create({
+      name,
+      description,
+      isPublic,
+      members: [],
+    });
+    group.members.push(user);
     return await this.save(group);
   }
 
   async addUserToGroup(groupId: number, user: User): Promise<Group> {
     const group = await this.findOne({
       where: { id: groupId },
-      relations: ['members'],
+      relations: ['members', 'memberJoinRequests'],
     });
     if (!group) {
       throw new Error('Group not found');
@@ -31,10 +38,22 @@ export class GroupRepository extends Repository<Group> {
     return await this.save(group);
   }
 
+  async sendJoinRequest(groupId: number, user: User): Promise<Group> {
+    const group = await this.findOne({
+      where: { id: groupId },
+      relations: ['members', 'memberJoinRequests'],
+    });
+    if (!group) {
+      throw new Error('Group not found');
+    }
+    group.memberJoinRequests.push(user);
+    return await this.save(group);
+  }
+
   async removeUserFromGroup(groupId: number, userId: number): Promise<Group> {
     const group = await this.findOne({
       where: { id: groupId },
-      relations: ['members'],
+      relations: ['members', 'memberJoinRequests'],
     });
     if (!group) {
       throw new Error('Group not found');
@@ -44,20 +63,22 @@ export class GroupRepository extends Repository<Group> {
   }
 
   async findAll(): Promise<Group[]> {
-    return await this.find({ relations: ['members'] });
+    return await this.find({ relations: ['members', 'memberJoinRequests'] });
   }
 
   async findOneById(id: number): Promise<Group | null> {
     return await this.findOne({
       where: { id },
-      relations: ['members'],
+      relations: ['members', 'memberJoinRequests'],
     });
   }
 
   async findManyByName(name: string): Promise<Group[] | null> {
     return this.createQueryBuilder('group')
+      .leftJoinAndSelect('group.memberJoinRequests', 'memberJoinRequest')
       .leftJoinAndSelect('group.members', 'member')
-      .where('group.name LIKE :name', { name: `%${name}%` })
+      .where('LOWER(group.name) LIKE LOWER(:name)', { name: `%${name}%` })
+      .orderBy('group.name', 'ASC')
       .getMany();
   }
 }

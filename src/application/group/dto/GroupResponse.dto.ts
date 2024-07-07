@@ -1,6 +1,6 @@
 import { UserResponseDTO } from '@application/user/dto';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString } from 'class-validator';
+import { IsBoolean, IsNumber, IsString } from 'class-validator';
 
 export class GroupResponseDTO {
   @ApiProperty()
@@ -17,4 +17,11 @@ export class GroupResponseDTO {
 
   @ApiProperty({ type: () => UserResponseDTO, isArray: true })
   members!: UserResponseDTO[];
+
+  @ApiProperty()
+  @IsBoolean()
+  isPublic!: boolean;
+
+  @ApiProperty({ type: () => UserResponseDTO, isArray: true })
+  memberJoinRequests!: UserResponseDTO[];
 }
