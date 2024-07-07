@@ -5,6 +5,7 @@ export interface IMessageRepository {
     value: string,
     authorId: number,
     groupId: number,
+    createdAt: Date,
   ): Promise<Message>;
   findAll(): Promise<Message[]>;
   getAllMessagesByGroupId(groupId: number): Promise<Message[]>;

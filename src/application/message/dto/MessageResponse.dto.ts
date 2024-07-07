@@ -1,7 +1,7 @@
 import { UserResponseDTO } from '@application/user/dto';
 import { GroupResponseDTO } from '@application/group/dto';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString } from 'class-validator';
+import { IsDate, IsNumber, IsString } from 'class-validator';
 
 export class MessageResponseDTO {
   @ApiProperty()
@@ -17,4 +17,8 @@ export class MessageResponseDTO {
 
   @ApiProperty({ type: () => GroupResponseDTO })
   group!: GroupResponseDTO;
+
+  @ApiProperty()
+  @IsDate()
+  createdAt!: Date;
 }

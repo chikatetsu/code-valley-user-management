@@ -38,4 +38,8 @@ export class Message extends BaseEntity {
   @ApiProperty()
   @Column()
   public groupId!: number;
+
+  @ApiProperty()
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  public createdAt!: Date;
 }

@@ -55,6 +55,7 @@ export class MessageService implements IMessageService {
       value: message.value,
       author: this.toUserResponseDTO(message.author),
       group: this.toGroupResponseDTO(message.group),
+      createdAt: message.createdAt,
     };
   };
 
