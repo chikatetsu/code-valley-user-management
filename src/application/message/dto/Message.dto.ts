@@ -1,16 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
 
-export class GroupDTO {
+export class MessageDTO {
   @ApiProperty()
   @IsString()
-  name!: string;
-
-  @ApiProperty()
-  @IsString()
-  description?: string;
+  value!: string;
 
   @ApiProperty()
   @IsString({ each: true })
-  memberIds!: number[];
+  authorId!: string;
+
+  @ApiProperty()
+  @IsString({ each: true })
+  groupId!: string;
 }
