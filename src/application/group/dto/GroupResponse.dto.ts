@@ -18,6 +18,9 @@ export class GroupResponseDTO {
   @ApiProperty({ type: () => UserResponseDTO, isArray: true })
   members!: UserResponseDTO[];
 
+  @ApiProperty({ type: () => UserResponseDTO, isArray: true })
+  admins!: UserResponseDTO[];
+
   @ApiProperty()
   @IsBoolean()
   isPublic!: boolean;

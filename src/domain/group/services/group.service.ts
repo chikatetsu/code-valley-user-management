@@ -60,6 +60,15 @@ export class GroupService implements IGroupService {
     return this.toGroupResponseDTO(group);
   }
 
+  async addAdmin(groupId: number, userId: number): Promise<GroupResponseDTO> {
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if (!user) {
+      throw new Error('User not found');
+    }
+    const group = await this.groupRepository.addAdmin(groupId, user);
+    return this.toGroupResponseDTO(group);
+  }
+
   async sendJoinRequest(
     groupId: number,
     userId: number,
@@ -70,6 +79,22 @@ export class GroupService implements IGroupService {
     }
     const group = await this.groupRepository.sendJoinRequest(groupId, user);
     return this.toGroupResponseDTO(group);
+  }
+
+  async acceptJoinRequest(
+    groupId: number,
+    userId: number,
+  ): Promise<GroupResponseDTO> {
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if (!user) {
+      throw new Error('User not found');
+    }
+    const group = await this.groupRepository.acceptJoinRequest(groupId, user);
+    return this.toGroupResponseDTO(group);
+  }
+
+  async refuseJoinRequest(groupId: number, userId: number): Promise<void> {
+    await this.groupRepository.refuseJoinRequest(groupId, userId);
   }
 
   async removeUserFromGroup(groupId: number, userId: number): Promise<void> {
@@ -88,6 +113,7 @@ export class GroupService implements IGroupService {
 
   async getGroupDetails(groupId: number): Promise<GroupResponseDTO | null> {
     const group = await this.groupRepository.findOneById(groupId);
+    console.log(group);
     return group ? this.toGroupResponseDTO(group) : null;
   }
 
@@ -97,6 +123,7 @@ export class GroupService implements IGroupService {
       name: group.name,
       description: group.description,
       members: group.members ? group.members.map(this.toUserResponseDTO) : [],
+      admins: group.admins ? group.admins.map(this.toUserResponseDTO) : [],
       isPublic: group.isPublic,
       memberJoinRequests: group.memberJoinRequests
         ? group.memberJoinRequests.map(this.toUserResponseDTO)

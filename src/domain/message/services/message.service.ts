@@ -81,6 +81,7 @@ export class MessageService implements IMessageService {
       id: group.id,
       name: group.name,
       members: group.members,
+      admins: group.admins,
       description: group.description,
       isPublic: group.isPublic,
       memberJoinRequests: group.memberJoinRequests,

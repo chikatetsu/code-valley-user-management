@@ -72,6 +72,20 @@ export class GroupController {
     return this.groupService.addUserToGroup(groupId, userId);
   }
 
+  @Post('admin/:groupId/:userId')
+  @ApiResponse({ status: 200, type: GroupResponseDTO })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
+  @ApiParam({ name: 'groupId', type: Number })
+  @ApiParam({ name: 'userId', type: Number })
+  async addAdmin(
+    @Req() req: any,
+    @Param('groupId', ParseIntPipe) groupId: number,
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<GroupResponseDTO> {
+    return this.groupService.addAdmin(groupId, userId);
+  }
+
   @Post('join/:groupId/:userId')
   @ApiResponse({ status: 200, type: GroupResponseDTO })
   @ApiResponse({ status: 400, description: 'Bad Request' })
@@ -84,6 +98,34 @@ export class GroupController {
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<GroupResponseDTO> {
     return this.groupService.sendJoinRequest(groupId, userId);
+  }
+
+  @Post('accept/:groupId/:userId')
+  @ApiResponse({ status: 200, type: GroupResponseDTO })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
+  @ApiParam({ name: 'groupId', type: Number })
+  @ApiParam({ name: 'userId', type: Number })
+  async acceptJoinRequest(
+    @Req() req: any,
+    @Param('groupId', ParseIntPipe) groupId: number,
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<GroupResponseDTO> {
+    return this.groupService.acceptJoinRequest(groupId, userId);
+  }
+
+  @Delete('refuse/:groupId/:userId')
+  @ApiResponse({ status: 200, type: GroupResponseDTO })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
+  @ApiParam({ name: 'groupId', type: Number })
+  @ApiParam({ name: 'userId', type: Number })
+  async refuseJoinRequest(
+    @Req() req: any,
+    @Param('groupId', ParseIntPipe) groupId: number,
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<void> {
+    this.groupService.refuseJoinRequest(groupId, userId);
   }
 
   @Delete('remove/:groupId/:userId')
