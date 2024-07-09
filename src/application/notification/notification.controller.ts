@@ -14,7 +14,6 @@ import {
   ApiBearerAuth, ApiNotFoundResponse,
   ApiOkResponse,
   ApiParam,
-  ApiQuery,
   ApiTags, ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
@@ -29,25 +28,29 @@ import { NotificationCountDTO } from '@application/notification/dto/notification
 export class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}
 
-  @Get('')
-  @ApiOkResponse({ type: [NotificationResponseDTO], description: 'List of all notifications' })
-  @ApiBadRequestResponse({ description: 'Bad Request' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiQuery({ name: 'limit', required: false })
-  async getNotifications(@Req() request, @Query('limit') limit?: string): Promise<NotificationResponseDTO[]> {
-    const parsedLimit = limit ? parseInt(limit, 10) : 10;
-    if (isNaN(parsedLimit)) {
-      throw new BadRequestException('Limit must be a number');
-    }
-    return await this.notificationService.getNotifications(request.user.id, parsedLimit);
-  }
-
   @Get('count')
   @ApiOkResponse({ type: NotificationCountDTO, description: 'The number of notification that hasn\'t been seen' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   async getNotificationCount(@Req() request): Promise<NotificationCountDTO> {
     return await this.notificationService.getNotificationCount(request.user.id);
+  }
+
+  @Get(':limit')
+  @ApiOkResponse({ type: [NotificationResponseDTO], description: 'List of all notifications' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiParam({ name: 'limit', type: Number, required: false })
+  async getNotifications(@Req() request, @Param('limit') limit?: string): Promise<NotificationResponseDTO[]> {
+    if (limit == ',') {
+      return await this.notificationService.getNotifications(request.user.id);
+    }
+
+    const parsedLimit = limit ? parseInt(limit, 10) : 10;
+    if (isNaN(parsedLimit)) {
+      throw new BadRequestException('Limit must be a number');
+    }
+    return await this.notificationService.getNotifications(request.user.id, parsedLimit);
   }
 
   @Post('see/:notificationId')

@@ -21,6 +21,7 @@ export class GroupService implements IGroupService {
     const members = await this.userRepository.findManyByIds(groupDTO.memberIds);
     const group = await this.groupRepository.createGroup(
       groupDTO.name,
+      groupDTO.description,
       members,
     );
     return this.toGroupResponseDTO(group);
@@ -47,6 +48,11 @@ export class GroupService implements IGroupService {
     return groups.map(this.toGroupResponseDTO);
   }
 
+  async findManyByName(name: string): Promise<GroupResponseDTO[]> {
+    const groups = await this.groupRepository.findManyByName(name);
+    return this.toManyResponseDto(groups);
+  }
+
   async getGroupDetails(groupId: number): Promise<GroupResponseDTO | null> {
     const group = await this.groupRepository.findOneById(groupId);
     return group ? this.toGroupResponseDTO(group) : null;
@@ -56,6 +62,7 @@ export class GroupService implements IGroupService {
     return {
       id: group.id,
       name: group.name,
+      description: group.description,
       members: group.members.map(this.toUserResponseDTO),
     };
   };
@@ -70,4 +77,12 @@ export class GroupService implements IGroupService {
       avatar: user.avatar,
     };
   };
+
+  private toManyResponseDto(groups: Group[]): GroupResponseDTO[] {
+    let response: GroupResponseDTO[] = [];
+    for (let group of groups) {
+      response.push(this.toGroupResponseDTO(group));
+    }
+    return response;
+  }
 }

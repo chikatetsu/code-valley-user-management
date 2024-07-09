@@ -9,19 +9,21 @@ import {
   UseGuards,
   Req,
   UseInterceptors,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { GroupService } from '@domain/group/services/group.service';
 import { GroupResponseDTO, GroupDTO } from '@application/group/dto';
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiOkResponse,
   ApiParam,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { NotFoundInterceptor, CreateGroupInterceptor } from './interceptors';
-
 @Controller('groups')
 @ApiTags('groups')
 @ApiBearerAuth()
@@ -35,7 +37,6 @@ export class GroupController {
   @ApiResponse({ status: 201, type: GroupResponseDTO })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 404, description: 'Not Found' })
-  @UseInterceptors(CreateGroupInterceptor)
   async createGroup(
     @Req() req: any,
     @Body() groupDTO: GroupDTO,
@@ -78,6 +79,23 @@ export class GroupController {
   @ApiResponse({ status: 404, description: 'Not Found' })
   async listGroups(@Req() req: any): Promise<GroupResponseDTO[]> {
     return this.groupService.listGroups();
+  }
+
+  @Get('search/:name')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(NotFoundInterceptor)
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    description: 'Search group',
+    type: GroupResponseDTO,
+  })
+  @ApiParam({ name: 'name', type: String })
+  async searchProfile(
+    @Req() req: any,
+    @Param('name') name: string,
+  ): Promise<GroupResponseDTO[]> {
+    return this.groupService.findManyByName(name);
   }
 
   @Get('details/:groupId')

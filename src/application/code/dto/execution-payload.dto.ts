@@ -9,4 +9,7 @@ export class ExecutionPayloadDto {
   @IsString()
   @ApiProperty()
   code: string;
+
+  @ApiProperty({ type: 'string', format: 'binary', required: false })
+  input_file?: any;
 }

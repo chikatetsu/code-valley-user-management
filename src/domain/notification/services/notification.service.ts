@@ -14,7 +14,7 @@ export class NotificationService implements INotificationService {
     @Inject(forwardRef(() => FriendshipService)) private friendShipService: FriendshipService,
   ) {}
 
-  async getNotifications(userId: number, limit: number): Promise<NotificationResponseDTO[]> {
+  async getNotifications(userId: number, limit: number = 100): Promise<NotificationResponseDTO[]> {
     const maxLimit = Math.min(limit, 100);
     const notifications = await this.notificationRepository.findManyByUserId(userId, maxLimit);
     return this.toManyResponseDto(notifications);

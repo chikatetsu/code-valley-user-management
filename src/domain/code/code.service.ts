@@ -1,8 +1,9 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { ExecutionPayloadDto, ExecutionResultDto } from '@application/code/dto';
 import { configService } from '@infra/config/config.service';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
+import FormData from 'form-data';
 
 @Injectable()
 export class CodeService {
@@ -10,13 +11,37 @@ export class CodeService {
 
   async executeCode(payload: ExecutionPayloadDto): Promise<ExecutionResultDto> {
     try {
+      const form = new FormData();
+      form.append('language', payload.language);
+      form.append('code', payload.code);
+      if (payload.input_file) {
+        form.append(
+          'input_file',
+          payload.input_file.buffer,
+          payload.input_file.originalname,
+        );
+      }
+
       const response = await firstValueFrom(
         this.httpService.post(
           configService.getDynoCodeUrl() + '/execute',
-          payload,
+          form,
+          {
+            headers: form.getHeaders(),
+            responseType: 'json',
+          },
         ),
       );
-      return response.data;
+
+      const responseData = response.data;
+      const result: ExecutionResultDto = {
+        output: responseData.output,
+        error: responseData.error,
+        outputFile: responseData.output_file_path || null,
+        outputFileContent: responseData.output_file_content || null,
+      };
+
+      return result;
     } catch (error) {
       if (error.response) {
         throw new HttpException(
