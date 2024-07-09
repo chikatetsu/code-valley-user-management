@@ -44,8 +44,6 @@ export class MessageService implements IMessageService {
   async getMessagesByGroupId(groupId: number): Promise<MessageResponseDTO[]> {
     const messages =
       await this.messageRepository.getAllMessagesByGroupId(groupId);
-    console.log(groupId);
-    console.log(messages);
     return messages ? this.toManyResponseDto(messages) : null;
   }
 
@@ -83,7 +81,10 @@ export class MessageService implements IMessageService {
       id: group.id,
       name: group.name,
       members: group.members,
+      admins: group.admins,
       description: group.description,
+      isPublic: group.isPublic,
+      memberJoinRequests: group.memberJoinRequests,
     };
   };
 }

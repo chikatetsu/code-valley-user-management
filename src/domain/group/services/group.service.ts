@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Group } from '@domain/group/entities/group.entity';
 import { GroupDTO, GroupResponseDTO } from '@application/group/dto';
@@ -17,14 +17,35 @@ export class GroupService implements IGroupService {
     private readonly userRepository: UserRepository,
   ) {}
 
-  async createGroup(groupDTO: GroupDTO): Promise<GroupResponseDTO> {
-    const members = await this.userRepository.findManyByIds(groupDTO.memberIds);
+  async createGroup(
+    groupDTO: GroupDTO,
+    userId: number,
+  ): Promise<GroupResponseDTO> {
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if (!user) {
+      throw new Error('User not found');
+    }
     const group = await this.groupRepository.createGroup(
       groupDTO.name,
       groupDTO.description,
-      members,
+      groupDTO.isPublic,
+      user,
     );
     return this.toGroupResponseDTO(group);
+  }
+
+  async updateGroup(
+    updateGroupDTO: GroupDTO,
+    groupId: number,
+  ): Promise<GroupResponseDTO> {
+    const group = await this.groupRepository.findOneById(groupId);
+
+    if (!group) {
+      throw new NotFoundException('Group not found');
+    }
+
+    Object.assign(group, updateGroupDTO);
+    return this.toGroupResponseDTO(await this.groupRepository.save(group));
   }
 
   async addUserToGroup(
@@ -37,6 +58,43 @@ export class GroupService implements IGroupService {
     }
     const group = await this.groupRepository.addUserToGroup(groupId, user);
     return this.toGroupResponseDTO(group);
+  }
+
+  async addAdmin(groupId: number, userId: number): Promise<GroupResponseDTO> {
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if (!user) {
+      throw new Error('User not found');
+    }
+    const group = await this.groupRepository.addAdmin(groupId, user);
+    return this.toGroupResponseDTO(group);
+  }
+
+  async sendJoinRequest(
+    groupId: number,
+    userId: number,
+  ): Promise<GroupResponseDTO> {
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if (!user) {
+      throw new Error('User not found');
+    }
+    const group = await this.groupRepository.sendJoinRequest(groupId, user);
+    return this.toGroupResponseDTO(group);
+  }
+
+  async acceptJoinRequest(
+    groupId: number,
+    userId: number,
+  ): Promise<GroupResponseDTO> {
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if (!user) {
+      throw new Error('User not found');
+    }
+    const group = await this.groupRepository.acceptJoinRequest(groupId, user);
+    return this.toGroupResponseDTO(group);
+  }
+
+  async refuseJoinRequest(groupId: number, userId: number): Promise<void> {
+    await this.groupRepository.refuseJoinRequest(groupId, userId);
   }
 
   async removeUserFromGroup(groupId: number, userId: number): Promise<void> {
@@ -55,6 +113,7 @@ export class GroupService implements IGroupService {
 
   async getGroupDetails(groupId: number): Promise<GroupResponseDTO | null> {
     const group = await this.groupRepository.findOneById(groupId);
+    console.log(group);
     return group ? this.toGroupResponseDTO(group) : null;
   }
 
@@ -63,7 +122,12 @@ export class GroupService implements IGroupService {
       id: group.id,
       name: group.name,
       description: group.description,
-      members: group.members.map(this.toUserResponseDTO),
+      members: group.members ? group.members.map(this.toUserResponseDTO) : [],
+      admins: group.admins ? group.admins.map(this.toUserResponseDTO) : [],
+      isPublic: group.isPublic,
+      memberJoinRequests: group.memberJoinRequests
+        ? group.memberJoinRequests.map(this.toUserResponseDTO)
+        : [],
     };
   };
 

@@ -11,6 +11,7 @@ import {
   UseInterceptors,
   HttpCode,
   HttpStatus,
+  Patch,
 } from '@nestjs/common';
 import { GroupService } from '@domain/group/services/group.service';
 import { GroupResponseDTO, GroupDTO } from '@application/group/dto';
@@ -41,8 +42,20 @@ export class GroupController {
     @Req() req: any,
     @Body() groupDTO: GroupDTO,
   ): Promise<GroupResponseDTO> {
-    groupDTO.memberIds.push(req.user.id);
-    return this.groupService.createGroup(groupDTO);
+    return this.groupService.createGroup(groupDTO, Number(req.user.id));
+  }
+
+  @Patch('update/:groupId')
+  @ApiBody({ type: GroupDTO })
+  @ApiResponse({ status: 200, type: GroupResponseDTO })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
+  @ApiParam({ name: 'groupId', type: Number })
+  async updateGroup(
+    @Param('groupId', ParseIntPipe) groupId: number,
+    @Body() updateGroupDTO: GroupDTO,
+  ): Promise<GroupResponseDTO> {
+    return this.groupService.updateGroup(updateGroupDTO, groupId);
   }
 
   @Post('add/:groupId/:userId')
@@ -57,6 +70,62 @@ export class GroupController {
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<GroupResponseDTO> {
     return this.groupService.addUserToGroup(groupId, userId);
+  }
+
+  @Post('admin/:groupId/:userId')
+  @ApiResponse({ status: 200, type: GroupResponseDTO })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
+  @ApiParam({ name: 'groupId', type: Number })
+  @ApiParam({ name: 'userId', type: Number })
+  async addAdmin(
+    @Req() req: any,
+    @Param('groupId', ParseIntPipe) groupId: number,
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<GroupResponseDTO> {
+    return this.groupService.addAdmin(groupId, userId);
+  }
+
+  @Post('join/:groupId/:userId')
+  @ApiResponse({ status: 200, type: GroupResponseDTO })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
+  @ApiParam({ name: 'groupId', type: Number })
+  @ApiParam({ name: 'userId', type: Number })
+  async sendJoinRequest(
+    @Req() req: any,
+    @Param('groupId', ParseIntPipe) groupId: number,
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<GroupResponseDTO> {
+    return this.groupService.sendJoinRequest(groupId, userId);
+  }
+
+  @Post('accept/:groupId/:userId')
+  @ApiResponse({ status: 200, type: GroupResponseDTO })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
+  @ApiParam({ name: 'groupId', type: Number })
+  @ApiParam({ name: 'userId', type: Number })
+  async acceptJoinRequest(
+    @Req() req: any,
+    @Param('groupId', ParseIntPipe) groupId: number,
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<GroupResponseDTO> {
+    return this.groupService.acceptJoinRequest(groupId, userId);
+  }
+
+  @Delete('refuse/:groupId/:userId')
+  @ApiResponse({ status: 200, type: GroupResponseDTO })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'Not Found' })
+  @ApiParam({ name: 'groupId', type: Number })
+  @ApiParam({ name: 'userId', type: Number })
+  async refuseJoinRequest(
+    @Req() req: any,
+    @Param('groupId', ParseIntPipe) groupId: number,
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<void> {
+    this.groupService.refuseJoinRequest(groupId, userId);
   }
 
   @Delete('remove/:groupId/:userId')
