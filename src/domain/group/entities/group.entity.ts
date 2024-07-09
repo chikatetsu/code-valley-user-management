@@ -27,4 +27,18 @@ export class Group extends BaseEntity {
   @ManyToMany(() => User)
   @JoinTable()
   public members!: User[];
+
+  @ApiProperty({ type: () => User, isArray: true })
+  @ManyToMany(() => User)
+  @JoinTable()
+  public admins!: User[];
+
+  @ApiProperty()
+  @Column()
+  public isPublic: boolean;
+
+  @ApiProperty({ type: () => User, isArray: true })
+  @ManyToMany(() => User)
+  @JoinTable()
+  public memberJoinRequests!: User[];
 }

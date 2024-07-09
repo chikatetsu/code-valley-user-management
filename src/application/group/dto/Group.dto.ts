@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsEmpty, IsString } from 'class-validator';
 
 export class GroupDTO {
   @ApiProperty()
@@ -11,6 +11,6 @@ export class GroupDTO {
   description?: string;
 
   @ApiProperty()
-  @IsString({ each: true })
-  memberIds!: number[];
+  @IsBoolean()
+  isPublic!: boolean;
 }
