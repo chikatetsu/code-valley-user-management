@@ -41,7 +41,7 @@ export class PostService {
       fileId,
     });
     await this.postRepository.save(post);
-    await this.notificationService.notifyFollowers(NotificationType.post, userId);
+    await this.notificationService.notifyFollowers(NotificationType.post, userId, post.id);
     return this.toPostResponseDto(post, userId, code_url);
   }
 
@@ -107,7 +107,7 @@ export class PostService {
     const likeCount = await this.postLikeRepository.count({
       where: { postId },
     });
-    await this.notificationService.notifyUser(NotificationType.like, userId, post.userId);
+    await this.notificationService.notifyUser(NotificationType.like, userId, post.userId, postId);
     return { id: postId, likes: likeCount };
   }
 

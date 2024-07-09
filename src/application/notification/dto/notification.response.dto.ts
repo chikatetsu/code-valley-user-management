@@ -44,4 +44,11 @@ export class NotificationResponseDTO {
   })
   @IsEnum(NotificationType)
   public notificationType: NotificationType;
+
+  @ApiProperty({
+    example: 1,
+    description: 'The id of the post or comment linked to the notification',
+  })
+  @IsNumber()
+  public linkId: number;
 }

@@ -41,12 +41,19 @@ export class Notification extends BaseEntity {
   @Column()
   public toUserId!: number;
 
-  constructor(notificationType: NotificationType, fromUserId: number, toUserId: number) {
+  @ApiProperty()
+  @Column({ nullable: true, default: null })
+  public linkId: number;
+
+  constructor(notificationType: NotificationType, fromUserId: number, toUserId: number, linkId: number = null) {
     super();
     this.notificationType = notificationType;
     this.fromUserId = fromUserId;
     this.toUserId = toUserId
     this.hasBeenRead = false;
     this.createdAt = new Date();
+    if (linkId) {
+      this.linkId = linkId;
+    }
   }
 }

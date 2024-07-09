@@ -49,15 +49,15 @@ export class NotificationService implements INotificationService {
     await this.notificationRepository.deleteOneById(notificationId);
   }
 
-  async notifyFollowers(notificationType: NotificationType, fromUserId: number): Promise<void> {
+  async notifyFollowers(notificationType: NotificationType, fromUserId: number, linkId: number = null): Promise<void> {
     const followers = await this.friendShipService.listFollowers(fromUserId)
     followers.forEach(followers => {
-      this.notifyUser(notificationType, fromUserId, followers.id);
+      this.notifyUser(notificationType, fromUserId, followers.id, linkId);
     });
   }
 
-  async notifyUser(notificationType: NotificationType, fromUserId: number, receiverId: number): Promise<void> {
-    const notification = new Notification(notificationType, fromUserId, receiverId);
+  async notifyUser(notificationType: NotificationType, fromUserId: number, receiverId: number, linkId: number = null): Promise<void> {
+    const notification = new Notification(notificationType, fromUserId, receiverId, linkId);
     await this.notificationRepository.createNotification(notification);
   }
 
@@ -71,6 +71,7 @@ export class NotificationService implements INotificationService {
       notificationType: notification.notificationType,
       fromUsername: notification.fromUser.username,
       fromUserId: notification.fromUserId,
+      linkId: notification.linkId,
     };
   }
 
