@@ -70,6 +70,7 @@ export class NotificationService implements INotificationService {
       hasBeenRead: notification.hasBeenRead,
       notificationType: notification.notificationType,
       fromUsername: notification.fromUser.username,
+      fromUserId: notification.fromUserId,
     };
   }
 

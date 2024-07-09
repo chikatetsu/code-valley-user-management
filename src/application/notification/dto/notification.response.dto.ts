@@ -32,6 +32,13 @@ export class NotificationResponseDTO {
   public fromUsername: string;
 
   @ApiProperty({
+    example: "1",
+    description: 'The id of the user',
+  })
+  @IsNumber()
+  public fromUserId: number;
+
+  @ApiProperty({
     example: NotificationType.like,
     description: 'The type of notification',
   })
