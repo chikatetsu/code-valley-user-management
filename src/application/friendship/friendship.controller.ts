@@ -63,7 +63,7 @@ export class FriendshipController {
     return this.friendshipService.acceptFriendRequest(senderId, receiverId);
   }
 
-  @Post('decline/:friendshipId')
+  @Post('decline/:senderId')
   @ApiParam({ name: 'senderId', type: Number })
   @ApiResponse({ status: 201 })
   @ApiResponse({ status: 400, description: 'Bad Request' })
