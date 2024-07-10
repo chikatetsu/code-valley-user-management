@@ -15,6 +15,10 @@ export class GroupResponseDTO {
   @IsString()
   description?: string;
 
+  @ApiProperty()
+  @IsString()
+  avatar?: string;
+
   @ApiProperty({ type: () => UserResponseDTO, isArray: true })
   members!: UserResponseDTO[];
 

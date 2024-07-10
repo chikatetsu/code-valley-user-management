@@ -7,6 +7,7 @@ import { UserResponseDTO } from '@application/user/dto';
 import { IGroupService } from '@domain/group/interfaces/group.service.interface';
 import { GroupRepository } from '@infra/database/group.repository';
 import { UserRepository } from '@infra/database/user.repository';
+import { ContentService } from '@domain/content/content.service';
 
 @Injectable()
 export class GroupService implements IGroupService {
@@ -15,34 +16,69 @@ export class GroupService implements IGroupService {
     private readonly groupRepository: GroupRepository,
     @InjectRepository(UserRepository)
     private readonly userRepository: UserRepository,
+    private readonly contentService: ContentService,
   ) {}
 
   async createGroup(
     groupDTO: GroupDTO,
     userId: number,
+    file: Express.Multer.File,
   ): Promise<GroupResponseDTO> {
     const user = await this.userRepository.findOneBy({ id: userId });
     if (!user) {
       throw new Error('User not found');
     }
+    console.log(groupDTO);
     const group = await this.groupRepository.createGroup(
       groupDTO.name,
       groupDTO.description,
-      groupDTO.isPublic,
+      groupDTO.isPublic === 'false' ? false : true,
       user,
+      '',
     );
+    let fileId: string | null = null;
+    let code_url: string | null = null;
+    console.log(file);
+    if (file) {
+      const fileResponse = await this.contentService.uploadFileToGroup(
+        file,
+        userId,
+        group.id,
+      );
+      [fileId, code_url] = [fileResponse.id, fileResponse.code_url];
+    }
+    group.avatar =
+      code_url !== null
+        ? code_url
+        : 'https://yt3.googleusercontent.com/Pjk-KU0aJH978tDhdO05PgUx8j3i1OvqC4-U0L_3EUdJo0eBUrQ-cb1g2ZJiTYTlk5pq_0gy=s900-c-k-c0x00ffffff-no-rj';
+
+    await this.groupRepository.save(group);
     return this.toGroupResponseDTO(group);
   }
 
   async updateGroup(
     updateGroupDTO: GroupDTO,
     groupId: number,
+    userId: number,
+    file: Express.Multer.File,
   ): Promise<GroupResponseDTO> {
     const group = await this.groupRepository.findOneById(groupId);
 
     if (!group) {
       throw new NotFoundException('Group not found');
     }
+
+    let fileId: string | null = null;
+    let code_url: string | null = null;
+    if (file) {
+      const fileResponse = await this.contentService.uploadFileToMicroservice(
+        file,
+        userId,
+      );
+      [fileId, code_url] = [fileResponse.id, fileResponse.code_url];
+    }
+
+    if (code_url) group.avatar = code_url;
 
     Object.assign(group, updateGroupDTO);
     return this.toGroupResponseDTO(await this.groupRepository.save(group));
@@ -125,6 +161,7 @@ export class GroupService implements IGroupService {
       members: group.members ? group.members.map(this.toUserResponseDTO) : [],
       admins: group.admins ? group.admins.map(this.toUserResponseDTO) : [],
       isPublic: group.isPublic,
+      avatar: group.avatar,
       memberJoinRequests: group.memberJoinRequests
         ? group.memberJoinRequests.map(this.toUserResponseDTO)
         : [],

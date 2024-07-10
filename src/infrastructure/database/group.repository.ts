@@ -15,11 +15,13 @@ export class GroupRepository extends Repository<Group> {
     description: string,
     isPublic: boolean,
     user: User,
+    avatar: string,
   ): Promise<Group> {
     const group = this.create({
       name,
       description,
       isPublic,
+      avatar,
       members: [],
       admins: [],
     });
