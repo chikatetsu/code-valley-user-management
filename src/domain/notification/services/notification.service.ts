@@ -17,7 +17,10 @@ export class NotificationService implements INotificationService {
   async getNotifications(userId: number, limit: number = 100): Promise<NotificationResponseDTO[]> {
     const maxLimit = Math.min(limit, 100);
     const notifications = await this.notificationRepository.findManyByUserId(userId, maxLimit);
-    return this.toManyResponseDto(notifications);
+    const result = notifications.sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )
+    return this.toManyResponseDto(result);
   }
 
   async getNotificationCount(userId: number): Promise<NotificationCountDTO> {
@@ -58,6 +61,12 @@ export class NotificationService implements INotificationService {
 
   async notifyUser(notificationType: NotificationType, fromUserId: number, receiverId: number, linkId: number = null): Promise<void> {
     const notification = new Notification(notificationType, fromUserId, receiverId, linkId);
+    if (notificationType === NotificationType.like) {
+      const existingNotification = await this.notificationRepository.findExactNotification(fromUserId, receiverId, notificationType, linkId);
+      if (existingNotification !== null) {
+        return;
+      }
+    }
     await this.notificationRepository.createNotification(notification);
   }
 

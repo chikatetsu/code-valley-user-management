@@ -113,7 +113,6 @@ export class GroupService implements IGroupService {
 
   async getGroupDetails(groupId: number): Promise<GroupResponseDTO | null> {
     const group = await this.groupRepository.findOneById(groupId);
-    console.log(group);
     return group ? this.toGroupResponseDTO(group) : null;
   }
 

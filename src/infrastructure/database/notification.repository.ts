@@ -1,6 +1,8 @@
 import { DataSource, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { Notification } from '@domain/notification/entities/notification.entity'
+import { NotificationResponseDTO } from '@application/notification/dto/notification.response.dto';
+import { NotificationType } from '@domain/notification/types/notification.type';
 
 @Injectable()
 export class NotificationRepository extends Repository<Notification> {
@@ -24,6 +26,17 @@ export class NotificationRepository extends Repository<Notification> {
       where: { toUserId: id },
       take: limit,
       relations: ['fromUser', 'toUser'],
+    });
+  }
+
+  async findExactNotification(fromUserId: number, toUserId: number, notificationType: NotificationType, linkId: number): Promise<Notification> {
+    return await this.findOne({
+      where: {
+        fromUserId: fromUserId,
+        toUserId: toUserId,
+        notificationType: notificationType,
+        linkId: linkId
+      }
     });
   }
 
