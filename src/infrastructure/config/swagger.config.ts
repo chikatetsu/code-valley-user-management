@@ -18,7 +18,12 @@ export function configureSwagger(app: INestApplication): void {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document, {
-    jsonDocumentUrl: 'api-docs',
-  });
+  SwaggerModule.setup(
+    'api',
+    app,
+    { ...document, openapi: '3.1.0' },
+    {
+      jsonDocumentUrl: 'api-docs',
+    },
+  );
 }
