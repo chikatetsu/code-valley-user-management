@@ -2,7 +2,6 @@ import {
   Controller,
   Post,
   Param,
-  Body,
   Delete,
   Get,
   ParseIntPipe,
@@ -60,11 +59,11 @@ export class FriendshipController {
     @Req() req: any,
     @Param('senderId', ParseIntPipe) senderId: number,
   ): Promise<FriendshipResponseDTO> {
-    const userId = req.user.id;
-    return this.friendshipService.acceptFriendRequest(senderId, userId);
+    const receiverId = req.user.id;
+    return this.friendshipService.acceptFriendRequest(senderId, receiverId);
   }
 
-  @Post('decline/:friendshipId')
+  @Post('decline/:senderId')
   @ApiParam({ name: 'senderId', type: Number })
   @ApiResponse({ status: 201 })
   @ApiResponse({ status: 400, description: 'Bad Request' })
@@ -72,8 +71,8 @@ export class FriendshipController {
     @Req() req: any,
     @Param('senderId', ParseIntPipe) senderId: number,
   ): Promise<void> {
-    const userId = req.user.id;
-    return this.friendshipService.declineFriendRequest(senderId, userId);
+    const receiverId = req.user.id;
+    return this.friendshipService.declineFriendRequest(senderId, receiverId);
   }
 
   @Delete('remove/:friendId')

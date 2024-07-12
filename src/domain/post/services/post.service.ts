@@ -1,21 +1,14 @@
-import {
-  Injectable,
-  NotFoundException,
-  ConflictException,
-  BadRequestException,
-} from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Post } from '../entities/post.entity';
 import { PostLike } from '../entities/post.like.entity';
-import {
-  CreatePostDto,
-  PostResponseDto,
-  LikePostResponseDto,
-} from '@application/post/dto';
+import { CreatePostDto, LikePostResponseDto, PostResponseDto } from '@application/post/dto';
 import { UserService } from '@domain/user/services/user.service';
 import { PostRepository } from '@infra/database/post.repository';
 import { ContentService } from '@domain/content/content.service';
+import { NotificationService } from '@domain/notification/services/notification.service';
+import { NotificationType } from '@domain/notification/types/notification.type';
 
 @Injectable()
 export class PostService {
@@ -25,7 +18,8 @@ export class PostService {
     private readonly postRepository: PostRepository,
     private readonly userService: UserService,
     private readonly contentService: ContentService,
-  ) {}
+    private readonly notificationService: NotificationService
+  ) { }
 
   async createPost(
     userId: number,
@@ -47,6 +41,7 @@ export class PostService {
       fileId,
     });
     await this.postRepository.save(post);
+    await this.notificationService.notifyFollowers(NotificationType.post, userId, post.id);
     return this.toPostResponseDto(post, userId, code_url);
   }
 
@@ -112,6 +107,7 @@ export class PostService {
     const likeCount = await this.postLikeRepository.count({
       where: { postId },
     });
+    await this.notificationService.notifyUser(NotificationType.like, userId, post.userId, postId);
     return { id: postId, likes: likeCount };
   }
 
