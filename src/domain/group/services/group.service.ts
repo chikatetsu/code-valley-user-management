@@ -71,9 +71,10 @@ export class GroupService implements IGroupService {
     let fileId: string | null = null;
     let code_url: string | null = null;
     if (file) {
-      const fileResponse = await this.contentService.uploadFileToMicroservice(
+      const fileResponse = await this.contentService.uploadFileToGroup(
         file,
         userId,
+        groupId,
       );
       [fileId, code_url] = [fileResponse.id, fileResponse.code_url];
     }
