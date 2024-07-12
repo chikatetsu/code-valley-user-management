@@ -348,6 +348,7 @@ export class FriendshipService implements IFriendshipService {
       email: user.email,
       username: user.username,
       status: status,
+      avatar: user.avatar,
     };
   }
 

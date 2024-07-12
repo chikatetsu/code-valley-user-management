@@ -17,4 +17,7 @@ export class UserFriendDTO {
 
   @ApiProperty()
   status: FriendshipStatus;
+
+  @ApiProperty()
+  avatar: string;
 }
