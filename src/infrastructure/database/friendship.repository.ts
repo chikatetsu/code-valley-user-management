@@ -5,7 +5,7 @@ import { FriendshipStatus } from '@application/friendship/types/friendship.statu
 
 @Injectable()
 export class FriendshipRepository extends Repository<Friendship> {
-  constructor(private dataSource: DataSource) {
+  constructor(private readonly dataSource: DataSource) {
     super(Friendship, dataSource.createEntityManager());
   }
 

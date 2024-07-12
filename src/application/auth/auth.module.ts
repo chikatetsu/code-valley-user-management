@@ -29,7 +29,6 @@ import { FirebaseModule } from '@application/firebase/firebase.module';
     UserRepository,
     AuthService,
     UserService,
-    UserService,
     BlacklistService,
     GoogleStrategy,
     JwtStrategy,

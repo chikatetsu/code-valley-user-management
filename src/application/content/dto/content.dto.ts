@@ -32,7 +32,7 @@ export class ContentDto {
 
   @ApiProperty()
   @IsString()
-  owner_id: string;
+  owner_id: number;
 
   @ApiProperty()
   @IsString()

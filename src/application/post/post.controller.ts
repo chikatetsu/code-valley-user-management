@@ -10,6 +10,8 @@ import {
   BadRequestException,
   UseInterceptors,
   UploadedFile,
+  Query,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { PostService } from '@domain/post/services/post.service';
 import { JwtAuthGuard } from '@application/auth/guards/jwt-auth.guard';
@@ -21,6 +23,7 @@ import {
   ApiParam,
   ApiTags,
   ApiConsumes,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { CreatePostDto, PostResponseDto, LikePostResponseDto } from './dto';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -35,9 +38,15 @@ export class PostController {
   @Get()
   @ApiResponse({ status: 200, type: PostResponseDto, isArray: true })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getPosts(@Req() req: Request): Promise<PostResponseDto[]> {
+  @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'offset', required: false })
+  async getPosts(
+    @Req() req: Request,
+    @Query('limit', ParseIntPipe) limit: number = 10,
+    @Query('offset', ParseIntPipe) offset: number = 0,
+  ): Promise<PostResponseDto[]> {
     const userId = req.user['id'];
-    return this.postService.getPosts(userId);
+    return this.postService.getPosts(userId, limit, offset);
   }
 
   @Get(':id')

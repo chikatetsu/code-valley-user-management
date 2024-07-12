@@ -4,7 +4,7 @@ import { DataSource, Repository } from 'typeorm';
 
 @Injectable()
 export class PostRepository extends Repository<Post> {
-  constructor(private dataSource: DataSource) {
+  constructor(private readonly dataSource: DataSource) {
     super(Post, dataSource.createEntityManager());
   }
   async findAll(): Promise<Post[]> {

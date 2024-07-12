@@ -1,21 +1,14 @@
-import {
-  Injectable,
-  NotFoundException,
-  ConflictException,
-  BadRequestException,
-} from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Post } from '../entities/post.entity';
 import { PostLike } from '../entities/post.like.entity';
-import {
-  CreatePostDto,
-  PostResponseDto,
-  LikePostResponseDto,
-} from '@application/post/dto';
+import { CreatePostDto, LikePostResponseDto, PostResponseDto } from '@application/post/dto';
 import { UserService } from '@domain/user/services/user.service';
 import { PostRepository } from '@infra/database/post.repository';
 import { ContentService } from '@domain/content/content.service';
+import { NotificationService } from '@domain/notification/services/notification.service';
+import { NotificationType } from '@domain/notification/types/notification.type';
 
 @Injectable()
 export class PostService {
@@ -25,7 +18,8 @@ export class PostService {
     private readonly postRepository: PostRepository,
     private readonly userService: UserService,
     private readonly contentService: ContentService,
-  ) {}
+    private readonly notificationService: NotificationService
+  ) { }
 
   async createPost(
     userId: number,
@@ -35,8 +29,10 @@ export class PostService {
     let fileId: string | null = null;
     let code_url: string | null = null;
     if (file) {
-      const fileResponse =
-        await this.contentService.uploadFileToMicroservice(file);
+      const fileResponse = await this.contentService.uploadFileToMicroservice(
+        file,
+        userId,
+      );
       [fileId, code_url] = [fileResponse.id, fileResponse.code_url];
     }
     const post = this.postRepository.create({
@@ -45,6 +41,7 @@ export class PostService {
       fileId,
     });
     await this.postRepository.save(post);
+    await this.notificationService.notifyFollowers(NotificationType.post, userId, post.id);
     return this.toPostResponseDto(post, userId, code_url);
   }
 
@@ -52,12 +49,20 @@ export class PostService {
     await this.postRepository.delete(postId);
   }
 
-  async getPosts(currentUserId: number): Promise<PostResponseDto[]> {
-    const posts = await this.postRepository.findAll();
-    const sortedPosts = this.sortPostsByDate(posts);
+  async getPosts(
+    currentUserId: number,
+    limit: number,
+    offset: number,
+  ): Promise<PostResponseDto[]> {
+    const maxLimit = Math.min(limit, 100);
+    const posts = await this.postRepository.find({
+      take: maxLimit,
+      skip: offset,
+      order: { createdAt: 'DESC' },
+    });
 
     return Promise.all(
-      sortedPosts.map(async (post) => {
+      posts.map(async (post) => {
         if (post.fileId) {
           const content = await this.contentService.getContentById(post.fileId);
           return this.toPostResponseDto(post, currentUserId, content.code_url);
@@ -102,6 +107,7 @@ export class PostService {
     const likeCount = await this.postLikeRepository.count({
       where: { postId },
     });
+    await this.notificationService.notifyUser(NotificationType.like, userId, post.userId, postId);
     return { id: postId, likes: likeCount };
   }
 

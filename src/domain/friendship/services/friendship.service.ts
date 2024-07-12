@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Not, Repository } from 'typeorm';
 import { IFriendshipService } from '@domain/friendship/interfaces/friendship.service.interface';
@@ -13,6 +13,8 @@ import { UserQueryDTO } from '@application/user/dto';
 import { FriendshipStatus } from '@application/friendship/types/friendship.status';
 import { UserFriendDTO } from '@application/user/dto/UserFriend.dto';
 import { FriendshipPendingDTO } from '@application/friendship/dto/FriendshipPending.dto';
+import { NotificationService } from '@domain/notification/services/notification.service';
+import { NotificationType } from '@domain/notification/types/notification.type';
 
 @Injectable()
 export class FriendshipService implements IFriendshipService {
@@ -21,6 +23,7 @@ export class FriendshipService implements IFriendshipService {
     private readonly friendshipRepository: Repository<Friendship>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @Inject(forwardRef(() => NotificationService)) private readonly notificationService: NotificationService
   ) {}
 
   async sendFriendRequest(
@@ -45,6 +48,7 @@ export class FriendshipService implements IFriendshipService {
       status: FriendshipStatus.pending,
     });
     await this.friendshipRepository.save(friendship);
+    await this.notificationService.notifyUser(NotificationType.friendshipReceived, senderId, receiverId);
     return this.toFriendshipResponseDTO(friendship);
   }
 
@@ -61,6 +65,7 @@ export class FriendshipService implements IFriendshipService {
     }
     friendship.status = FriendshipStatus.accepted;
     await this.friendshipRepository.save(friendship);
+    await this.notificationService.notifyUser(NotificationType.friendshipAccepted, receiverId, senderId);
     return this.toFriendshipResponseDTO(friendship);
   }
 
@@ -88,6 +93,7 @@ export class FriendshipService implements IFriendshipService {
     }
     friendship.status = FriendshipStatus.declined;
     await this.friendshipRepository.save(friendship);
+    await this.notificationService.notifyUser(NotificationType.friendshipRefused, receiverId, senderId);
   }
 
   async removeFriend(userId: number, friendId: number): Promise<void> {
@@ -218,18 +224,16 @@ export class FriendshipService implements IFriendshipService {
 
   async listFollowers(
     userId: number,
-    limit: number,
-    offset: number,
+    limit: number = 100,
+    offset: number = 0,
   ): Promise<UserFriendDTO[]> {
-    const maxLimit = Math.min(limit, 100);
-
     const friendships = await this.friendshipRepository.find({
       where: {
         receiverId: userId,
         status: In([FriendshipStatus.accepted, FriendshipStatus.pending]),
       },
       relations: ['sender'],
-      take: maxLimit,
+      take: limit,
       skip: offset,
     });
 
@@ -240,7 +244,7 @@ export class FriendshipService implements IFriendshipService {
           status: FriendshipStatus.accepted,
         },
         relations: ['receiver'],
-        take: maxLimit,
+        take: limit,
         skip: offset,
       })),
     );
@@ -348,6 +352,7 @@ export class FriendshipService implements IFriendshipService {
       email: user.email,
       username: user.username,
       status: status,
+      avatar: user.avatar,
     };
   }
 
