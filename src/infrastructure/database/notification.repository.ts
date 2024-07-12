@@ -40,6 +40,26 @@ export class NotificationRepository extends Repository<Notification> {
     });
   }
 
+  async findSeenByUserId(id: number): Promise<Notification[]> {
+    return await this.find({
+      where: {
+        toUserId: id,
+        hasBeenRead: true
+      },
+      relations: ['fromUser', 'toUser'],
+    });
+  }
+
+  async findNotSeenByUserId(id: number): Promise<Notification[]> {
+    return await this.find({
+      where: {
+        toUserId: id,
+        hasBeenRead: false
+      },
+      relations: ['fromUser', 'toUser'],
+    });
+  }
+
   async countUnseenByUserId(id: number): Promise<number> {
     return this.count({
       where: {

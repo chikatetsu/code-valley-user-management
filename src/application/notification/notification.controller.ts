@@ -81,6 +81,24 @@ export class NotificationController {
     return response;
   }
 
+  @Post('seeall')
+  @ApiOkResponse({ description: 'Notifications has been seen successfully' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiNotFoundResponse({ description: 'Not Found' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  async seeAllNotifications(@Req() request): Promise<NotificationResponseDTO[]> {
+    return await this.notificationService.seeAllNotifications(request.user.id);
+  }
+
+  @Post('unseeall')
+  @ApiOkResponse({ description: 'Notifications has been unseen successfully' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiNotFoundResponse({ description: 'Not Found' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  async unseeAllNotifications(@Req() request): Promise<NotificationResponseDTO[]> {
+    return await this.notificationService.unseeAllNotifications(request.user.id);
+  }
+
   @Delete(':notificationId')
   @ApiOkResponse({ description: 'Notification has been deleted successfully' })
   @ApiBadRequestResponse({ description: 'Bad Request' })

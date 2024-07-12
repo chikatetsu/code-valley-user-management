@@ -48,6 +48,30 @@ export class NotificationService implements INotificationService {
     return this.toResponseDto(saveResult);
   }
 
+  async seeAllNotifications(userId: number): Promise<NotificationResponseDTO[]> {
+    const notifications = await this.notificationRepository.findNotSeenByUserId(userId);
+    if (notifications == null) {
+      return null;
+    }
+    for (const notification of notifications) {
+      notification.hasBeenRead = true;
+      await notification.save();
+    }
+    return this.toManyResponseDto(notifications);
+  }
+
+  async unseeAllNotifications(userId: number): Promise<NotificationResponseDTO[]> {
+    const notifications = await this.notificationRepository.findSeenByUserId(userId);
+    if (notifications == null) {
+      return null;
+    }
+    for (const notification of notifications) {
+      notification.hasBeenRead = false;
+      await notification.save();
+    }
+    return this.toManyResponseDto(notifications);
+  }
+
   async removeNotification(notificationId: number): Promise<void> {
     await this.notificationRepository.deleteOneById(notificationId);
   }
