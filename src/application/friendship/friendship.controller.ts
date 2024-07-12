@@ -37,7 +37,7 @@ import { FollowersAndFollowingsCountDTO } from './dto/FollowersAndFollowingsCoun
 @UseGuards(AuthGuard('jwt'))
 @UseInterceptors(FriendshipInterceptor)
 export class FriendshipController {
-  constructor(private readonly friendshipService: FriendshipService) { }
+  constructor(private readonly friendshipService: FriendshipService) {}
 
   @Post('send/:receiverId')
   @UseInterceptors(FriendshipInterceptor)
