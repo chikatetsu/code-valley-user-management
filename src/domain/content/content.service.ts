@@ -52,9 +52,6 @@ export class ContentService {
       formData.append('file', file.buffer, file.originalname);
       formData.append('owner_id', owner_id);
       formData.append('group_id', group_id);
-
-      console.log(configService.getContentCraftersUrl() + '/v1/group/upload');
-
       const response = await firstValueFrom(
         this.httpService.post(
           configService.getContentCraftersUrl() + '/v1/group/upload',

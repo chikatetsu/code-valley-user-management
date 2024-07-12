@@ -163,7 +163,7 @@ export class FriendshipController {
   }
 
   @Get('suggestions')
-  @ApiResponse({ status: 200, type: [UserQueryDTO] })
+  @ApiResponse({ status: 200, type: [UserFriendDTO] })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiQuery({ name: 'limit', required: false })
   @ApiQuery({ name: 'offset', required: false })

@@ -28,7 +28,6 @@ export class GroupService implements IGroupService {
     if (!user) {
       throw new Error('User not found');
     }
-    console.log(groupDTO);
     const group = await this.groupRepository.createGroup(
       groupDTO.name,
       groupDTO.description,
@@ -38,7 +37,6 @@ export class GroupService implements IGroupService {
     );
     let fileId: string | null = null;
     let code_url: string | null = null;
-    console.log(file);
     if (file) {
       const fileResponse = await this.contentService.uploadFileToGroup(
         file,
@@ -150,7 +148,6 @@ export class GroupService implements IGroupService {
 
   async getGroupDetails(groupId: number): Promise<GroupResponseDTO | null> {
     const group = await this.groupRepository.findOneById(groupId);
-    console.log(group);
     return group ? this.toGroupResponseDTO(group) : null;
   }
 
