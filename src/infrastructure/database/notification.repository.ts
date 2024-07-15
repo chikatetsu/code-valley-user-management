@@ -1,6 +1,6 @@
 import { DataSource, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
-import { Notification } from '@domain/notification/entities/notification.entity'
+import { Notification } from '@domain/notification/entities/notification.entity';
 import { NotificationResponseDTO } from '@application/notification/dto/notification.response.dto';
 import { NotificationType } from '@domain/notification/types/notification.type';
 
@@ -29,14 +29,19 @@ export class NotificationRepository extends Repository<Notification> {
     });
   }
 
-  async findExactNotification(fromUserId: number, toUserId: number, notificationType: NotificationType, linkId: number): Promise<Notification> {
+  async findExactNotification(
+    fromUserId: number,
+    toUserId: number,
+    notificationType: NotificationType,
+    linkId: number,
+  ): Promise<Notification> {
     return await this.findOne({
       where: {
         fromUserId: fromUserId,
         toUserId: toUserId,
         notificationType: notificationType,
-        linkId: linkId
-      }
+        linkId: linkId,
+      },
     });
   }
 
@@ -44,7 +49,7 @@ export class NotificationRepository extends Repository<Notification> {
     return await this.find({
       where: {
         toUserId: id,
-        hasBeenRead: true
+        hasBeenRead: true,
       },
       relations: ['fromUser', 'toUser'],
     });
@@ -54,7 +59,7 @@ export class NotificationRepository extends Repository<Notification> {
     return await this.find({
       where: {
         toUserId: id,
-        hasBeenRead: false
+        hasBeenRead: false,
       },
       relations: ['fromUser', 'toUser'],
     });
@@ -64,12 +69,12 @@ export class NotificationRepository extends Repository<Notification> {
     return this.count({
       where: {
         toUserId: id,
-        hasBeenRead: false
-      }
+        hasBeenRead: false,
+      },
     });
   }
 
   async deleteOneById(id: number): Promise<void> {
-    await this.delete({ id: id })
+    await this.delete({ id: id });
   }
 }

@@ -9,7 +9,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { Friendship } from '@domain/friendship/entities/friendship.entity';
 import { Post } from '@domain/post/entities/post.entity';
-import { Notification } from '@domain/notification/entities/notification.entity'
+import { Notification } from '@domain/notification/entities/notification.entity';
 
 @Entity()
 export class User extends BaseEntity {

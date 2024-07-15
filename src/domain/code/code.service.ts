@@ -14,6 +14,8 @@ export class CodeService {
       const form = new FormData();
       form.append('language', payload.language);
       form.append('code', payload.code);
+      form.append('output_extension', payload.output_extension);
+
       if (payload.input_file) {
         form.append(
           'input_file',

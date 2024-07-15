@@ -1,4 +1,11 @@
-import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from '@domain/user/entities/user.entity';
 import { NotificationType } from '@domain/notification/types/notification.type';
@@ -45,11 +52,16 @@ export class Notification extends BaseEntity {
   @Column({ nullable: true, default: null })
   public linkId: number;
 
-  constructor(notificationType: NotificationType, fromUserId: number, toUserId: number, linkId: number = null) {
+  constructor(
+    notificationType: NotificationType,
+    fromUserId: number,
+    toUserId: number,
+    linkId: number = null,
+  ) {
     super();
     this.notificationType = notificationType;
     this.fromUserId = fromUserId;
-    this.toUserId = toUserId
+    this.toUserId = toUserId;
     this.hasBeenRead = false;
     this.createdAt = new Date();
     if (linkId) {

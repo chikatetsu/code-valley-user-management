@@ -10,6 +10,10 @@ export class ExecutionPayloadDto {
   @ApiProperty()
   code: string;
 
+  @ApiProperty()
+  @IsString()
+  output_extension: string;
+
   @ApiProperty({ type: 'string', format: 'binary', required: false })
   input_file?: any;
 }
