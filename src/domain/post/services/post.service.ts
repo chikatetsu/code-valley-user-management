@@ -40,6 +40,7 @@ export class PostService {
       const fileResponse = await this.contentService.uploadFileToMicroservice(
         file,
         userId,
+        createPostDto.output_extension,
       );
       [fileId, code_url] = [fileResponse.id, fileResponse.code_url];
     }
@@ -54,7 +55,7 @@ export class PostService {
       userId,
       post.id,
     );
-    return this.toPostResponseDto(post, userId, code_url);
+    return this.toPostResponseDto(post, userId, code_url, '.txt');
   }
 
   async deletePost(postId: number): Promise<void> {
@@ -77,7 +78,12 @@ export class PostService {
       posts.map(async (post) => {
         if (post.fileId) {
           const content = await this.contentService.getContentById(post.fileId);
-          return this.toPostResponseDto(post, currentUserId, content.code_url);
+          return this.toPostResponseDto(
+            post,
+            currentUserId,
+            content.code_url,
+            content.output_type,
+          );
         }
         return this.toPostResponseDto(post, currentUserId, null);
       }),
@@ -156,6 +162,7 @@ export class PostService {
     post: Post,
     currentUserId: number,
     codeUrl: string,
+    outputType: string = '.txt',
   ): Promise<PostResponseDto> {
     const user = await this.userService.findOneById(post.userId);
     const likeCount = await this.postLikeRepository.count({
@@ -172,6 +179,7 @@ export class PostService {
       userId: post.userId,
       fileId: post.fileId,
       code_url: codeUrl,
+      output_type: outputType,
       username: user.username,
       createdAt: post.createdAt,
       avatar: user.avatar,

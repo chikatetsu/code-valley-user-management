@@ -17,6 +17,9 @@ export class PostResponseDto {
   code_url: string;
 
   @ApiProperty()
+  output_type: string;
+
+  @ApiProperty()
   username: string;
 
   @ApiProperty()

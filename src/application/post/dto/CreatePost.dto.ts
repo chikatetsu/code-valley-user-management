@@ -8,4 +8,7 @@ export class CreatePostDto {
 
   @ApiProperty({ type: 'string', format: 'binary', required: false })
   file: Express.Multer.File;
+
+  @ApiProperty({ example: 'Output extension' })
+  output_extension: string;
 }
