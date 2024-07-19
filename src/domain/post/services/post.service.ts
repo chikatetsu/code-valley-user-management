@@ -247,6 +247,26 @@ export class PostService {
     }));
   }
 
+  async deleteComment(
+    userId: number,
+    postId: number,
+    commentId: number,
+  ): Promise<void> {
+    const comment = await this.commentRepository.findOne({
+      where: { id: commentId, post: { id: postId } },
+      relations: ['user'],
+    });
+    if (!comment) {
+      throw new NotFoundException('Comment not found');
+    }
+
+    if (comment.user.id !== userId) {
+      throw new ConflictException('User is not the author of the comment');
+    }
+
+    await this.commentRepository.delete(commentId);
+  }
+
   private sortPostsByDate(posts: Post[]): Post[] {
     return posts.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }

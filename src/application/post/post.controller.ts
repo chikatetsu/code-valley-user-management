@@ -158,4 +158,16 @@ export class PostController {
   ): Promise<CommentResponseDto[]> {
     return this.postService.getCommentsByPostId(postId, limit, offset);
   }
+
+  @Delete(':postId/comments/:commentId')
+  @ApiResponse({ status: 204 })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async deleteComment(
+    @Req() req: Request,
+    @Param('postId') postId: number,
+    @Param('commentId') commentId: number,
+  ): Promise<void> {
+    const userId = req.user['id'];
+    return this.postService.deleteComment(userId, postId, commentId);
+  }
 }
