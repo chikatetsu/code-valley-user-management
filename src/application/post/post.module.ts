@@ -11,11 +11,14 @@ import { PostLikeRepository } from '@infra/database/post.like.repository';
 import { FirebaseModule } from '@application/firebase/firebase.module';
 import { ContentModule } from '@application/content/content.module';
 import { NotificationModule } from '@application/notification/notification.module';
+import { Comment } from '@domain/post/entities/comment.entity';
+import { CommentRepository } from '@infra/database/comment.repository';
+import { User } from '@domain/user/entities/user.entity';
 
 @Module({
   imports: [
     ContentModule,
-    TypeOrmModule.forFeature([Post, PostLike]),
+    TypeOrmModule.forFeature([Post, PostLike, Comment, User]),
     FirebaseModule,
     NotificationModule,
   ],
@@ -26,6 +29,7 @@ import { NotificationModule } from '@application/notification/notification.modul
     UserRepository,
     PostRepository,
     PostLikeRepository,
+    CommentRepository,
   ],
 })
 export class PostModule {}

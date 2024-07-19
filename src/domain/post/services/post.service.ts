@@ -6,8 +6,11 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Post } from '../entities/post.entity';
+import { Comment } from '../entities/comment.entity';
 import { PostLike } from '../entities/post.like.entity';
 import {
+  CommentResponseDto,
+  CreateCommentDto,
   CreatePostDto,
   LikePostResponseDto,
   PostResponseDto,
@@ -23,11 +26,14 @@ export class PostService {
   constructor(
     @InjectRepository(PostLike)
     private readonly postLikeRepository: Repository<PostLike>,
-    private readonly postRepository: PostRepository,
+    @InjectRepository(Post)
+    private readonly postRepository: Repository<Post>,
+    @InjectRepository(Comment)
+    private readonly commentRepository: Repository<Comment>,
     private readonly userService: UserService,
     private readonly contentService: ContentService,
     private readonly notificationService: NotificationService,
-  ) {}
+  ) { }
 
   async createPost(
     userId: number,
@@ -186,6 +192,59 @@ export class PostService {
       likes: likeCount,
       userHasLiked: !!userHasLiked,
     };
+  }
+
+  async createComment(
+    userId: number,
+    postId: number,
+    createCommentDto: CreateCommentDto,
+  ): Promise<CommentResponseDto> {
+    const post = await this.postRepository.findOne({ where: { id: postId } });
+    if (!post) {
+      throw new NotFoundException(`Post with id ${postId} not found`);
+    }
+
+    const user = await this.userService.findOneUserById(userId);
+    const comment = new Comment();
+    comment.content = createCommentDto.content;
+    comment.user = user;
+    comment.post = post;
+
+    await this.commentRepository.save(comment);
+
+    return {
+      id: comment.id,
+      content: comment.content,
+      userId: user.id,
+      username: user.username,
+      avatar: user.avatar,
+      postId: post.id,
+      createdAt: comment.createdAt,
+    };
+  }
+
+  async getCommentsByPostId(
+    postId: number,
+    limit: number,
+    offset: number,
+  ): Promise<CommentResponseDto[]> {
+    const comments = await this.commentRepository.find({
+      where: { post: { id: postId } },
+      take: limit,
+      skip: offset,
+      order: { createdAt: 'DESC' },
+      relations: ['user', 'post'],
+    });
+
+    return comments.map((comment) => ({
+      id: comment.id,
+      content: comment.content,
+      userId: comment.user.id,
+      username: comment.user.username,
+      avatar: comment.user.avatar,
+      postId: comment.post.id,
+      createdAt: comment.createdAt,
+    }));
   }
 
   private sortPostsByDate(posts: Post[]): Post[] {

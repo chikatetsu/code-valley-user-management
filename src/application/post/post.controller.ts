@@ -12,6 +12,7 @@ import {
   UploadedFile,
   Query,
   ParseIntPipe,
+  Logger,
 } from '@nestjs/common';
 import { PostService } from '@domain/post/services/post.service';
 import { JwtAuthGuard } from '@application/auth/guards/jwt-auth.guard';
@@ -25,7 +26,13 @@ import {
   ApiConsumes,
   ApiQuery,
 } from '@nestjs/swagger';
-import { CreatePostDto, PostResponseDto, LikePostResponseDto } from './dto';
+import {
+  CreatePostDto,
+  PostResponseDto,
+  LikePostResponseDto,
+  CommentResponseDto,
+  CreateCommentDto,
+} from './dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('posts')
@@ -125,5 +132,30 @@ export class PostController {
   ): Promise<LikePostResponseDto> {
     const userId = req.user['id'];
     return this.postService.unlikePost(id, userId);
+  }
+
+  @Post(':postId/comments')
+  @ApiResponse({ status: 201, type: CommentResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async createComment(
+    @Req() req: Request,
+    @Param('postId') postId: number,
+    @Body() createCommentDto: CreateCommentDto,
+  ): Promise<CommentResponseDto> {
+    const userId = req.user['id'];
+    return this.postService.createComment(userId, postId, createCommentDto);
+  }
+
+  @Get(':postId/comments')
+  @ApiResponse({ status: 200, type: CommentResponseDto, isArray: true })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'offset', required: false })
+  async getComments(
+    @Param('postId') postId: number,
+    @Query('limit', ParseIntPipe) limit: number = 10,
+    @Query('offset', ParseIntPipe) offset: number = 0,
+  ): Promise<CommentResponseDto[]> {
+    return this.postService.getCommentsByPostId(postId, limit, offset);
   }
 }
