@@ -10,6 +10,7 @@ import { Exclude } from 'class-transformer';
 import { Friendship } from '@domain/friendship/entities/friendship.entity';
 import { Post } from '@domain/post/entities/post.entity';
 import { Notification } from '@domain/notification/entities/notification.entity';
+import { Comment } from '@domain/post/entities/comment.entity';
 
 @Entity()
 export class User extends BaseEntity {
@@ -57,6 +58,9 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Post, (post) => post.user)
   public posts: Post[];
+
+  @OneToMany(() => Comment, (comment) => comment.user)
+  comments: Comment[];
 
   @OneToMany(() => Notification, (notification) => notification.toUser)
   public notifications: Notification[];

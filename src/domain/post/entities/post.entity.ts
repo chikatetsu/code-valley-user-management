@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { User } from '@domain/user/entities/user.entity';
 import { PostLike } from './post.like.entity';
+import { Comment } from './comment.entity';
 
 @Entity()
 export class Post extends BaseEntity {
@@ -28,6 +29,9 @@ export class Post extends BaseEntity {
 
   @OneToMany(() => PostLike, (postLike) => postLike.post)
   likes: PostLike[];
+
+  @OneToMany(() => Comment, (comment) => comment.post)
+  comments: Comment[];
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;

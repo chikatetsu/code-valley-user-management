@@ -1,6 +1,6 @@
 {
   "name": "code-valley-user-management",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Code Valley User Management is a RESTful API that allows you to manage users and their roles for your Code Valley application.",
   "author": {
     "name": "James ABIB, Ronan KIELT, Charles CRETOIS",
