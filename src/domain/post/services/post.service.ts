@@ -33,7 +33,7 @@ export class PostService {
     private readonly userService: UserService,
     private readonly contentService: ContentService,
     private readonly notificationService: NotificationService,
-  ) { }
+  ) {}
 
   async createPost(
     userId: number,
