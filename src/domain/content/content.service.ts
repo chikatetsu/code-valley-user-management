@@ -72,6 +72,36 @@ export class ContentService {
     }
   }
 
+  async uploadFileForMessage(
+    file: Express.Multer.File,
+    owner_id: number,
+    group_id: number,
+    message_id: number,
+  ): Promise<FileUploadedDto> {
+    try {
+      const formData = new FormData();
+      formData.append('file', file.buffer, file.originalname);
+      formData.append('owner_id', owner_id);
+      formData.append('group_id', group_id);
+      formData.append('message_id', message_id);
+      const response = await firstValueFrom(
+        this.httpService.post(
+          configService.getContentCraftersUrl() + '/v1/group/upload',
+          formData,
+          {
+            headers: {
+              ...formData.getHeaders(),
+            },
+          },
+        ),
+      );
+
+      return response.data;
+    } catch (error) {
+      throw new BadRequestException('Failed to upload file');
+    }
+  }
+
   async codeContentToMultersFile(
     content: CodeContentFileDto,
   ): Promise<Express.Multer.File> {

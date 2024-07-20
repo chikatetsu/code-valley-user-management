@@ -42,4 +42,8 @@ export class Message extends BaseEntity {
   @ApiProperty()
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   public createdAt!: Date;
+
+  @ApiProperty()
+  @Column({ type: 'varchar', nullable: true })
+  public file: string;
 }

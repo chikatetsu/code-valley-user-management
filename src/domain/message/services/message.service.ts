@@ -10,6 +10,7 @@ import { Group } from '@domain/group/entities/group.entity';
 import { GroupResponseDTO } from '@application/group/dto';
 import { UserRepository } from '@infra/database/user.repository';
 import { GroupRepository } from '@infra/database/group.repository';
+import { ContentService } from '@domain/content/content.service';
 
 @Injectable()
 export class MessageService implements IMessageService {
@@ -20,9 +21,13 @@ export class MessageService implements IMessageService {
     private readonly userRepository: UserRepository,
     @InjectRepository(GroupRepository)
     private readonly groupRepository: GroupRepository,
+    private readonly contentService: ContentService,
   ) {}
 
-  async createMessage(messageDTO: MessageDTO): Promise<MessageResponseDTO> {
+  async createMessage(
+    messageDTO: MessageDTO,
+    file: Express.Multer.File,
+  ): Promise<MessageResponseDTO> {
     const author = await this.userRepository.findOneById(
       Number(messageDTO.authorId),
     );
@@ -33,7 +38,23 @@ export class MessageService implements IMessageService {
       messageDTO.value,
       author,
       group,
+      '',
     );
+
+    let fileId: string | null = null;
+    let code_url: string | null = null;
+    if (file) {
+      const fileResponse = await this.contentService.uploadFileForMessage(
+        file,
+        author.id,
+        group.id,
+        message.id,
+      );
+      [fileId, code_url] = [fileResponse.id, fileResponse.code_url];
+    }
+    message.file = code_url !== null ? code_url : '';
+
+    await this.messageRepository.save(message);
     return this.toMessageResponseDTO(message);
   }
 
@@ -54,6 +75,7 @@ export class MessageService implements IMessageService {
       author: this.toUserResponseDTO(message.author),
       group: this.toGroupResponseDTO(message.group),
       createdAt: message.createdAt,
+      file: message.file,
     };
   };
 

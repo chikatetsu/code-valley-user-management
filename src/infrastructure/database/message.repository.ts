@@ -15,9 +15,10 @@ export class MessageRepository extends Repository<Message> {
     value: string,
     author: User,
     group: Group,
+    file: string,
   ): Promise<Message> {
     const createdAt = new Date();
-    const message = this.create({ value, author, group, createdAt });
+    const message = this.create({ value, author, group, createdAt, file });
     return await this.save(message);
   }
 

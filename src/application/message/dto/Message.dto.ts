@@ -13,4 +13,7 @@ export class MessageDTO {
   @ApiProperty()
   @IsString({ each: true })
   groupId!: string;
+
+  @ApiProperty({ type: 'string', format: 'binary', required: false })
+  file: Express.Multer.File;
 }
