@@ -17,7 +17,7 @@ export class GroupService implements IGroupService {
     @InjectRepository(UserRepository)
     private readonly userRepository: UserRepository,
     private readonly contentService: ContentService,
-  ) { }
+  ) {}
 
   async createGroup(
     groupDTO: GroupDTO,
