@@ -43,12 +43,12 @@ export class MessageController {
         const ext = file.originalname.toLowerCase().split('.').pop();
         if (
           !RegExp(
-            /(jpg|jpeg|png|gif|javascript|js|rust|rs|lua|python|py)$/,
+            /(jpg|jpeg|png|gif|javascript|js|rust|rs|lua|python|py|cpp|cs|java|ipynb|ts)$/,
           ).exec(ext)
         ) {
           callback(
             new BadRequestException(
-              `Extension '${ext}' is not allowed, only .jpg, .jpeg, .png, .gif, .js, .rs, .lua, .py`,
+              `Extension '${ext}' is not allowed, only .jpg, .jpeg, .png, .gif, .js, .rs, .lua, .py, .cpp, .cs, .java, .ipynb, .ts are allowed`,
             ),
             false,
           );
