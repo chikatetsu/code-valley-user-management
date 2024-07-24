@@ -48,7 +48,7 @@ export class GroupService implements IGroupService {
     group.avatar =
       code_url !== null
         ? code_url
-        : 'https://yt3.googleusercontent.com/Pjk-KU0aJH978tDhdO05PgUx8j3i1OvqC4-U0L_3EUdJo0eBUrQ-cb1g2ZJiTYTlk5pq_0gy=s900-c-k-c0x00ffffff-no-rj';
+        : 'https://cdn-icons-png.flaticon.com/512/25/25437.png';
 
     await this.groupRepository.save(group);
     return this.toGroupResponseDTO(group);

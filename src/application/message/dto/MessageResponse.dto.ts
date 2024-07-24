@@ -21,4 +21,8 @@ export class MessageResponseDTO {
   @ApiProperty()
   @IsDate()
   createdAt!: Date;
+
+  @ApiProperty()
+  @IsString()
+  file?: string;
 }

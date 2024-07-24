@@ -77,6 +77,7 @@ export class ContentController {
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: ContentFileDto })
   async uploadProgram(
+    @Body() body: ContentFileDto,
     @Req() req: Request,
     @UploadedFile() file: Express.Multer.File,
   ): Promise<ContentDto> {
@@ -84,6 +85,7 @@ export class ContentController {
     let file_uploaded = await this.contentService.uploadFileToMicroservice(
       file,
       userId,
+      body.output_extension,
     );
     return this.contentService.getContentById(file_uploaded.id);
   }

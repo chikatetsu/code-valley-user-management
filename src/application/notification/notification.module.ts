@@ -8,7 +8,10 @@ import { NotificationRepository } from '@infra/database/notification.repository'
 import { FriendshipModule } from '@application/friendship/friendship.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Notification, User]), forwardRef(() => FriendshipModule)],
+  imports: [
+    TypeOrmModule.forFeature([Notification, User]),
+    forwardRef(() => FriendshipModule),
+  ],
   providers: [NotificationRepository, NotificationService],
   controllers: [NotificationController],
   exports: [NotificationRepository, NotificationService],

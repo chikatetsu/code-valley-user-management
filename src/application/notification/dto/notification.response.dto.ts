@@ -32,7 +32,7 @@ export class NotificationResponseDTO {
   public fromUsername: string;
 
   @ApiProperty({
-    example: "1",
+    example: '1',
     description: 'The id of the user',
   })
   @IsNumber()

@@ -11,25 +11,37 @@ import { FriendshipService } from '@domain/friendship/services/friendship.servic
 export class NotificationService implements INotificationService {
   constructor(
     private notificationRepository: NotificationRepository,
-    @Inject(forwardRef(() => FriendshipService)) private friendShipService: FriendshipService,
+    @Inject(forwardRef(() => FriendshipService))
+    private friendShipService: FriendshipService,
   ) {}
 
-  async getNotifications(userId: number, limit: number = 100): Promise<NotificationResponseDTO[]> {
+  async getNotifications(
+    userId: number,
+    limit: number = 100,
+  ): Promise<NotificationResponseDTO[]> {
     const maxLimit = Math.min(limit, 100);
-    const notifications = await this.notificationRepository.findManyByUserId(userId, maxLimit);
+    const notifications = await this.notificationRepository.findManyByUserId(
+      userId,
+      maxLimit,
+    );
     const result = notifications.sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    )
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
     return this.toManyResponseDto(result);
   }
 
   async getNotificationCount(userId: number): Promise<NotificationCountDTO> {
-    const countValue = await this.notificationRepository.countUnseenByUserId(userId);
+    const countValue =
+      await this.notificationRepository.countUnseenByUserId(userId);
     return this.toCountDto(countValue);
   }
 
-  async seeNotification(notificationId: number): Promise<NotificationResponseDTO> {
-    const notification = await this.notificationRepository.findOneById(notificationId);
+  async seeNotification(
+    notificationId: number,
+  ): Promise<NotificationResponseDTO> {
+    const notification =
+      await this.notificationRepository.findOneById(notificationId);
     if (notification == null) {
       return null;
     }
@@ -38,8 +50,11 @@ export class NotificationService implements INotificationService {
     return this.toResponseDto(saveResult);
   }
 
-  async unseeNotification(notificationId: number): Promise<NotificationResponseDTO> {
-    const notification = await this.notificationRepository.findOneById(notificationId);
+  async unseeNotification(
+    notificationId: number,
+  ): Promise<NotificationResponseDTO> {
+    const notification =
+      await this.notificationRepository.findOneById(notificationId);
     if (notification == null) {
       return null;
     }
@@ -48,8 +63,11 @@ export class NotificationService implements INotificationService {
     return this.toResponseDto(saveResult);
   }
 
-  async seeAllNotifications(userId: number): Promise<NotificationResponseDTO[]> {
-    const notifications = await this.notificationRepository.findNotSeenByUserId(userId);
+  async seeAllNotifications(
+    userId: number,
+  ): Promise<NotificationResponseDTO[]> {
+    const notifications =
+      await this.notificationRepository.findNotSeenByUserId(userId);
     if (notifications == null) {
       return null;
     }
@@ -60,8 +78,11 @@ export class NotificationService implements INotificationService {
     return this.toManyResponseDto(notifications);
   }
 
-  async unseeAllNotifications(userId: number): Promise<NotificationResponseDTO[]> {
-    const notifications = await this.notificationRepository.findSeenByUserId(userId);
+  async unseeAllNotifications(
+    userId: number,
+  ): Promise<NotificationResponseDTO[]> {
+    const notifications =
+      await this.notificationRepository.findSeenByUserId(userId);
     if (notifications == null) {
       return null;
     }
@@ -76,17 +97,37 @@ export class NotificationService implements INotificationService {
     await this.notificationRepository.deleteOneById(notificationId);
   }
 
-  async notifyFollowers(notificationType: NotificationType, fromUserId: number, linkId: number = null): Promise<void> {
-    const followers = await this.friendShipService.listFollowers(fromUserId)
-    followers.forEach(followers => {
+  async notifyFollowers(
+    notificationType: NotificationType,
+    fromUserId: number,
+    linkId: number = null,
+  ): Promise<void> {
+    const followers = await this.friendShipService.listFollowers(fromUserId);
+    followers.forEach((followers) => {
       this.notifyUser(notificationType, fromUserId, followers.id, linkId);
     });
   }
 
-  async notifyUser(notificationType: NotificationType, fromUserId: number, receiverId: number, linkId: number = null): Promise<void> {
-    const notification = new Notification(notificationType, fromUserId, receiverId, linkId);
+  async notifyUser(
+    notificationType: NotificationType,
+    fromUserId: number,
+    receiverId: number,
+    linkId: number = null,
+  ): Promise<void> {
+    const notification = new Notification(
+      notificationType,
+      fromUserId,
+      receiverId,
+      linkId,
+    );
     if (notificationType === NotificationType.like) {
-      const existingNotification = await this.notificationRepository.findExactNotification(fromUserId, receiverId, notificationType, linkId);
+      const existingNotification =
+        await this.notificationRepository.findExactNotification(
+          fromUserId,
+          receiverId,
+          notificationType,
+          linkId,
+        );
       if (existingNotification !== null) {
         return;
       }
@@ -108,7 +149,9 @@ export class NotificationService implements INotificationService {
     };
   }
 
-  private toManyResponseDto(notifications: Notification[]): NotificationResponseDTO[] {
+  private toManyResponseDto(
+    notifications: Notification[],
+  ): NotificationResponseDTO[] {
     let response: NotificationResponseDTO[] = [];
     for (let notification of notifications) {
       response.push(this.toResponseDto(notification));
@@ -118,7 +161,7 @@ export class NotificationService implements INotificationService {
 
   private toCountDto(value: number): NotificationCountDTO {
     return {
-      count: value
-    }
+      count: value,
+    };
   }
 }

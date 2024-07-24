@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class PostResponseDto {
+export class CommentResponseDto {
   @ApiProperty()
   id: number;
 
@@ -11,26 +11,14 @@ export class PostResponseDto {
   userId: number;
 
   @ApiProperty()
-  fileId: string;
-
-  @ApiProperty()
-  code_url: string;
-
-  @ApiProperty()
-  output_type: string;
-
-  @ApiProperty()
   username: string;
-
-  @ApiProperty()
-  createdAt: Date;
 
   @ApiProperty()
   avatar: string;
 
   @ApiProperty()
-  likes: number;
+  postId: number;
 
   @ApiProperty()
-  userHasLiked: boolean;
+  createdAt: Date;
 }

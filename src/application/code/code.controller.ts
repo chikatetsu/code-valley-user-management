@@ -31,6 +31,7 @@ export class CodeController {
     const payload = {
       language: body.language,
       code: body.code,
+      output_extension: body.output_extension,
       input_file: file,
     };
 

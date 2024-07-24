@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { User, UserBuilder } from '@domain/user/entities/user.entity';
 import { IUserService } from '../interfaces/user.service.interface';
 import {
@@ -32,7 +37,18 @@ export class UserService implements IUserService {
 
   async findOneById(id: number): Promise<UserResponseDTO> {
     const user = await this.userRepository.findOneById(id);
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
     return this.toResponseDto(user);
+  }
+
+  async findOneUserById(id: number): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
+    return user;
   }
 
   async findOneByUsername(username: string): Promise<UserResponseDTO> {

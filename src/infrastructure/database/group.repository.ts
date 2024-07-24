@@ -104,6 +104,11 @@ export class GroupRepository extends Repository<Group> {
       throw new Error('Group not found');
     }
     group.members = group.members.filter((member) => member.id !== userId);
+
+    group.admins = group.admins.filter((member) => member.id !== userId);
+
+    if (group.admins.length === 0) group.admins.push(group.members[0]);
+
     return await this.save(group);
   }
 

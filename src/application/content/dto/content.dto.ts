@@ -28,6 +28,10 @@ export class ContentDto {
 
   @ApiProperty()
   @IsString()
+  output_type: string;
+
+  @ApiProperty()
+  @IsString()
   filename: string;
 
   @ApiProperty()

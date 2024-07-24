@@ -38,6 +38,19 @@ import { FollowersAndFollowingsCountDTO } from './dto/FollowersAndFollowingsCoun
 export class FriendshipController {
   constructor(private readonly friendshipService: FriendshipService) {}
 
+  @Post('send/:senderId/:receiverId')
+  @UseInterceptors(FriendshipInterceptor)
+  @ApiParam({ name: 'receiverId', type: Number })
+  @ApiResponse({ status: 201, type: FriendshipResponseDTO })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  async sendSpecificFriendRequest(
+    @Req() req: any,
+    @Param('senderId', ParseIntPipe) senderId: number,
+    @Param('receiverId', ParseIntPipe) receiverId: number,
+  ): Promise<FriendshipResponseDTO> {
+    return this.friendshipService.sendFriendRequest(senderId, receiverId);
+  }
+
   @Post('send/:receiverId')
   @UseInterceptors(FriendshipInterceptor)
   @ApiParam({ name: 'receiverId', type: Number })

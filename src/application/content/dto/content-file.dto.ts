@@ -24,6 +24,10 @@ export class CodeContentFileDto {
 }
 
 export class ContentFileDto {
+  @ApiProperty()
+  @IsString()
+  output_extension: string;
+
   @ApiProperty({ type: 'string', format: 'binary', required: false })
   file: Express.Multer.File;
 }

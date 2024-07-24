@@ -9,7 +9,10 @@ import { FriendshipInterceptor } from './interceptors/friendship.interceptor';
 import { NotificationModule } from '@application/notification/notification.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Friendship, User]), forwardRef(() => NotificationModule)],
+  imports: [
+    TypeOrmModule.forFeature([Friendship, User]),
+    forwardRef(() => NotificationModule),
+  ],
   providers: [FriendshipRepository, FriendshipService, FriendshipInterceptor],
   controllers: [FriendshipController],
   exports: [FriendshipService],

@@ -1,4 +1,9 @@
-import { BadRequestException, forwardRef, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Not, Repository } from 'typeorm';
 import { IFriendshipService } from '@domain/friendship/interfaces/friendship.service.interface';
@@ -23,7 +28,8 @@ export class FriendshipService implements IFriendshipService {
     private readonly friendshipRepository: Repository<Friendship>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @Inject(forwardRef(() => NotificationService)) private readonly notificationService: NotificationService
+    @Inject(forwardRef(() => NotificationService))
+    private readonly notificationService: NotificationService,
   ) {}
 
   async sendFriendRequest(
@@ -48,7 +54,11 @@ export class FriendshipService implements IFriendshipService {
       status: FriendshipStatus.pending,
     });
     await this.friendshipRepository.save(friendship);
-    await this.notificationService.notifyUser(NotificationType.friendshipReceived, senderId, receiverId);
+    await this.notificationService.notifyUser(
+      NotificationType.friendshipReceived,
+      senderId,
+      receiverId,
+    );
     return this.toFriendshipResponseDTO(friendship);
   }
 
@@ -65,7 +75,11 @@ export class FriendshipService implements IFriendshipService {
     }
     friendship.status = FriendshipStatus.accepted;
     await this.friendshipRepository.save(friendship);
-    await this.notificationService.notifyUser(NotificationType.friendshipAccepted, receiverId, senderId);
+    await this.notificationService.notifyUser(
+      NotificationType.friendshipAccepted,
+      receiverId,
+      senderId,
+    );
     return this.toFriendshipResponseDTO(friendship);
   }
 
@@ -93,7 +107,11 @@ export class FriendshipService implements IFriendshipService {
     }
     friendship.status = FriendshipStatus.declined;
     await this.friendshipRepository.save(friendship);
-    await this.notificationService.notifyUser(NotificationType.friendshipRefused, receiverId, senderId);
+    await this.notificationService.notifyUser(
+      NotificationType.friendshipRefused,
+      receiverId,
+      senderId,
+    );
   }
 
   async removeFriend(userId: number, friendId: number): Promise<void> {

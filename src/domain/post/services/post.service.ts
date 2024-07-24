@@ -1,9 +1,20 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Post } from '../entities/post.entity';
+import { Comment } from '../entities/comment.entity';
 import { PostLike } from '../entities/post.like.entity';
-import { CreatePostDto, LikePostResponseDto, PostResponseDto } from '@application/post/dto';
+import {
+  CommentResponseDto,
+  CreateCommentDto,
+  CreatePostDto,
+  LikePostResponseDto,
+  PostResponseDto,
+} from '@application/post/dto';
 import { UserService } from '@domain/user/services/user.service';
 import { PostRepository } from '@infra/database/post.repository';
 import { ContentService } from '@domain/content/content.service';
@@ -15,11 +26,14 @@ export class PostService {
   constructor(
     @InjectRepository(PostLike)
     private readonly postLikeRepository: Repository<PostLike>,
-    private readonly postRepository: PostRepository,
+    @InjectRepository(Post)
+    private readonly postRepository: Repository<Post>,
+    @InjectRepository(Comment)
+    private readonly commentRepository: Repository<Comment>,
     private readonly userService: UserService,
     private readonly contentService: ContentService,
-    private readonly notificationService: NotificationService
-  ) { }
+    private readonly notificationService: NotificationService,
+  ) {}
 
   async createPost(
     userId: number,
@@ -32,6 +46,7 @@ export class PostService {
       const fileResponse = await this.contentService.uploadFileToMicroservice(
         file,
         userId,
+        createPostDto.output_extension,
       );
       [fileId, code_url] = [fileResponse.id, fileResponse.code_url];
     }
@@ -41,8 +56,12 @@ export class PostService {
       fileId,
     });
     await this.postRepository.save(post);
-    await this.notificationService.notifyFollowers(NotificationType.post, userId, post.id);
-    return this.toPostResponseDto(post, userId, code_url);
+    await this.notificationService.notifyFollowers(
+      NotificationType.post,
+      userId,
+      post.id,
+    );
+    return this.toPostResponseDto(post, userId, code_url, '.txt');
   }
 
   async deletePost(postId: number): Promise<void> {
@@ -65,7 +84,12 @@ export class PostService {
       posts.map(async (post) => {
         if (post.fileId) {
           const content = await this.contentService.getContentById(post.fileId);
-          return this.toPostResponseDto(post, currentUserId, content.code_url);
+          return this.toPostResponseDto(
+            post,
+            currentUserId,
+            content.code_url,
+            content.output_type,
+          );
         }
         return this.toPostResponseDto(post, currentUserId, null);
       }),
@@ -107,7 +131,12 @@ export class PostService {
     const likeCount = await this.postLikeRepository.count({
       where: { postId },
     });
-    await this.notificationService.notifyUser(NotificationType.like, userId, post.userId, postId);
+    await this.notificationService.notifyUser(
+      NotificationType.like,
+      userId,
+      post.userId,
+      postId,
+    );
     return { id: postId, likes: likeCount };
   }
 
@@ -139,6 +168,7 @@ export class PostService {
     post: Post,
     currentUserId: number,
     codeUrl: string,
+    outputType: string = '.txt',
   ): Promise<PostResponseDto> {
     const user = await this.userService.findOneById(post.userId);
     const likeCount = await this.postLikeRepository.count({
@@ -155,12 +185,86 @@ export class PostService {
       userId: post.userId,
       fileId: post.fileId,
       code_url: codeUrl,
+      output_type: outputType,
       username: user.username,
       createdAt: post.createdAt,
       avatar: user.avatar,
       likes: likeCount,
       userHasLiked: !!userHasLiked,
     };
+  }
+
+  async createComment(
+    userId: number,
+    postId: number,
+    createCommentDto: CreateCommentDto,
+  ): Promise<CommentResponseDto> {
+    const post = await this.postRepository.findOne({ where: { id: postId } });
+    if (!post) {
+      throw new NotFoundException(`Post with id ${postId} not found`);
+    }
+
+    const user = await this.userService.findOneUserById(userId);
+    const comment = new Comment();
+    comment.content = createCommentDto.content;
+    comment.user = user;
+    comment.post = post;
+
+    await this.commentRepository.save(comment);
+
+    return {
+      id: comment.id,
+      content: comment.content,
+      userId: user.id,
+      username: user.username,
+      avatar: user.avatar,
+      postId: post.id,
+      createdAt: comment.createdAt,
+    };
+  }
+
+  async getCommentsByPostId(
+    postId: number,
+    limit: number,
+    offset: number,
+  ): Promise<CommentResponseDto[]> {
+    const comments = await this.commentRepository.find({
+      where: { post: { id: postId } },
+      take: limit,
+      skip: offset,
+      order: { createdAt: 'DESC' },
+      relations: ['user', 'post'],
+    });
+
+    return comments.map((comment) => ({
+      id: comment.id,
+      content: comment.content,
+      userId: comment.user.id,
+      username: comment.user.username,
+      avatar: comment.user.avatar,
+      postId: comment.post.id,
+      createdAt: comment.createdAt,
+    }));
+  }
+
+  async deleteComment(
+    userId: number,
+    postId: number,
+    commentId: number,
+  ): Promise<void> {
+    const comment = await this.commentRepository.findOne({
+      where: { id: commentId, post: { id: postId } },
+      relations: ['user'],
+    });
+    if (!comment) {
+      throw new NotFoundException('Comment not found');
+    }
+
+    if (comment.user.id !== userId) {
+      throw new ConflictException('User is not the author of the comment');
+    }
+
+    await this.commentRepository.delete(commentId);
   }
 
   private sortPostsByDate(posts: Post[]): Post[] {
